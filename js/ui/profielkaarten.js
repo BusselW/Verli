@@ -745,16 +745,13 @@ const ProfielKaarten = (() => {
         
         // Position the card
         const viewportHeight = window.innerHeight;
-        // Always clean up any previous card/root before creating a new one
-        hideProfileCard();
-
+        const viewportWidth = window.innerWidth;
+        
         // Render the card to get its dimensions
         document.body.appendChild(cardContainer);
         const root = ReactDOM.createRoot(cardContainer);
         cardContainer.reactRoot = root;
         root.render(cardElement);
-        
-        const cardRect = cardContainer.getBoundingClientRect();
         
         const cardRect = cardContainer.getBoundingClientRect();
         
@@ -793,6 +790,8 @@ const ProfielKaarten = (() => {
     };
 
     /**
+     * Hide the active profile card
+     */
     const hideProfileCard = () => {
         if (activeCard) {
             try {
@@ -811,8 +810,6 @@ const ProfielKaarten = (() => {
             }
             
             activeCard = null;
-        }
-    };
         }
     };
 
@@ -906,7 +903,7 @@ const ProfielKaarten = (() => {
                             });
                             
                             cardContainer.addEventListener('mouseleave', () => {
-                                cardTimeout = setTimeout(hideProfileCard, 300);
+                                cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
                             });
                             
                             // Now fetch data asynchronously
@@ -983,7 +980,7 @@ const ProfielKaarten = (() => {
                         cardTimeout = null;
                     }
                     
-                    cardTimeout = setTimeout(hideProfileCard, 300);
+                    cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
                 });
                 
                 // Mark as initialized in WeakSet
