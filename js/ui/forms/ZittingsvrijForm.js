@@ -1,6 +1,7 @@
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
 import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
+import { createSharePointDateTime } from '../../utils/dateTimeUtils.js';
 
 const { createElement: h, useState, useEffect } = React;
 
@@ -208,8 +209,8 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
             Title: finalTitle,
             Medewerker: selectedMedewerker ? selectedMedewerker.Title : null,
             Gebruikersnaam: medewerkerUsername,
-            ZittingsVrijeDagTijd: `${startDate}T${startTime}:00`,
-            ZittingsVrijeDagTijdEind: `${endDate}T${endTime}:00`,
+            ZittingsVrijeDagTijd: createSharePointDateTime(startDate, startTime),
+            ZittingsVrijeDagTijdEind: createSharePointDateTime(endDate, endTime),
             Opmerking: opmerking,
             Terugkerend: false, // Always false since recurring is hidden
             TerugkerendTot: null,

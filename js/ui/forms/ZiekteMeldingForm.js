@@ -1,6 +1,7 @@
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
 import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
+import { createSharePointDateTime } from '../../utils/dateTimeUtils.js';
 
 const { createElement: h, useState, useEffect } = React;
 
@@ -149,8 +150,8 @@ const ZiekteMeldingForm = ({ onSubmit, onClose, shiftTypes = {}, initialData = {
             Title: `Ziekmelding - ${fullName} - ${currentDate}`,
             Medewerker: fullName,
             MedewerkerID: username,
-            StartDatum: `${startDate}T${startTime}:00`,
-            EindDatum: `${endDate}T${endTime}:00`,
+            StartDatum: createSharePointDateTime(startDate, startTime),
+            EindDatum: createSharePointDateTime(endDate, endTime),
             Omschrijving: omschrijving,
             Status: status,
             RedenId: String(redenId), // Convert to string as SharePoint expects Edm.String

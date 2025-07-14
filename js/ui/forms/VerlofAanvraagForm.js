@@ -1,6 +1,7 @@
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
 import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
+import { createSharePointDateTime } from '../../utils/dateTimeUtils.js';
 
 const { createElement: h, useState, useEffect } = React;
 
@@ -236,8 +237,8 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
             Title: `Verlofaanvraag - ${fullName} - ${currentDate}`,
             Medewerker: selectedMedewerker.Title,
             MedewerkerID: medewerkerUsername,
-            StartDatum: `${startDate}T${startTime}:00`,
-            EindDatum: `${endDate}T${endTime}:00`,
+            StartDatum: createSharePointDateTime(startDate, startTime),
+            EindDatum: createSharePointDateTime(endDate, endTime),
             RedenId: String(redenId), // Convert to string as SharePoint expects Edm.String
             Reden: 'Verlof/vakantie',
             Omschrijving: omschrijving,

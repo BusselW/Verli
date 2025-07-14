@@ -234,4 +234,43 @@ export const isSameISODate = (date1, date2) => {
     return iso1 === iso2;
 };
 
+/**
+ * Create a properly formatted datetime string for SharePoint submission
+ * This ensures consistent timezone handling and prevents date shifts
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @param {string} timeString - Time string in HH:MM format
+ * @returns {string} Properly formatted datetime string for SharePoint
+ */
+export const createSharePointDateTime = (dateString, timeString) => {
+    if (!dateString || !timeString) {
+        console.warn('createSharePointDateTime: Missing date or time input', { dateString, timeString });
+        return null;
+    }
+    
+    // Create a local date object to avoid timezone shifts
+    const [year, month, day] = dateString.split('-').map(Number);
+    const [hours, minutes] = timeString.split(':').map(Number);
+    
+    // Create date in local timezone
+    const localDate = new Date(year, month - 1, day, hours, minutes, 0);
+    
+    // Return as ISO string which SharePoint handles correctly
+    return localDate.toISOString();
+};
+
+/**
+ * Create a date-only string for SharePoint (useful for full-day events)
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {string} Properly formatted date string for SharePoint
+ */
+export const createSharePointDate = (dateString) => {
+    if (!dateString) {
+        console.warn('createSharePointDate: Missing date input');
+        return null;
+    }
+    
+    // For date-only fields, use the date with time set to start of day in local timezone
+    return createSharePointDateTime(dateString, '00:00');
+};
+
 console.log("Date and Time Utilities loaded successfully.");

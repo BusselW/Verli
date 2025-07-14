@@ -1,6 +1,7 @@
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
 import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
+import { createSharePointDateTime } from '../../utils/dateTimeUtils.js';
 
 const { createElement: h, useState, useEffect } = React;
 
@@ -161,12 +162,12 @@ const CompensatieUrenForm = ({ onSubmit, onClose, initialData = {}, medewerkers 
         const username = selectedMedewerker ? selectedMedewerker.Username : '';
         const currentDate = new Date().toLocaleDateString('nl-NL');
 
-        // Construct date strings manually to avoid timezone conversions.
-        // This format is treated as a "floating" timezone by SharePoint.
-        const startDateTimeString = `${startDate}T${startTime}:00`;
-        const endDateTimeString = `${endDate}T${endTime}:00`;
-        const ruildagStartString = isRuildag && ruildagStart ? `${ruildagStart}T09:00:00` : null;
-        const ruildagEindeString = isRuildag && ruildagEinde ? `${ruildagEinde}T17:00:00` : null;
+        // Create properly formatted datetime strings for SharePoint submission
+        // This ensures consistent timezone handling and prevents date shifts
+        const startDateTimeString = createSharePointDateTime(startDate, startTime);
+        const endDateTimeString = createSharePointDateTime(endDate, endTime);
+        const ruildagStartString = isRuildag && ruildagStart ? createSharePointDateTime(ruildagStart, '09:00') : null;
+        const ruildagEindeString = isRuildag && ruildagEinde ? createSharePointDateTime(ruildagEinde, '17:00') : null;
 
         const formData = {
             Title: `Compensatie-uren - ${fullName} - ${currentDate}`,
