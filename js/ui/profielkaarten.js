@@ -881,23 +881,43 @@ const ProfielKaarten = (() => {
      * Hide the active profile card
      */
     const hideProfileCard = () => {
+        console.log(`🔒 HIDE PROFILE CARD: Starting hide process`, {
+            activeCardExists: !!activeCard,
+            cardTimeoutExists: !!cardTimeout
+        });
+        
         if (activeCard) {
+            console.log(`🔒 HIDE PROFILE CARD: Active card found, proceeding with cleanup`);
             try {
                 // Safely unmount React component using createRoot
                 if (activeCard.reactRoot) {
+                    console.log(`🔒 HIDE PROFILE CARD: Unmounting React root`);
                     activeCard.reactRoot.unmount();
                     activeCard.reactRoot = null;
                 }
                 
                 // Remove the element if it's still in the DOM
                 if (document.body.contains(activeCard)) {
+                    console.log(`🔒 HIDE PROFILE CARD: Removing card from DOM`);
                     activeCard.remove();
+                } else {
+                    console.log(`🔒 HIDE PROFILE CARD: Card already removed from DOM`);
                 }
             } catch (error) {
-                console.error('Error while hiding profile card:', error);
+                console.error('🔒 HIDE PROFILE CARD: Error while hiding profile card:', error);
             }
             
             activeCard = null;
+            console.log(`🔒 HIDE PROFILE CARD: Cleanup complete, activeCard set to null`);
+        } else {
+            console.log(`🔒 HIDE PROFILE CARD: No active card to hide`);
+        }
+        
+        // Clear any pending timeouts
+        if (cardTimeout) {
+            console.log(`🔒 HIDE PROFILE CARD: Clearing cardTimeout`);
+            clearTimeout(cardTimeout);
+            cardTimeout = null;
         }
     };
 
@@ -906,7 +926,10 @@ const ProfielKaarten = (() => {
      * @param {string} selector - CSS selector for elements to apply hover behavior to
      */
     const init = (selector = '[data-username]') => {
-        console.log(`ProfielKaarten: Initializing with selector "${selector}"`);
+        console.log(`🔧 ProfielKaarten: Initializing with selector "${selector}"`);
+        console.log(`🔧 ProfielKaarten: Document ready state: ${document.readyState}`);
+        console.log(`🔧 ProfielKaarten: activeCard status:`, activeCard);
+        console.log(`🔧 ProfielKaarten: cardTimeout status:`, cardTimeout);
         
         // Use a WeakSet to track initialized elements, allowing GC when elements are removed
         const initializedElements = new WeakSet();
@@ -916,9 +939,27 @@ const ProfielKaarten = (() => {
          */
         function applyProfileCardHover() {
             const elements = document.querySelectorAll(selector);
-            console.log(`ProfielKaarten: Found ${elements.length} elements matching "${selector}"`);
+            console.log(`🔍 ProfielKaarten: Found ${elements.length} elements matching "${selector}"`);
             
-            elements.forEach(element => {
+            // Log sample elements for debugging
+            if (elements.length > 0) {
+                console.log(`🔍 ProfielKaarten: Sample elements:`, 
+                    Array.from(elements).slice(0, 3).map(el => ({
+                        tagName: el.tagName,
+                        className: el.className,
+                        username: el.dataset.username,
+                        hasTooltip: el.dataset.tooltipAttached
+                    }))
+                );
+            }
+            
+            elements.forEach((element, index) => {
+                console.log(`🔍 ProfielKaarten: Processing element ${index + 1}/${elements.length}:`, {
+                    tagName: element.tagName,
+                    className: element.className,
+                    username: element.dataset.username,
+                    alreadyInitialized: initializedElements.has(element)
+                });
                 // Skip if already initialized (using WeakSet)
                 if (initializedElements.has(element)) return;
                 
@@ -934,64 +975,92 @@ const ProfielKaarten = (() => {
                     return;
                 }
                 
-                console.log(`ProfielKaarten: Adding hover behavior to element for username "${username}"`);
+                console.log(`✅ ProfielKaarten: Adding hover behavior to element for username "${username}"`);
                 
                 element.addEventListener('mouseenter', (event) => {
+                    console.log(`🐭 MOUSEENTER: Started for username "${username}"`, {
+                        targetElement: event.currentTarget.tagName,
+                        className: event.currentTarget.className,
+                        currentCardTimeout: cardTimeout,
+                        activeCardExists: !!activeCard
+                    });
+                    
                     // Store a reference to the element
                     const targetElement = event.currentTarget;
                     
                     // Clear any existing hide timeout
                     if (cardTimeout) {
+                        console.log(`🕐 MOUSEENTER: Clearing existing cardTimeout:`, cardTimeout);
                         clearTimeout(cardTimeout);
                         cardTimeout = null;
                     }
                     
                     // If a card is already showing, don't show another one
                     if (activeCard) {
+                        console.log(`⚠️ MOUSEENTER: Active card already exists, skipping for "${username}"`);
                         return;
                     }
                     
                     // Set a delay before showing the card
+                    console.log(`⏱️ MOUSEENTER: Setting timeout for "${username}" with delay ${HOVER_DELAY_MS}ms`);
                     cardTimeout = setTimeout(async () => {
                         try {
+                            console.log(`⏰ TIMEOUT TRIGGERED: Starting card creation for "${username}"`);
+                            
                             // First, verify the element is still in the DOM
                             if (!document.body.contains(targetElement)) {
-                                console.warn('Target element no longer in DOM');
+                                console.warn(`❌ TIMEOUT: Target element no longer in DOM for "${username}"`);
                                 return;
                             }
                             
+                            console.log(`✅ TIMEOUT: Target element still in DOM for "${username}"`);
+                            
                             // Create a placeholder div for the card immediately
+                            console.log(`📦 TIMEOUT: Creating card container for "${username}"`);
                             const cardContainer = document.createElement('div');
                             cardContainer.id = 'profile-card-container';
                             cardContainer.style.position = 'fixed';
                             cardContainer.style.zIndex = '9999';
                             cardContainer.innerHTML = '<div class="profile-card-loading">Loading...</div>';
                             document.body.appendChild(cardContainer);
+                            console.log(`📦 TIMEOUT: Card container added to DOM for "${username}"`);
                             
                             // Position it near the target element
                             const rect = targetElement.getBoundingClientRect();
                             cardContainer.style.top = `${rect.bottom + 5}px`;
                             cardContainer.style.left = `${rect.left}px`;
+                            console.log(`📍 TIMEOUT: Card positioned at (${rect.left}, ${rect.bottom + 5}) for "${username}"`);
                             
                             // Set as active card
                             if (activeCard) {
+                                console.log(`🔄 TIMEOUT: Hiding existing active card before setting new one for "${username}"`);
                                 hideProfileCard();
                             }
                             activeCard = cardContainer;
+                            console.log(`✅ TIMEOUT: Set as active card for "${username}"`);
+                            
+                            // Add mouse events to the card itself
+                            console.log(`🐭 TIMEOUT: Adding mouse events to card for "${username}"`);
                             
                             // Add mouse events to the card itself
                             cardContainer.addEventListener('mouseenter', () => {
+                                console.log(`🐭 CARD MOUSEENTER: Entered card for "${username}"`);
                                 if (cardTimeout) {
+                                    console.log(`🕐 CARD MOUSEENTER: Clearing hide timeout for "${username}"`);
                                     clearTimeout(cardTimeout);
                                     cardTimeout = null;
                                 }
                             });
                             
                             cardContainer.addEventListener('mouseleave', () => {
+                                console.log(`🐭 CARD MOUSELEAVE: Left card for "${username}"`);
                                 if (cardTimeout) {
+                                    console.log(`🕐 CARD MOUSELEAVE: Clearing existing timeout for "${username}"`);
                                     clearTimeout(cardTimeout);
                                 }
+                                console.log(`⏱️ CARD MOUSELEAVE: Setting hide timeout for "${username}" with delay ${HOVER_HIDE_DELAY_MS}ms`);
                                 cardTimeout = setTimeout(() => {
+                                    console.log(`⏰ CARD HIDE TIMEOUT: Hiding card for "${username}"`);
                                     hideProfileCard();
                                     cardTimeout = null;
                                 }, HOVER_HIDE_DELAY_MS);
@@ -1074,13 +1143,23 @@ const ProfielKaarten = (() => {
                 });
                 
                 element.addEventListener('mouseleave', () => {
+                    console.log(`🐭 ELEMENT MOUSELEAVE: Left element for username "${username}"`, {
+                        targetElement: element.tagName,
+                        className: element.className,
+                        currentCardTimeout: cardTimeout,
+                        activeCardExists: !!activeCard
+                    });
+                    
                     // Only set hide timeout if we're not already in a hide timeout
                     if (cardTimeout) {
+                        console.log(`🕐 ELEMENT MOUSELEAVE: Clearing existing timeout for "${username}"`);
                         clearTimeout(cardTimeout);
                     }
                     
                     // Set a hide timeout
+                    console.log(`⏱️ ELEMENT MOUSELEAVE: Setting hide timeout for "${username}" with delay ${HOVER_HIDE_DELAY_MS}ms`);
                     cardTimeout = setTimeout(() => {
+                        console.log(`⏰ ELEMENT HIDE TIMEOUT: Hiding card for "${username}"`);
                         hideProfileCard();
                         cardTimeout = null;
                     }, HOVER_HIDE_DELAY_MS);
@@ -1096,13 +1175,16 @@ const ProfielKaarten = (() => {
         
         // Set up a mutation observer to watch for changes and reapply as needed
         const observer = new MutationObserver((mutations) => {
+            console.log(`🔍 ProfielKaarten: MutationObserver detected ${mutations.length} mutations`);
             for (const mutation of mutations) {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    console.log(`🔍 ProfielKaarten: Mutation detected new nodes, reapplying hover behavior`);
                     applyProfileCardHover();
                 }
             }
         });
         
+        console.log(`🔍 ProfielKaarten: Starting MutationObserver for DOM changes`);
         observer.observe(document.body, { childList: true, subtree: true });
     };
 
@@ -1115,7 +1197,9 @@ const ProfielKaarten = (() => {
 
 // Initialize the profile cards when the DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Initializing ProfielKaarten...');
+    console.log('🚀 ProfielKaarten: DOM Content Loaded, initializing...');
+    console.log('🚀 ProfielKaarten: Document ready state:', document.readyState);
+    console.log('🚀 ProfielKaarten: Elements with data-username:', document.querySelectorAll('[data-username]').length);
     ProfielKaarten.init();
 });
 
@@ -1128,7 +1212,10 @@ if (typeof module !== 'undefined' && module.exports) {
 
 export default ProfielKaarten;
 
-console.log('ProfielKaarten module loaded successfully.', {
+console.log('🎯 ProfielKaarten module loaded successfully.', {
     fetchSharePointListAvailable: typeof fetchSharePointList,
-    linkInfoAvailable: typeof linkInfo
+    linkInfoAvailable: typeof linkInfo,
+    getUserInfoAvailable: typeof getUserInfo,
+    documentReadyState: document.readyState,
+    elementsWithDataUsername: document.querySelectorAll('[data-username]').length
 });
