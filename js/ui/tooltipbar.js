@@ -683,8 +683,8 @@ const TooltipManager = {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
                             const hasTooltipElements = node.querySelectorAll ? 
-                                node.querySelectorAll('.verlof-blok:not([data-username]), .compensatie-uur-blok:not([data-username]), .compensatie-uur-container:not([data-username]), .ziekte-blok:not([data-username]), .zittingsvrij-blok:not([data-username]), [data-tooltip]:not([data-username]), [title]:not([data-username]), [data-feestdag]:not([data-username]), [data-afkorting]:not([data-username]), button:not([data-username])').length > 0 ||
-                                node.matches('.verlof-blok:not([data-username]), .compensatie-uur-blok:not([data-username]), .compensatie-uur-container:not([data-username]), .ziekte-blok:not([data-username]), .zittingsvrij-blok:not([data-username]), [data-tooltip]:not([data-username]), [title]:not([data-username]), [data-feestdag]:not([data-username]), [data-afkorting]:not([data-username]), button:not([data-username])') : false;
+                                node.querySelectorAll(this.TOOLTIP_SELECTOR).length > 0 ||
+                                node.matches(this.TOOLTIP_SELECTOR) : false;
                                 
                             if (hasTooltipElements) {
                                 shouldReattach = true;
