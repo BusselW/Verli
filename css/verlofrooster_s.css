@@ -2400,8 +2400,8 @@ td .compensatie-uur-container img.compensatie-icon-svg {
 
 #profile-card-container {
     opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transform: translateY(-5px); /* Reduced from -10px for subtler animation */
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Smoother and longer transition */
 }
 
 #profile-card-container.show {
@@ -2622,4 +2622,21 @@ body.dark-theme .help-dropdown-item i {
 /* Ensure the indicator is above other elements */
 .background-refresh-indicator {
     z-index: 9999 !important;
+}
+
+/* Profile card interaction improvements */
+#profile-card-container::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    z-index: -1;
+    pointer-events: auto;
+}
+
+/* Ensure the profile card itself has proper pointer events */
+.profile-card {
+    pointer-events: auto;
 }

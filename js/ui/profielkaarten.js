@@ -11,8 +11,8 @@ import * as linkInfo from '../services/linkInfo.js';
 
 const fallbackAvatar = 'https://placehold.co/96x96/4a90e2/ffffff?text=';
 
-const HOVER_DELAY_MS = 300;
-const HOVER_HIDE_DELAY_MS = 150;
+const HOVER_DELAY_MS = 300; // Reduced from 500ms to make cards appear faster
+const HOVER_HIDE_DELAY_MS = 500; // Increased from 300ms to 500ms to give more time
 
 const ProfielKaarten = (() => {
     const h = React.createElement;
@@ -411,6 +411,9 @@ const ProfielKaarten = (() => {
             siteUrl = 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof';
         }
         
+        // Remove trailing slash if present to prevent double slashes
+        siteUrl = siteUrl.replace(/\/$/, '');
+        
         // Use absolute fallback if needed
         const iconUrl = siteUrl ? 
             `${siteUrl}/cpw/Rooster/icons/profilecards/${iconName}` : 
@@ -481,6 +484,8 @@ const ProfielKaarten = (() => {
             console.log('Using hardcoded siteUrl:', siteUrl);
         }
         
+        // Remove trailing slash if present to prevent double slashes
+        siteUrl = siteUrl.replace(/\/$/, '');
         const iconBasePath = `${siteUrl}/cpw/Rooster/icons/profilecards`;
         console.log('Icon base path:', iconBasePath);
 
@@ -1009,14 +1014,27 @@ const ProfielKaarten = (() => {
                             cardContainer.style.position = 'fixed';
                             cardContainer.style.zIndex = '9999';
                             cardContainer.innerHTML = '<div class="profile-card-loading">Loading...</div>';
+                            
+                            // Add a smooth show animation
+                            cardContainer.style.opacity = '0';
+                            cardContainer.style.transform = 'translateY(-5px)';
+                            cardContainer.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+                            
                             document.body.appendChild(cardContainer);
                             console.log(`📦 TIMEOUT: Card container added to DOM for "${username}"`);
                             
+                            // Trigger show animation
+                            setTimeout(() => {
+                                if (cardContainer.parentNode) {
+                                    cardContainer.style.opacity = '1';
+                                    cardContainer.style.transform = 'translateY(0)';
+                                }
+                            }, 10);
                             // Position it near the target element
                             const rect = targetElement.getBoundingClientRect();
-                            cardContainer.style.top = `${rect.bottom + 5}px`;
+                            cardContainer.style.top = `${rect.bottom + 8}px`;
                             cardContainer.style.left = `${rect.left}px`;
-                            console.log(`📍 TIMEOUT: Card positioned at (${rect.left}, ${rect.bottom + 5}) for "${username}"`);
+                            console.log(`📍 TIMEOUT: Card positioned at (${rect.left}, ${rect.bottom + 8}) for "${username}"`);
                             
                             // Set as active card
                             if (activeCard) {
@@ -1026,12 +1044,11 @@ const ProfielKaarten = (() => {
                             activeCard = cardContainer;
                             console.log(`✅ TIMEOUT: Set as active card for "${username}"`);
                             
-                            // Add mouse events to the card itself
+                            // Add mouse events to the card itself to prevent hiding when mouse moves to card
                             console.log(`🐭 TIMEOUT: Adding mouse events to card for "${username}"`);
                             
-                            // Add mouse events to the card itself
                             cardContainer.addEventListener('mouseenter', () => {
-                                console.log(`🐭 CARD MOUSEENTER: Entered card for "${username}"`);
+                                console.log(`🐭 CARD MOUSEENTER: Entered card for "${username}", keeping card visible`);
                                 if (cardTimeout) {
                                     console.log(`🕐 CARD MOUSEENTER: Clearing hide timeout for "${username}"`);
                                     clearTimeout(cardTimeout);
@@ -1039,8 +1056,16 @@ const ProfielKaarten = (() => {
                                 }
                             });
                             
-                            cardContainer.addEventListener('mouseleave', () => {
+                            cardContainer.addEventListener('mouseleave', (e) => {
                                 console.log(`🐭 CARD MOUSELEAVE: Left card for "${username}"`);
+                                
+                                // Check if mouse is moving to the original element (prevent hiding)
+                                const relatedTarget = e.relatedTarget;
+                                if (relatedTarget && targetElement && targetElement.contains(relatedTarget)) {
+                                    console.log(`🎯 CARD MOUSELEAVE: Mouse moved to original element, not hiding card`);
+                                    return;
+                                }
+                                
                                 if (cardTimeout) {
                                     console.log(`🕐 CARD MOUSELEAVE: Clearing existing timeout for "${username}"`);
                                     clearTimeout(cardTimeout);
@@ -1106,17 +1131,22 @@ const ProfielKaarten = (() => {
                             const viewportHeight = window.innerHeight;
                             const viewportWidth = window.innerWidth;
                             
-                            let top = rect.bottom + 5;
+                            let top = rect.bottom + 8; // Reduced gap from 5px to 8px for better mouse movement
                             let left = rect.left;
                             
                             // If card would extend below viewport, position it above the element
                             if (top + cardRect.height > viewportHeight) {
-                                top = rect.top - cardRect.height - 5;
+                                top = rect.top - cardRect.height - 8; // Use consistent 8px gap
                             }
                             
                             // If card would extend beyond right edge, align right edge with viewport
                             if (left + cardRect.width > viewportWidth) {
                                 left = viewportWidth - cardRect.width - 10;
+                            }
+                            
+                            // Ensure card doesn't go off the left edge
+                            if (left < 10) {
+                                left = 10;
                             }
                             
                             cardContainer.style.top = `${top}px`;
@@ -1129,13 +1159,20 @@ const ProfielKaarten = (() => {
                     }, HOVER_DELAY_MS);
                 });
                 
-                element.addEventListener('mouseleave', () => {
+                element.addEventListener('mouseleave', (e) => {
                     console.log(`🐭 ELEMENT MOUSELEAVE: Left element for username "${username}"`, {
                         targetElement: element.tagName,
                         className: element.className,
                         currentCardTimeout: cardTimeout,
                         activeCardExists: !!activeCard
                     });
+                    
+                    // Check if mouse is moving to the profile card (prevent hiding)
+                    const relatedTarget = e.relatedTarget;
+                    if (relatedTarget && activeCard && activeCard.contains(relatedTarget)) {
+                        console.log(`🎯 ELEMENT MOUSELEAVE: Mouse moved to profile card, not hiding`);
+                        return;
+                    }
                     
                     // Only set hide timeout if we're not already in a hide timeout
                     if (cardTimeout) {
@@ -1222,5 +1259,7 @@ console.log('🎯 ProfielKaarten module loaded successfully.', {
     linkInfoAvailable: typeof linkInfo,
     getUserInfoAvailable: typeof getUserInfo,
     documentReadyState: document.readyState,
-    elementsWithDataUsername: document.querySelectorAll('[data-username]').length
+    elementsWithDataUsername: document.querySelectorAll('[data-username]').length,
+    HOVER_DELAY_MS: HOVER_DELAY_MS,
+    HOVER_HIDE_DELAY_MS: HOVER_HIDE_DELAY_MS
 });
