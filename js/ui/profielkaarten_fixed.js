@@ -817,7 +817,7 @@ const ProfielKaarten = (() => {
      * Apply profile card hover behavior to elements
      * @param {string} selector - CSS selector for elements to apply hover behavior to
      */
-    const init = (selector = '.medewerker-naam, .medewerker-avatar') => {
+    const init = (selector = '[data-username]') => {
         console.log(`ProfielKaarten: Initializing with selector "${selector}"`);
         
         // Use a WeakSet to track initialized elements, allowing GC when elements are removed
