@@ -277,7 +277,10 @@ const Mededelingen = ({ teams = [] }) => {
                 },
                     h('div', { className: 'announcement-content' },
                         h('h4', { className: 'announcement-title' }, announcement.Title),
-                        h('p', { className: 'announcement-description' }, announcement.Aanvulling),
+                        h('div', { 
+                            className: 'announcement-description',
+                            dangerouslySetInnerHTML: { __html: announcement.Aanvulling || '' }
+                        }),
                         h('div', { className: 'announcement-meta' },
                             announcement.DatumTijdStart && h('span', { className: 'announcement-date' },
                                 h('i', { className: 'fas fa-calendar' }),

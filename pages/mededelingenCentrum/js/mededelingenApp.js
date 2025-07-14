@@ -328,6 +328,13 @@ const MededelingenApp = () => {
         });
     };
 
+    // Helper function to strip HTML tags for table display
+    const stripHtmlTags = (html) => {
+        if (!html) return '';
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return doc.body.textContent || '';
+    };
+
     const getStatusBadge = (mededeling) => {
         const now = new Date();
         const startDate = mededeling.DatumTijdStart ? new Date(mededeling.DatumTijdStart) : null;
@@ -408,8 +415,8 @@ const MededelingenApp = () => {
                                     textOverflow: 'ellipsis',
                                     whiteSpace: 'nowrap'
                                 },
-                                title: mededeling.Aanvulling 
-                            }, mededeling.Aanvulling || '-')
+                                title: stripHtmlTags(mededeling.Aanvulling) 
+                            }, stripHtmlTags(mededeling.Aanvulling) || '-')
                         ),
                         h('td', null, formatDate(mededeling.DatumTijdStart)),
                         h('td', null, formatDate(mededeling.DatumTijdEinde)),
