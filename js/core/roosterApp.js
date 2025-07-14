@@ -629,9 +629,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('Verlofaanvraag ingediend:', result);
             setIsVerlofModalOpen(false);
             
-            // Full page reload to ensure data consistency
-            console.log('🔄 Reloading page to refresh verlof data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update verlof...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('Fout bij het indienen van verlofaanvraag:', error);
             console.error('Error details:', {
@@ -650,9 +652,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('Ziekmelding ingediend:', result);
             setIsZiekModalOpen(false);
             
-            // Full page reload to ensure data consistency  
-            console.log('🔄 Reloading page to refresh ziekte data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update ziekte...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('Fout bij het indienen van ziekmelding:', error);
             alert('Fout bij het indienen van ziekmelding: ' + error.message);
@@ -666,9 +670,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('✅ Compensatie-uren ingediend successfully:', result);
             setIsCompensatieModalOpen(false);
             
-            // Full page reload to ensure data consistency
-            console.log('🔄 Reloading page to refresh compensatie data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update compensatie...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('❌ Fout bij het indienen van compensatie-uren:', error);
             alert('Fout bij het indienen van compensatie-uren: ' + error.message);
@@ -686,9 +692,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('✅ Zittingsvrij ingediend successfully:', result);
             setIsZittingsvrijModalOpen(false);
             
-            // Full page reload to ensure data consistency
-            console.log('🔄 Reloading page to refresh zittingsvrij data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update zittingsvrij...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('❌ Fout bij het indienen van zittingsvrij:', error);
             alert('Fout bij het indienen van zittingsvrij: ' + error.message);

@@ -11,8 +11,8 @@ import * as linkInfo from '../services/linkInfo.js';
 
 const fallbackAvatar = 'https://placehold.co/96x96/4a90e2/ffffff?text=';
 
-const HOVER_DELAY_MS = 500;
-const HOVER_HIDE_DELAY_MS = 300;
+const HOVER_DELAY_MS = 300;
+const HOVER_HIDE_DELAY_MS = 150;
 
 const ProfielKaarten = (() => {
     const h = React.createElement;
@@ -783,7 +783,13 @@ const ProfielKaarten = (() => {
         });
         
         cardContainer.addEventListener('mouseleave', () => {
-            cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
+            if (cardTimeout) {
+                clearTimeout(cardTimeout);
+            }
+            cardTimeout = setTimeout(() => {
+                hideProfileCard();
+                cardTimeout = null;
+            }, HOVER_HIDE_DELAY_MS);
         });
         
         activeCard = cardContainer;
@@ -846,9 +852,15 @@ const ProfielKaarten = (() => {
                     // Store a reference to the element
                     const targetElement = event.currentTarget;
                     
-                    // Clear any existing timeout
+                    // Clear any existing hide timeout
                     if (cardTimeout) {
                         clearTimeout(cardTimeout);
+                        cardTimeout = null;
+                    }
+                    
+                    // If a card is already showing, don't show another one
+                    if (activeCard) {
+                        return;
                     }
                     
                     // Set a delay before showing the card
@@ -888,7 +900,13 @@ const ProfielKaarten = (() => {
                             });
                             
                             cardContainer.addEventListener('mouseleave', () => {
-                                cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
+                                if (cardTimeout) {
+                                    clearTimeout(cardTimeout);
+                                }
+                                cardTimeout = setTimeout(() => {
+                                    hideProfileCard();
+                                    cardTimeout = null;
+                                }, HOVER_HIDE_DELAY_MS);
                             });
                             
                             // Now fetch data asynchronously
@@ -960,12 +978,16 @@ const ProfielKaarten = (() => {
                 });
                 
                 element.addEventListener('mouseleave', () => {
+                    // Only set hide timeout if we're not already in a hide timeout
                     if (cardTimeout) {
                         clearTimeout(cardTimeout);
-                        cardTimeout = null;
                     }
                     
-                    cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
+                    // Set a hide timeout
+                    cardTimeout = setTimeout(() => {
+                        hideProfileCard();
+                        cardTimeout = null;
+                    }, HOVER_HIDE_DELAY_MS);
                 });
                 
                 // Mark as initialized in WeakSet

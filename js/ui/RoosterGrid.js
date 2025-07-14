@@ -191,6 +191,7 @@ const RoosterGrid = ({
                                                 key: dag.toISOString(),
                                                 className: classes,
                                                 id: medewerker.id === 1 && dag.getDate() === 1 ? 'dag-cel' : undefined,
+                                                'data-username': medewerker.Username,
                                                 onClick: () => handleCellClick(medewerker, dag),
                                                 onContextMenu: (e) => {
                                                     e.preventDefault();
