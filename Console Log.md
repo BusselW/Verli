@@ -1,4 +1,4 @@
-X: Critical error in profielkaarten.js - code duplication still present. File showing duplicate function declarations and constants. Manual cleanup in progress but duplication still detected in multiple functions and imports.
+Y: Profile card timing issue fixed - increased HOVER_HIDE_DELAY_MS from 300ms to 800ms, reduced positioning gaps, and added debug logging to track mouse events. Cards should now stay visible longer when moving mouse from trigger to card.
 profielkaarten.js:1006 ProfielKaarten module loaded successfully.
 userUtils.js:61 User utilities loaded successfully.
 dateTimeUtils.js:237 Date and Time Utilities loaded successfully.

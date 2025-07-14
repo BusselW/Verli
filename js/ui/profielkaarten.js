@@ -12,7 +12,7 @@ import * as linkInfo from '../services/linkInfo.js';
 const fallbackAvatar = 'https://placehold.co/96x96/4a90e2/ffffff?text=';
 
 const HOVER_DELAY_MS = 500;
-const HOVER_HIDE_DELAY_MS = 300;
+const HOVER_HIDE_DELAY_MS = 800;
 
 const ProfielKaarten = (() => {
     const h = React.createElement;
@@ -756,12 +756,12 @@ const ProfielKaarten = (() => {
         const cardRect = cardContainer.getBoundingClientRect();
         
         // Adjust position to ensure the card is fully visible
-        let top = rect.bottom + 5;
+        let top = rect.bottom + 2; // Reduced gap for easier mouse movement
         let left = rect.left;
         
         // If card would extend below viewport, position it above the element
         if (top + cardRect.height > viewportHeight) {
-            top = rect.top - cardRect.height - 5;
+            top = rect.top - cardRect.height - 2; // Reduced gap for easier mouse movement
         }
         
         // If card would extend beyond right edge, align right edge with viewport
@@ -776,6 +776,7 @@ const ProfielKaarten = (() => {
         
         // Add mouse events to the card itself
         cardContainer.addEventListener('mouseenter', () => {
+            console.log('ProfielKaarten: Mouse entered card');
             if (cardTimeout) {
                 clearTimeout(cardTimeout);
                 cardTimeout = null;
@@ -783,6 +784,7 @@ const ProfielKaarten = (() => {
         });
         
         cardContainer.addEventListener('mouseleave', () => {
+            console.log('ProfielKaarten: Mouse left card, setting hide timeout');
             cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
         });
         
@@ -960,6 +962,7 @@ const ProfielKaarten = (() => {
                 });
                 
                 element.addEventListener('mouseleave', () => {
+                    console.log('ProfielKaarten: Mouse left trigger element, setting hide timeout');
                     if (cardTimeout) {
                         clearTimeout(cardTimeout);
                         cardTimeout = null;
