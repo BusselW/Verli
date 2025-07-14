@@ -1,3 +1,16 @@
+X: Fixed "Datetimestring is not a function" error in VerlofAanvraagForm.js by adding type checking to splitDateTime function.
+
+The error was caused by the splitDateTime function receiving non-string values (likely undefined or function) instead of datetime strings. Added validation to check if the parameter is actually a string before calling string methods like .includes() and .split().
+
+Updated splitDateTime to:
+1. Check if dateTimeString is actually a string type
+2. Log warnings when unexpected types are received  
+3. Return safe default values when invalid input is provided
+4. Prevent "is not a function" errors by validating input types
+
+Previous console log entries below:
+---
+
 Y: Previous issues with profile cards opening on grid hover and rapid hide/show cycles have been resolved.
 
 Updated profielkaarten.js to:
