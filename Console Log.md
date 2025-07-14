@@ -1,13 +1,4 @@
-react-dom.development.js:29905 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
- ✅ ContextMenuN module loaded successfully.
- 🚀 Initializing TooltipManager immediately
- Initializing TooltipManager
- TooltipManager initialized successfully
- 🔧 Developer utilities added to window:
-    - window.inspectFeestdag(date|element) - Inspect feestdag by date or element
-tooltipbar.js:1054    - window.feestdagVandaag() - Check if today is a feestdag
-tooltipbar.js:1055    - window.feestdagenDezeMaand() - Get all feestdagen this month
-tooltipbar.js:1056    - window.TooltipManager - Access full TooltipManager object
+X: Critical error in profielkaarten.js - code duplication still present. File showing duplicate function declarations and constants. Manual cleanup in progress but duplication still detected in multiple functions and imports.
 profielkaarten.js:1006 ProfielKaarten module loaded successfully.
 userUtils.js:61 User utilities loaded successfully.
 dateTimeUtils.js:237 Date and Time Utilities loaded successfully.
