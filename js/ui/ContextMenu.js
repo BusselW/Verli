@@ -37,6 +37,51 @@ export const canManageOthersEvents = async () => {
 };
 
 /**
+ * Check if an item is a restricted work schedule type (VVD/VVM/VVO)
+ * These types should only be modifiable by privileged users
+ * @param {object} item - The item to check
+ * @returns {boolean} True if item is a restricted type
+ */
+export const isRestrictedWorkScheduleType = (item) => {
+    if (!item) return false;
+    
+    // Check for UrenPerWeek items with restricted types
+    if (item.MaandagSoort || item.DinsdagSoort || item.WoensdagSoort || 
+        item.DonderdagSoort || item.VrijdagSoort) {
+        const restrictedTypes = ['VVD', 'VVM', 'VVO'];
+        
+        // Check if any day has a restricted type
+        const dayTypes = [
+            item.MaandagSoort,
+            item.DinsdagSoort, 
+            item.WoensdagSoort,
+            item.DonderdagSoort,
+            item.VrijdagSoort
+        ].filter(type => type);
+        
+        const hasRestrictedType = dayTypes.some(type => restrictedTypes.includes(type));
+        
+        if (hasRestrictedType) {
+            console.log('🚫 Detected restricted work schedule type:', { 
+                itemId: item.ID || item.Id,
+                dayTypes,
+                restrictedTypesFound: dayTypes.filter(type => restrictedTypes.includes(type))
+            });
+        }
+        
+        return hasRestrictedType;
+    }
+    
+    // Also check if this is a UrenPerWeek record that defines VVD/VVM/VVO schedules
+    if (item.Title && (item.Title.includes('VVD') || item.Title.includes('VVM') || item.Title.includes('VVO'))) {
+        console.log('🚫 Detected restricted work schedule definition in Title:', item.Title);
+        return true;
+    }
+    
+    return false;
+};
+
+/**
  * Check if user can edit/delete a specific item
  * @param {object} item - The item to check permissions for
  * @param {string} currentUsername - The current user's username
@@ -70,6 +115,16 @@ export const canUserModifyItem = async (item, currentUsername) => {
         currentUsername, 
         isOwnItem 
     });
+    
+    // Check if item is a restricted type (VVD/VVM/VVO)
+    const isRestrictedType = isRestrictedWorkScheduleType(item);
+    console.log('🚫 canUserModifyItem: Restricted type check:', isRestrictedType);
+    
+    // If it's a restricted type, only allow if user has privileged access
+    if (isRestrictedType) {
+        console.log('🔒 Item is restricted type (VVD/VVM/VVO), requiring privileged access');
+        return false; // Non-privileged users cannot edit VVD/VVM/VVO items at all
+    }
     
     return isOwnItem;
 };
@@ -433,6 +488,93 @@ const ContextMenuN = ({
         filteredItems.map(renderMenuItem)
     );
 };
+
+/**
+ * Enhanced CRUD operation with VVD/VVM/VVO restrictions
+ * @param {string} operation - 'create', 'update', or 'delete'
+ * @param {string} listName - SharePoint list name
+ * @param {object} itemData - Item data
+ * @param {number} itemId - Item ID (for update/delete)
+ * @param {string} currentUsername - Current user's username
+ * @returns {Promise<object|boolean>} Operation result
+ */
+export const performRestrictedCRUDOperation = async (operation, listName, itemData, itemId = null, currentUsername = null) => {
+    console.log(`🔒 performRestrictedCRUDOperation: ${operation} on ${listName}`, { itemData, itemId, currentUsername });
+    
+    try {
+        // For update and delete operations, check item restrictions
+        if ((operation === 'update' || operation === 'delete') && itemId) {
+            // First, get the existing item to check its type
+            const existingItem = await getListItemById(listName, itemId);
+            
+            if (isRestrictedWorkScheduleType(existingItem)) {
+                const hasPrivilegedAccess = await canManageOthersEvents();
+                if (!hasPrivilegedAccess) {
+                    throw new Error('🚫 Je hebt geen rechten om VVD/VVM/VVO werkrooster items te wijzigen. Neem contact op met een administrator.');
+                }
+            }
+            
+            // Check basic permissions
+            const canModify = await canUserModifyItem(existingItem, currentUsername);
+            if (!canModify) {
+                throw new Error('🚫 Je hebt geen rechten om dit item te wijzigen.');
+            }
+        }
+        
+        // For create operations with restricted data
+        if (operation === 'create' && isRestrictedWorkScheduleType(itemData)) {
+            const hasPrivilegedAccess = await canManageOthersEvents();
+            if (!hasPrivilegedAccess) {
+                throw new Error('🚫 Je hebt geen rechten om VVD/VVM/VVO werkrooster items aan te maken. Neem contact op met een administrator.');
+            }
+        }
+        
+        // Perform the actual operation
+        switch (operation) {
+            case 'create':
+                return await createListItem(listName, itemData);
+            case 'update':
+                return await updateListItem(listName, itemId, itemData);
+            case 'delete':
+                return await deleteListItem(listName, itemId);
+            default:
+                throw new Error(`❌ Onbekende operatie: ${operation}`);
+        }
+        
+    } catch (error) {
+        console.error(`❌ Error in ${operation} operation:`, error);
+        throw error;
+    }
+};
+
+/**
+ * Get a single item by ID from SharePoint list
+ * @param {string} listName - SharePoint list name
+ * @param {number} itemId - Item ID
+ * @returns {Promise<object>} Item data
+ */
+const getListItemById = async (listName, itemId) => {
+    // This should use your existing SharePoint service
+    // Implementation depends on which dataService is being used
+    const url = `https://som.org.om.local/sites/MulderT/CustomPW/Verlof/_api/web/lists/getbytitle('${listName}')/items(${itemId})`;
+    
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=verbose'
+        }
+    });
+    
+    if (!response.ok) {
+        throw new Error(`❌ Could not fetch item ${itemId} from ${listName}: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.d;
+};
+
+// Import existing CRUD functions (adjust imports based on your dataService structure)
+import { createListItem, updateListItem, deleteListItem } from '../services/sharepointCRUD.js';
 
 export default ContextMenuN;
 

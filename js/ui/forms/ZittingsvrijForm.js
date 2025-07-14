@@ -1,5 +1,6 @@
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
+import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
 
 const { createElement: h, useState, useEffect } = React;
 
@@ -195,7 +196,7 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
     };
     
     // Separated form submission logic
-    const submitForm = () => {
+    const submitForm = async () => {
         const selectedMedewerker = medewerkers.find(m => m.Id === parseInt(medewerkerId, 10));
         const fullName = selectedMedewerker ? selectedMedewerker.Title : 'Onbekend';
         const currentDate = new Date().toLocaleDateString('nl-NL');
@@ -216,7 +217,23 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
             // Add a list property to specify which list to use
             _listName: 'IncidenteelZittingVrij'
         };
-        onSubmit(formData);
+        
+        // Validate permissions before submission
+        try {
+            const operation = formData.ID ? 'update' : 'create';
+            const validation = await validateFormSubmission(formData, operation);
+            
+            if (!validation.valid) {
+                console.warn('🚫 Zittingsvrij form validation failed:', validation.errors);
+                showCRUDRestrictionMessage(operation, validation.errors.join(', '));
+                return;
+            }
+            
+            onSubmit(formData);
+        } catch (error) {
+            console.error('❌ Error validating zittingsvrij form:', error);
+            alert('Er is een fout opgetreden bij het valideren van het formulier.');
+        }
     };
 
     return h('form', { onSubmit: handleSubmit, className: 'modal-form' },

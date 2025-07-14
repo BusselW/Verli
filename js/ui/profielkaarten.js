@@ -12,7 +12,7 @@ import * as linkInfo from '../services/linkInfo.js';
 const fallbackAvatar = 'https://placehold.co/96x96/4a90e2/ffffff?text=';
 
 const HOVER_DELAY_MS = 500;
-const HOVER_HIDE_DELAY_MS = 800;
+const HOVER_HIDE_DELAY_MS = 300;
 
 const ProfielKaarten = (() => {
     const h = React.createElement;
@@ -756,12 +756,12 @@ const ProfielKaarten = (() => {
         const cardRect = cardContainer.getBoundingClientRect();
         
         // Adjust position to ensure the card is fully visible
-        let top = rect.bottom + 2; // Reduced gap for easier mouse movement
+        let top = rect.bottom + 5;
         let left = rect.left;
         
         // If card would extend below viewport, position it above the element
         if (top + cardRect.height > viewportHeight) {
-            top = rect.top - cardRect.height - 2; // Reduced gap for easier mouse movement
+            top = rect.top - cardRect.height - 5;
         }
         
         // If card would extend beyond right edge, align right edge with viewport
@@ -776,7 +776,6 @@ const ProfielKaarten = (() => {
         
         // Add mouse events to the card itself
         cardContainer.addEventListener('mouseenter', () => {
-            console.log('ProfielKaarten: Mouse entered card');
             if (cardTimeout) {
                 clearTimeout(cardTimeout);
                 cardTimeout = null;
@@ -784,7 +783,6 @@ const ProfielKaarten = (() => {
         });
         
         cardContainer.addEventListener('mouseleave', () => {
-            console.log('ProfielKaarten: Mouse left card, setting hide timeout');
             cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
         });
         
@@ -819,7 +817,7 @@ const ProfielKaarten = (() => {
      * Apply profile card hover behavior to elements
      * @param {string} selector - CSS selector for elements to apply hover behavior to
      */
-    const init = (selector = '.medewerker-naam, .medewerker-avatar') => {
+    const init = (selector = '[data-username]') => {
         console.log(`ProfielKaarten: Initializing with selector "${selector}"`);
         
         // Use a WeakSet to track initialized elements, allowing GC when elements are removed
@@ -962,7 +960,6 @@ const ProfielKaarten = (() => {
                 });
                 
                 element.addEventListener('mouseleave', () => {
-                    console.log('ProfielKaarten: Mouse left trigger element, setting hide timeout');
                     if (cardTimeout) {
                         clearTimeout(cardTimeout);
                         cardTimeout = null;

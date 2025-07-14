@@ -25,6 +25,7 @@ import { getCurrentUserGroups, isUserInAnyGroup } from '../services/permissionSe
 import * as linkInfo from '../services/linkInfo.js';
 import LoadingLogic, { loadFilteredData, shouldReloadData, updateCacheKey, clearAllCache, logLoadingStatus } from '../services/loadingLogic.js';
 import ContextMenu, { canManageOthersEvents, canUserModifyItem } from '../ui/ContextMenu.js';
+import { validateFormSubmission, showCRUDRestrictionMessage } from '../services/crudPermissionService.js';
 import ProfielKaarten from '../ui/profielkaarten.js';
 import FAB from '../ui/FloatingActionButton.js';
 import Modal from '../ui/Modal.js';

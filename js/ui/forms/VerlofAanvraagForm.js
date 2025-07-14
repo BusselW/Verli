@@ -1,5 +1,6 @@
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
+import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
 
 const { createElement: h, useState, useEffect } = React;
 
@@ -204,7 +205,7 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const selectedMedewerker = medewerkers.find(m => m.Id === parseInt(medewerkerId, 10));
         const fullName = selectedMedewerker ? selectedMedewerker.Title : 'Onbekend';
@@ -244,7 +245,23 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
         };
         
         console.log('Final formData for verlof submission:', formData);
-        onSubmit(formData);
+        
+        // Validate permissions before submission
+        try {
+            const operation = formData.ID ? 'update' : 'create';
+            const validation = await validateFormSubmission(formData, operation);
+            
+            if (!validation.valid) {
+                console.warn('🚫 Form validation failed:', validation.errors);
+                showCRUDRestrictionMessage(operation, validation.errors.join(', '));
+                return;
+            }
+            
+            onSubmit(formData);
+        } catch (error) {
+            console.error('❌ Error validating verlof form:', error);
+            alert('Er is een fout opgetreden bij het valideren van het formulier.');
+        }
     };
 
     return h('div', { className: 'modal-form-wrapper' },
