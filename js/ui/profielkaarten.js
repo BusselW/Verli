@@ -129,6 +129,15 @@ const ProfielKaarten = (() => {
             
             console.log(`fetchWerkroosterData: Received ${urenItems.length} UrenPerWeek records`);
             
+            // Debug: Show sample data structure and what we're looking for
+            if (urenItems.length > 0) {
+                console.log('fetchWerkroosterData: Sample UrenPerWeek record:', urenItems[0]);
+                console.log('fetchWerkroosterData: Available MedewerkerID values:', 
+                    urenItems.map(item => item.MedewerkerID).filter(id => id).slice(0, 5)
+                );
+            }
+            console.log(`fetchWerkroosterData: Looking for medewerkerID: "${medewerkerID}"`);
+            
             // Check only MedewerkerID field (UrenPerWeek doesn't have Username field)
             const filteredItems = urenItems.filter(item => 
                 item.MedewerkerID === medewerkerID
@@ -137,13 +146,40 @@ const ProfielKaarten = (() => {
             console.log(`fetchWerkroosterData: Found ${filteredItems.length} matching records`);
             
             if (filteredItems.length === 0) {
-                // If no exact match, try a case-insensitive match
+                console.log('fetchWerkroosterData: No exact match found, trying alternatives...');
+                
+                // Try different username formats
+                let altItems = [];
                 const lowercaseID = medewerkerID.toLowerCase();
-                const altItems = urenItems.filter(item => 
+                
+                // 1. Case-insensitive match
+                altItems = urenItems.filter(item => 
                     (item.MedewerkerID && item.MedewerkerID.toLowerCase() === lowercaseID)
                 );
                 
                 console.log(`fetchWerkroosterData: Found ${altItems.length} case-insensitive matches`);
+                
+                // 2. If no match and input has domain, try without domain
+                if (altItems.length === 0 && medewerkerID.includes('\\')) {
+                    const usernameWithoutDomain = medewerkerID.split('\\')[1];
+                    console.log(`fetchWerkroosterData: Trying without domain: "${usernameWithoutDomain}"`);
+                    altItems = urenItems.filter(item => 
+                        item.MedewerkerID === usernameWithoutDomain ||
+                        (item.MedewerkerID && item.MedewerkerID.toLowerCase() === usernameWithoutDomain.toLowerCase())
+                    );
+                    console.log(`fetchWerkroosterData: Found ${altItems.length} matches without domain`);
+                }
+                
+                // 3. If no match and input doesn't have domain, try with som\ domain
+                if (altItems.length === 0 && !medewerkerID.includes('\\')) {
+                    const usernameWithDomain = `som\\${medewerkerID}`;
+                    console.log(`fetchWerkroosterData: Trying with domain: "${usernameWithDomain}"`);
+                    altItems = urenItems.filter(item => 
+                        item.MedewerkerID === usernameWithDomain ||
+                        (item.MedewerkerID && item.MedewerkerID.toLowerCase() === usernameWithDomain.toLowerCase())
+                    );
+                    console.log(`fetchWerkroosterData: Found ${altItems.length} matches with domain`);
+                }
                 
                 if (altItems.length > 0) {
                     // Sort by Ingangsdatum desc
@@ -152,7 +188,31 @@ const ProfielKaarten = (() => {
                     return altItems[0];
                 }
                 
-                return null;
+                // Create a default work schedule if no data found
+                console.log('fetchWerkroosterData: No UrenPerWeek data found, creating default schedule');
+                return {
+                    MedewerkerID: medewerkerID,
+                    MaandagStart: '08:30',
+                    MaandagEind: '17:00',
+                    MaandagTotaal: '8.5',
+                    MaandagSoort: 'Normaal',
+                    DinsdagStart: '08:30',
+                    DinsdagEind: '17:00',
+                    DinsdagTotaal: '8.5',
+                    DinsdagSoort: 'Normaal',
+                    WoensdagStart: '08:30',
+                    WoensdagEind: '17:00',
+                    WoensdagTotaal: '8.5',
+                    WoensdagSoort: 'Normaal',
+                    DonderdagStart: '08:30',
+                    DonderdagEind: '17:00',
+                    DonderdagTotaal: '8.5',
+                    DonderdagSoort: 'Normaal',
+                    VrijdagStart: '08:30',
+                    VrijdagEind: '17:00',
+                    VrijdagTotaal: '8.5',
+                    VrijdagSoort: 'Normaal'
+                };
             }
             
             // Sort by Ingangsdatum desc
