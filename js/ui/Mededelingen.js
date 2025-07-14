@@ -5,7 +5,7 @@
  * Provides interface for privileged users to create new announcements
  */
 
-import { fetchSharePointList, createSharePointListItem } from '../services/sharepointService.js';
+import { fetchSharePointList, createSharePointListItem, updateSharePointListItem, deleteSharePointListItem } from '../services/sharepointService.js';
 import { getCurrentUserInfo } from '../services/sharepointService.js';
 import { canManageOthersEvents } from './ContextMenu.js';
 
@@ -31,6 +31,10 @@ const Mededelingen = ({ teams = [] }) => {
         endDate: '',
         targetTeams: []
     });
+
+    // Edit state
+    const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+    const [showEditForm, setShowEditForm] = useState(false);
 
     useEffect(() => {
         initializeComponent();
@@ -141,6 +145,102 @@ const Mededelingen = ({ teams = [] }) => {
                 window.NotificationSystem.error('Fout bij het aanmaken van de mededeling: ' + error.message, 'Fout opgetreden');
             }
         }
+    };
+
+    const handleEditAnnouncement = (announcement) => {
+        setEditingAnnouncement(announcement);
+        setFormData({
+            title: announcement.Title || '',
+            description: announcement.Aanvulling || '',
+            startDate: announcement.DatumTijdStart ? 
+                new Date(announcement.DatumTijdStart).toISOString().slice(0, 16) : '',
+            endDate: announcement.DatumTijdEinde ? 
+                new Date(announcement.DatumTijdEinde).toISOString().slice(0, 16) : '',
+            targetTeams: announcement.UitzendenAan ? 
+                announcement.UitzendenAan.split(';').map(team => team.trim()) : []
+        });
+        setShowEditForm(true);
+        setShowCreateForm(false);
+    };
+
+    const handleUpdateAnnouncement = async (e) => {
+        e.preventDefault();
+        
+        if (!editingAnnouncement) return;
+
+        try {
+            const updateData = {
+                Title: formData.title,
+                Aanvulling: formData.description,
+                DatumTijdStart: formData.startDate ? new Date(formData.startDate).toISOString() : null,
+                DatumTijdEinde: formData.endDate ? new Date(formData.endDate).toISOString() : null,
+                UitzendenAan: formData.targetTeams.join('; ')
+            };
+
+            await updateSharePointListItem('Mededeling', editingAnnouncement.ID, updateData);
+            
+            // Reset form and reload announcements
+            setFormData({
+                title: '',
+                description: '',
+                startDate: '',
+                endDate: '',
+                targetTeams: []
+            });
+            setEditingAnnouncement(null);
+            setShowEditForm(false);
+            
+            await loadAnnouncements();
+            
+            if (window.NotificationSystem) {
+                window.NotificationSystem.success('Mededeling succesvol bijgewerkt', 'Bijgewerkt');
+            }
+            console.log('✅ Announcement updated successfully');
+        } catch (error) {
+            console.error('❌ Error updating announcement:', error);
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Fout bij het bijwerken van de mededeling: ' + error.message, 'Fout opgetreden');
+            }
+        }
+    };
+
+    const handleDeleteAnnouncement = async (announcement) => {
+        if (!canManageAnnouncements) {
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Je hebt geen rechten om mededelingen te verwijderen.', 'Toegang geweigerd');
+            }
+            return;
+        }
+
+        // Simple confirmation using confirm() - could be enhanced with modal later
+        if (confirm(`Weet je zeker dat je de mededeling "${announcement.Title}" wilt verwijderen?`)) {
+            try {
+                await deleteSharePointListItem('Mededeling', announcement.ID);
+                await loadAnnouncements();
+                
+                if (window.NotificationSystem) {
+                    window.NotificationSystem.success('Mededeling succesvol verwijderd', 'Verwijderd');
+                }
+                console.log('✅ Announcement deleted successfully');
+            } catch (error) {
+                console.error('❌ Error deleting announcement:', error);
+                if (window.NotificationSystem) {
+                    window.NotificationSystem.error('Fout bij het verwijderen van de mededeling: ' + error.message, 'Fout opgetreden');
+                }
+            }
+        }
+    };
+
+    const handleCancelEdit = () => {
+        setEditingAnnouncement(null);
+        setShowEditForm(false);
+        setFormData({
+            title: '',
+            description: '',
+            startDate: '',
+            endDate: '',
+            targetTeams: []
+        });
     };
 
     const handleTeamToggle = (teamName) => {
@@ -275,6 +375,91 @@ const Mededelingen = ({ teams = [] }) => {
             )
         ),
 
+        // Edit form (if visible)
+        showEditForm && h('div', { className: 'announcement-form-container' },
+            h('form', { className: 'announcement-form', onSubmit: handleUpdateAnnouncement },
+                h('div', { className: 'form-group' },
+                    h('label', { htmlFor: 'edit-announcement-title' }, 'Titel:'),
+                    h('input', {
+                        id: 'edit-announcement-title',
+                        type: 'text',
+                        value: formData.title,
+                        onChange: (e) => setFormData(prev => ({ ...prev, title: e.target.value })),
+                        required: true,
+                        placeholder: 'Titel van de mededeling'
+                    })
+                ),
+                h('div', { className: 'form-group' },
+                    h('label', { htmlFor: 'edit-announcement-description' }, 'Beschrijving:'),
+                    h('textarea', {
+                        id: 'edit-announcement-description',
+                        value: formData.description,
+                        onChange: (e) => setFormData(prev => ({ ...prev, description: e.target.value })),
+                        required: true,
+                        placeholder: 'Inhoud van de mededeling',
+                        rows: 3
+                    })
+                ),
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-group' },
+                        h('label', { htmlFor: 'edit-announcement-start' }, 'Startdatum:'),
+                        h('input', {
+                            id: 'edit-announcement-start',
+                            type: 'datetime-local',
+                            value: formData.startDate,
+                            onChange: (e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))
+                        })
+                    ),
+                    h('div', { className: 'form-group' },
+                        h('label', { htmlFor: 'edit-announcement-end' }, 'Einddatum:'),
+                        h('input', {
+                            id: 'edit-announcement-end',
+                            type: 'datetime-local',
+                            value: formData.endDate,
+                            onChange: (e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))
+                        })
+                    )
+                ),
+                h('div', { className: 'form-group' },
+                    h('label', null, 'Doelgroep:'),
+                    h('div', { className: 'team-checkboxes' },
+                        teams.map(team => 
+                            h('label', { 
+                                key: team.ID, 
+                                className: 'team-checkbox'
+                            },
+                                h('input', {
+                                    type: 'checkbox',
+                                    checked: formData.targetTeams.includes(team.Naam),
+                                    onChange: () => handleTeamToggle(team.Naam)
+                                }),
+                                h('span', null, team.Naam)
+                            )
+                        ),
+                        h('label', { className: 'team-checkbox' },
+                            h('input', {
+                                type: 'checkbox',
+                                checked: formData.targetTeams.includes('Alle teams'),
+                                onChange: () => handleTeamToggle('Alle teams')
+                            }),
+                            h('span', null, 'Alle teams')
+                        )
+                    )
+                ),
+                h('div', { className: 'form-actions' },
+                    h('button', {
+                        type: 'button',
+                        className: 'btn-cancel',
+                        onClick: handleCancelEdit
+                    }, 'Annuleren'),
+                    h('button', {
+                        type: 'submit',
+                        className: 'btn-submit'
+                    }, 'Bijwerken')
+                )
+            )
+        ),
+
         // Active announcements
         announcements.length > 0 && h('div', { className: 'announcements-list' },
             announcements.map(announcement => 
@@ -301,6 +486,23 @@ const Mededelingen = ({ teams = [] }) => {
                                 h('i', { className: 'fas fa-users' }),
                                 ` Voor: ${announcement.UitzendenAan}`
                             )
+                        )
+                    ),
+                    // Action buttons (only for privileged users)
+                    canManageAnnouncements && h('div', { className: 'announcement-actions' },
+                        h('button', {
+                            className: 'btn-edit',
+                            onClick: () => handleEditAnnouncement(announcement),
+                            title: 'Bewerken'
+                        },
+                            h('i', { className: 'fas fa-edit' })
+                        ),
+                        h('button', {
+                            className: 'btn-delete',
+                            onClick: () => handleDeleteAnnouncement(announcement),
+                            title: 'Verwijderen'
+                        },
+                            h('i', { className: 'fas fa-trash' })
                         )
                     )
                 )
