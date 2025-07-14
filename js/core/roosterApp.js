@@ -39,6 +39,7 @@ import Legenda from '../ui/Legenda.js';
 import RoosterHeader from '../ui/RoosterHeader.js';
 import RoosterGrid from '../ui/RoosterGrid.js';
 import TooltipManager from '../ui/tooltipbar.js';
+import Mededelingen from '../ui/Mededelingen.js';
 
 const { useState, useEffect, useMemo, useCallback, createElement: h, Fragment } = React;
 
@@ -940,13 +941,10 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasFirstClick: !!firstClickState
                         });
                         
-                        // Determine the correct selection to use
-                        let finalSelection = null;
-                        
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('🏖️ Context menu Verlof: Using existing selection for same employee:', selectionData);
-                            finalSelection = selectionData;
+                            console.log('🏖️ Context menu Verlof clicked. Using existing selection for same employee:', selectionData);
+                            // Keep existing selection as-is - this respects the two-click selection
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -954,35 +952,29 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            finalSelection = {
+                            const rangeSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏖️ Context menu Verlof: Using two-click range selection:', finalSelection);
+                            console.log('🏖️ Context menu Verlof: Using two-click range selection:', rangeSelection);
+                            setSelection(rangeSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            finalSelection = {
+                            const currentSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏖️ Context menu Verlof: Creating single-day selection:', finalSelection);
+                            console.log('🏖️ Context menu Verlof clicked. Creating single-day selection:', currentSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
+                            setSelection(currentSelection);
                         }
-                        
-                        // Ensure selection is set before opening modal
-                        setSelection(finalSelection);
-                        
-                        // Use setTimeout to ensure state update completes before opening modal
-                        setTimeout(() => {
-                            console.log('🏖️ Opening Verlof modal with final selection:', finalSelection);
                             setIsVerlofModalOpen(true);
-                        }, 0);
                         setContextMenu(null);
                     }
                 },
@@ -1004,9 +996,6 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasSelection: !!selectionData,
                             hasFirstClick: !!firstClickState
                         });
-                        
-                        // Determine the correct selection to use
-                        let finalSelection = null;
                         
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
@@ -1990,6 +1979,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                     setZoekTerm,
                     geselecteerdTeam,
                     setGeselecteerdTeam,
+                    teams
+                }),
+                h(Mededelingen, {
                     teams
                 }),
                 h(Legenda, {
