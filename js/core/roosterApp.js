@@ -629,20 +629,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('Verlofaanvraag ingediend:', result);
             setIsVerlofModalOpen(false);
             
-            // Graceful data reload - only refresh verlof data to minimize DOM changes
-            console.log('🔄 Gracefully reloading verlof data...');
-            
-            try {
-                // Only reload verlof data, not everything
-                const verlofData = await loadFilteredData(fetchSharePointList, 'Verlof', 'verlof', weergaveType, huidigJaar, weergaveType === 'week' ? huidigWeek : huidigMaand);
-                setVerlofItems((verlofData || []).map(v => ({ ...v, StartDatum: createLocalDate(v.StartDatum), EindDatum: createLocalDate(v.EindDatum) })));
-                console.log('✅ Verlof data refreshed successfully');
-            } catch (error) {
-                console.error('❌ Error refreshing verlof data:', error);
-                // Fallback to full refresh if needed
-                clearAllCache();
-                await silentRefreshData(true);
-            }
+            // Full page reload to ensure data consistency
+            console.log('🔄 Reloading page to refresh verlof data...');
+            window.location.reload();
         } catch (error) {
             console.error('Fout bij het indienen van verlofaanvraag:', error);
             console.error('Error details:', {
@@ -661,20 +650,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('Ziekmelding ingediend:', result);
             setIsZiekModalOpen(false);
             
-            // Graceful data reload - only refresh verlof data (ziekte goes to verlof list)
-            console.log('🔄 Gracefully reloading ziekte data...');
-            
-            try {
-                // Only reload verlof data since ziekte items go to the verlof list
-                const verlofData = await loadFilteredData(fetchSharePointList, 'Verlof', 'verlof', weergaveType, huidigJaar, weergaveType === 'week' ? huidigWeek : huidigMaand);
-                setVerlofItems((verlofData || []).map(v => ({ ...v, StartDatum: createLocalDate(v.StartDatum), EindDatum: createLocalDate(v.EindDatum) })));
-                console.log('✅ Ziekte data refreshed successfully');
-            } catch (error) {
-                console.error('❌ Error refreshing ziekte data:', error);
-                // Fallback to full refresh if needed
-                clearAllCache();
-                await silentRefreshData(true);
-            }
+            // Full page reload to ensure data consistency  
+            console.log('🔄 Reloading page to refresh ziekte data...');
+            window.location.reload();
         } catch (error) {
             console.error('Fout bij het indienen van ziekmelding:', error);
             alert('Fout bij het indienen van ziekmelding: ' + error.message);
@@ -688,24 +666,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('✅ Compensatie-uren ingediend successfully:', result);
             setIsCompensatieModalOpen(false);
             
-            // Graceful data reload - only refresh compensatie data to minimize DOM changes
-            console.log('🔄 Gracefully reloading compensatie data...');
-            
-            try {
-                // Only reload compensatie data, not everything
-                const compensatieData = await loadFilteredData(fetchSharePointList, 'CompensatieUren', 'compensatie', weergaveType, huidigJaar, weergaveType === 'week' ? huidigWeek : huidigMaand);
-                setCompensatieUrenItems((compensatieData || []).map(c => ({
-                    ...c,
-                    StartCompensatieUren: createLocalDate(c.StartCompensatieUren),
-                    EindeCompensatieUren: createLocalDate(c.EindeCompensatieUren)
-                })));
-                console.log('✅ Compensatie data refreshed successfully');
-            } catch (error) {
-                console.error('❌ Error refreshing compensatie data:', error);
-                // Fallback to full refresh if needed
-                clearAllCache();
-                await silentRefreshData(true);
-            }
+            // Full page reload to ensure data consistency
+            console.log('🔄 Reloading page to refresh compensatie data...');
+            window.location.reload();
         } catch (error) {
             console.error('❌ Fout bij het indienen van compensatie-uren:', error);
             alert('Fout bij het indienen van compensatie-uren: ' + error.message);
@@ -723,20 +686,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('✅ Zittingsvrij ingediend successfully:', result);
             setIsZittingsvrijModalOpen(false);
             
-            // Graceful data reload - only refresh zittingsvrij data to minimize DOM changes
-            console.log('🔄 Gracefully reloading zittingsvrij data...');
-            
-            try {
-                // Only reload zittingsvrij data, not everything
-                const zittingsvrijData = await loadFilteredData(fetchSharePointList, 'IncidenteelZittingVrij', 'zittingsvrij', weergaveType, huidigJaar, weergaveType === 'week' ? huidigWeek : huidigMaand);
-                setZittingsvrijItems((zittingsvrijData || []).map(z => ({ ...z, StartDatum: createLocalDate(z.ZittingsVrijeDagTijd), EindDatum: createLocalDate(z.ZittingsVrijeDagTijdEind) })));
-                console.log('✅ Zittingsvrij data refreshed successfully');
-            } catch (error) {
-                console.error('❌ Error refreshing zittingsvrij data:', error);
-                // Fallback to full refresh if needed
-                clearAllCache();
-                await silentRefreshData(true);
-            }
+            // Full page reload to ensure data consistency
+            console.log('🔄 Reloading page to refresh zittingsvrij data...');
+            window.location.reload();
         } catch (error) {
             console.error('❌ Fout bij het indienen van zittingsvrij:', error);
             alert('Fout bij het indienen van zittingsvrij: ' + error.message);
