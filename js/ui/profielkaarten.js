@@ -941,27 +941,14 @@ const ProfielKaarten = (() => {
             const elements = document.querySelectorAll(selector);
             console.log(`🔍 ProfielKaarten: Found ${elements.length} elements matching "${selector}"`);
             
-            // Log sample elements for debugging
-            if (elements.length > 0) {
-                console.log(`🔍 ProfielKaarten: Sample elements:`, 
-                    Array.from(elements).slice(0, 3).map(el => ({
-                        tagName: el.tagName,
-                        className: el.className,
-                        username: el.dataset.username,
-                        hasTooltip: el.dataset.tooltipAttached
-                    }))
-                );
-            }
+            let newElementsCount = 0;
             
             elements.forEach((element, index) => {
-                console.log(`🔍 ProfielKaarten: Processing element ${index + 1}/${elements.length}:`, {
-                    tagName: element.tagName,
-                    className: element.className,
-                    username: element.dataset.username,
-                    alreadyInitialized: initializedElements.has(element)
-                });
                 // Skip if already initialized (using WeakSet)
                 if (initializedElements.has(element)) return;
+                
+                newElementsCount++;
+                console.log(`🔍 ProfielKaarten: Initializing NEW element ${newElementsCount} for username "${element.dataset.username}"`);
                 
                 const username = element.dataset.username;
                 if (!username) {
@@ -995,10 +982,10 @@ const ProfielKaarten = (() => {
                         cardTimeout = null;
                     }
                     
-                    // If a card is already showing, don't show another one
+                    // If a card is already showing, hide it first and proceed with new one
                     if (activeCard) {
-                        console.log(`⚠️ MOUSEENTER: Active card already exists, skipping for "${username}"`);
-                        return;
+                        console.log(`⚠️ MOUSEENTER: Active card already exists, hiding it before showing new one for "${username}"`);
+                        hideProfileCard();
                     }
                     
                     // Set a delay before showing the card
@@ -1167,7 +1154,10 @@ const ProfielKaarten = (() => {
                 
                 // Mark as initialized in WeakSet
                 initializedElements.add(element);
+                console.log(`✅ ProfielKaarten: Successfully initialized element for username "${username}"`);
             });
+            
+            console.log(`🔍 ProfielKaarten: Initialized ${newElementsCount} new elements out of ${elements.length} total elements`);
         }
         
         // Apply immediately for existing elements
@@ -1175,12 +1165,27 @@ const ProfielKaarten = (() => {
         
         // Set up a mutation observer to watch for changes and reapply as needed
         const observer = new MutationObserver((mutations) => {
-            console.log(`🔍 ProfielKaarten: MutationObserver detected ${mutations.length} mutations`);
+            let hasRelevantChanges = false;
+            
             for (const mutation of mutations) {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                    console.log(`🔍 ProfielKaarten: Mutation detected new nodes, reapplying hover behavior`);
-                    applyProfileCardHover();
+                    // Check if any added nodes contain elements with data-username
+                    for (const node of mutation.addedNodes) {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            if (node.hasAttribute && node.hasAttribute('data-username') || 
+                                node.querySelector && node.querySelector('[data-username]')) {
+                                hasRelevantChanges = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (hasRelevantChanges) break;
                 }
+            }
+            
+            if (hasRelevantChanges) {
+                console.log(`🔍 ProfielKaarten: MutationObserver detected relevant changes, reapplying hover behavior`);
+                applyProfileCardHover();
             }
         });
         
