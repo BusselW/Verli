@@ -50,7 +50,10 @@ const RoosterGrid = ({
                             ),
                             (teamMedewerkers || []).map(medewerker =>
                                 h('tr', { key: medewerker.id, className: 'medewerker-rij' },
-                                    h('td', { className: 'medewerker-kolom' }, 
+                                    h('td', { 
+                                        className: 'medewerker-kolom',
+                                        'data-username': medewerker.Username
+                                    }, 
                                         h(MedewerkerRow, { medewerker: medewerker || {} })
                                     ),
                                     // Render calendar cells for each day with proper data blocks
