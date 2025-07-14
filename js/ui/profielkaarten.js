@@ -11,6 +11,8 @@ import * as linkInfo from '../services/linkInfo.js';
 
 const fallbackAvatar = 'https://placehold.co/96x96/4a90e2/ffffff?text=';
 
+const HOVER_DELAY_MS = 500;
+
 const ProfielKaarten = (() => {
     const h = React.createElement;
     let activeCard = null;
@@ -591,7 +593,7 @@ const ProfielKaarten = (() => {
                                     : 'https://som.org.om.local/sites/MulderT/customPW/Verlof/cpw/Rooster/icons/profilecards/horen-ja.svg')
                                 : (iconBasePath && iconBasePath !== 'undefined'
                                     ? `${iconBasePath}/horen-nee.svg`
-                                    : 'https://som.org.om/local/sites/MulderT/customPW/Verlof/cpw/Rooster/icons/profilecards/horen-nee.svg'),
+                                    : 'https://som.org.om.local/sites/MulderT/customPW/Verlof/cpw/Rooster/icons/profilecards/horen-nee.svg'),
                             alt: medewerker.Horen ? 'Ja' : 'Nee',
                             title: medewerker.Horen ? 'Ja' : 'Nee',
                             onError: (e) => {
@@ -742,8 +744,9 @@ const ProfielKaarten = (() => {
         
         // Position the card
         const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        
+        // Always clean up any previous card/root before creating a new one
+        hideProfileCard();
+
         // Render the card to get its dimensions
         document.body.appendChild(cardContainer);
         const root = ReactDOM.createRoot(cardContainer);
@@ -752,13 +755,15 @@ const ProfielKaarten = (() => {
         
         const cardRect = cardContainer.getBoundingClientRect();
         
+        const cardRect = cardContainer.getBoundingClientRect();
+        
         // Adjust position to ensure the card is fully visible
-        let top = rect.bottom;
+        let top = rect.bottom + 5;
         let left = rect.left;
         
         // If card would extend below viewport, position it above the element
         if (top + cardRect.height > viewportHeight) {
-            top = rect.top - cardRect.height;
+            top = rect.top - cardRect.height - 5;
         }
         
         // If card would extend beyond right edge, align right edge with viewport
@@ -787,14 +792,13 @@ const ProfielKaarten = (() => {
     };
 
     /**
-     * Hide the active profile card
-     */
     const hideProfileCard = () => {
         if (activeCard) {
             try {
                 // Safely unmount React component using createRoot
                 if (activeCard.reactRoot) {
                     activeCard.reactRoot.unmount();
+                    activeCard.reactRoot = null;
                 }
                 
                 // Remove the element if it's still in the DOM
@@ -806,6 +810,8 @@ const ProfielKaarten = (() => {
             }
             
             activeCard = null;
+        }
+    };
         }
     };
 
@@ -833,13 +839,17 @@ const ProfielKaarten = (() => {
         /**
          * Apply profile card hover behavior to matching elements
          */
+        // Use a WeakSet to track initialized elements, allowing GC when elements are removed
+        const initializedElements = applyProfileCardHover.initializedElements || new WeakSet();
+        applyProfileCardHover.initializedElements = initializedElements;
+
         function applyProfileCardHover() {
             const elements = document.querySelectorAll(selector);
             console.log(`ProfielKaarten: Found ${elements.length} elements matching "${selector}"`);
             
             elements.forEach(element => {
-                // Skip if already initialized
-                if (element.dataset.profileCardInitialized) return;
+                // Skip if already initialized (using WeakSet)
+                if (initializedElements.has(element)) return;
                 
                 const username = element.dataset.username;
                 if (!username) {
@@ -963,7 +973,7 @@ const ProfielKaarten = (() => {
                             console.error('Error showing profile card:', error);
                             hideProfileCard();
                         }
-                    }, 500);
+                    }, HOVER_DELAY_MS);
                 });
                 
                 element.addEventListener('mouseleave', () => {
@@ -975,8 +985,8 @@ const ProfielKaarten = (() => {
                     cardTimeout = setTimeout(hideProfileCard, 300);
                 });
                 
-                // Mark as initialized
-                element.dataset.profileCardInitialized = 'true';
+                // Mark as initialized in WeakSet
+                initializedElements.add(element);
             });
         }
     };
