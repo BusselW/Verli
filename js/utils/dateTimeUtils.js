@@ -247,15 +247,18 @@ export const createSharePointDateTime = (dateString, timeString) => {
         return null;
     }
     
-    // Create a local date object to avoid timezone shifts
+    // Parse input values
     const [year, month, day] = dateString.split('-').map(Number);
     const [hours, minutes] = timeString.split(':').map(Number);
     
-    // Create date in local timezone
-    const localDate = new Date(year, month - 1, day, hours, minutes, 0);
+    // Create ISO string manually to avoid timezone conversion
+    const paddedMonth = String(month).padStart(2, '0');
+    const paddedDay = String(day).padStart(2, '0');
+    const paddedHours = String(hours).padStart(2, '0');
+    const paddedMinutes = String(minutes).padStart(2, '0');
     
-    // Return as ISO string which SharePoint handles correctly
-    return localDate.toISOString();
+    // Return ISO string without timezone conversion
+    return `${year}-${paddedMonth}-${paddedDay}T${paddedHours}:${paddedMinutes}:00`;
 };
 
 /**
@@ -269,7 +272,7 @@ export const createSharePointDate = (dateString) => {
         return null;
     }
     
-    // For date-only fields, use the date with time set to start of day in local timezone
+    // For date-only fields, use the date with time set to start of day
     return createSharePointDateTime(dateString, '00:00');
 };
 

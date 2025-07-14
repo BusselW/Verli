@@ -983,7 +983,23 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
                             console.log('🏖️ Context menu Verlof clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is
+                            // Keep existing selection as-is - this respects the two-click selection
+                        } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
+                            // If we have a first click for this employee, use it as start and current date as end
+                            const startDate = new Date(firstClickState.dag);
+                            const endDate = new Date(dateData);
+                            const actualStart = startDate <= endDate ? startDate : endDate;
+                            const actualEnd = startDate <= endDate ? endDate : startDate;
+                            
+                            const rangeSelection = {
+                                start: actualStart,
+                                end: actualEnd,
+                                medewerkerId: employeeData.Username,
+                                medewerkerData: employeeData
+                            };
+                            console.log('🏖️ Context menu Verlof: Using two-click range selection:', rangeSelection);
+                            setSelection(rangeSelection);
+                            setFirstClickData(null); // Clear first click data
                         } else {
                             const currentSelection = {
                                 start: dateData,
@@ -991,7 +1007,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏖️ Context menu Verlof clicked. Creating new selection:', currentSelection);
+                            console.log('🏖️ Context menu Verlof clicked. Creating single-day selection:', currentSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
@@ -1023,7 +1039,23 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
                             console.log('🏥 Context menu Ziekte clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is
+                            // Keep existing selection as-is - this respects the two-click selection
+                        } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
+                            // If we have a first click for this employee, use it as start and current date as end
+                            const startDate = new Date(firstClickState.dag);
+                            const endDate = new Date(dateData);
+                            const actualStart = startDate <= endDate ? startDate : endDate;
+                            const actualEnd = startDate <= endDate ? endDate : startDate;
+                            
+                            const rangeSelection = {
+                                start: actualStart,
+                                end: actualEnd,
+                                medewerkerId: employeeData.Username,
+                                medewerkerData: employeeData
+                            };
+                            console.log('🏥 Context menu Ziekte: Using two-click range selection:', rangeSelection);
+                            setSelection(rangeSelection);
+                            setFirstClickData(null); // Clear first click data
                         } else {
                             const currentSelection = {
                                 start: dateData,
@@ -1031,7 +1063,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏥 Context menu Ziekte clicked. Creating new selection:', currentSelection);
+                            console.log('🏥 Context menu Ziekte clicked. Creating single-day selection:', currentSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
@@ -1064,7 +1096,23 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
                             console.log('⏰ Context menu Compensatie clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is
+                            // Keep existing selection as-is - this respects the two-click selection
+                        } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
+                            // If we have a first click for this employee, use it as start and current date as end
+                            const startDate = new Date(firstClickState.dag);
+                            const endDate = new Date(dateData);
+                            const actualStart = startDate <= endDate ? startDate : endDate;
+                            const actualEnd = startDate <= endDate ? endDate : startDate;
+                            
+                            const rangeSelection = {
+                                start: actualStart,
+                                end: actualEnd,
+                                medewerkerId: employeeData.Username,
+                                medewerkerData: employeeData
+                            };
+                            console.log('⏰ Context menu Compensatie: Using two-click range selection:', rangeSelection);
+                            setSelection(rangeSelection);
+                            setFirstClickData(null); // Clear first click data
                         } else {
                             const currentSelection = {
                                 start: dateData,
@@ -1072,7 +1120,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⏰ Context menu Compensatie clicked. Creating new selection:', currentSelection);
+                            console.log('⏰ Context menu Compensatie clicked. Creating single-day selection:', currentSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
@@ -1104,7 +1152,23 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
                             console.log('⚖️ Context menu Zittingsvrij clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is
+                            // Keep existing selection as-is - this respects the two-click selection
+                        } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
+                            // If we have a first click for this employee, use it as start and current date as end
+                            const startDate = new Date(firstClickState.dag);
+                            const endDate = new Date(dateData);
+                            const actualStart = startDate <= endDate ? startDate : endDate;
+                            const actualEnd = startDate <= endDate ? endDate : startDate;
+                            
+                            const rangeSelection = {
+                                start: actualStart,
+                                end: actualEnd,
+                                medewerkerId: employeeData.Username,
+                                medewerkerData: employeeData
+                            };
+                            console.log('⚖️ Context menu Zittingsvrij: Using two-click range selection:', rangeSelection);
+                            setSelection(rangeSelection);
+                            setFirstClickData(null); // Clear first click data
                         } else {
                             const currentSelection = {
                                 start: dateData,
@@ -1112,7 +1176,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⚖️ Context menu Zittingsvrij clicked. Creating new selection:', currentSelection);
+                            console.log('⚖️ Context menu Zittingsvrij clicked. Creating single-day selection:', currentSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
