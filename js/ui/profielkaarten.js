@@ -12,6 +12,7 @@ import * as linkInfo from '../services/linkInfo.js';
 const fallbackAvatar = 'https://placehold.co/96x96/4a90e2/ffffff?text=';
 
 const HOVER_DELAY_MS = 500;
+const HOVER_HIDE_DELAY_MS = 300;
 
 const ProfielKaarten = (() => {
     const h = React.createElement;
@@ -785,7 +786,7 @@ const ProfielKaarten = (() => {
         });
         
         cardContainer.addEventListener('mouseleave', () => {
-            cardTimeout = setTimeout(hideProfileCard, 300);
+            cardTimeout = setTimeout(hideProfileCard, HOVER_HIDE_DELAY_MS);
         });
         
         activeCard = cardContainer;
