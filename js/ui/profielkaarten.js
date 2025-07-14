@@ -820,27 +820,12 @@ const ProfielKaarten = (() => {
     const init = (selector = '.medewerker-naam, .medewerker-avatar') => {
         console.log(`ProfielKaarten: Initializing with selector "${selector}"`);
         
-        // Apply immediately for existing elements
-        applyProfileCardHover();
-        
-        // Set up a mutation observer to watch for changes and reapply as needed
-        const observer = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                    applyProfileCardHover();
-                }
-            }
-        });
-        
-        observer.observe(document.body, { childList: true, subtree: true });
+        // Use a WeakSet to track initialized elements, allowing GC when elements are removed
+        const initializedElements = new WeakSet();
         
         /**
          * Apply profile card hover behavior to matching elements
          */
-        // Use a WeakSet to track initialized elements, allowing GC when elements are removed
-        const initializedElements = applyProfileCardHover.initializedElements || new WeakSet();
-        applyProfileCardHover.initializedElements = initializedElements;
-
         function applyProfileCardHover() {
             const elements = document.querySelectorAll(selector);
             console.log(`ProfielKaarten: Found ${elements.length} elements matching "${selector}"`);
@@ -987,6 +972,20 @@ const ProfielKaarten = (() => {
                 initializedElements.add(element);
             });
         }
+        
+        // Apply immediately for existing elements
+        applyProfileCardHover();
+        
+        // Set up a mutation observer to watch for changes and reapply as needed
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    applyProfileCardHover();
+                }
+            }
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
     };
 
     // Public API
