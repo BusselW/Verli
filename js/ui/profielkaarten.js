@@ -929,8 +929,9 @@ const ProfielKaarten = (() => {
     /**
      * Apply profile card hover behavior to elements
      * @param {string} selector - CSS selector for elements to apply hover behavior to
+     * Default targets only employee name column and profile info, excluding calendar cells
      */
-    const init = (selector = '[data-username]') => {
+    const init = (selector = '.medewerker-kolom[data-username], .medewerker-info [data-username]') => {
         console.log(`🔧 ProfielKaarten: Initializing with selector "${selector}"`);
         console.log(`🔧 ProfielKaarten: Document ready state: ${document.readyState}`);
         console.log(`🔧 ProfielKaarten: activeCard status:`, activeCard);
@@ -945,6 +946,14 @@ const ProfielKaarten = (() => {
         function applyProfileCardHover() {
             const elements = document.querySelectorAll(selector);
             console.log(`🔍 ProfielKaarten: Found ${elements.length} elements matching "${selector}"`);
+            
+            // Debug: Show what types of elements we're targeting
+            const elementTypes = Array.from(elements).map(el => ({
+                tagName: el.tagName,
+                className: el.className,
+                username: el.dataset.username
+            }));
+            console.log(`🔍 ProfielKaarten: Element types found:`, elementTypes);
             
             let newElementsCount = 0;
             
@@ -1206,11 +1215,12 @@ const ProfielKaarten = (() => {
             
             for (const mutation of mutations) {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                    // Check if any added nodes contain elements with data-username
+                    // Check if any added nodes contain elements matching our specific selector
                     for (const node of mutation.addedNodes) {
                         if (node.nodeType === Node.ELEMENT_NODE) {
-                            if (node.hasAttribute && node.hasAttribute('data-username') || 
-                                node.querySelector && node.querySelector('[data-username]')) {
+                            if ((node.hasAttribute && node.hasAttribute('data-username') && 
+                                 (node.classList.contains('medewerker-kolom') || node.closest('.medewerker-info'))) || 
+                                (node.querySelector && node.querySelector('.medewerker-kolom[data-username], .medewerker-info [data-username]'))) {
                                 hasRelevantChanges = true;
                                 break;
                             }
@@ -1241,7 +1251,8 @@ const ProfielKaarten = (() => {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 ProfielKaarten: DOM Content Loaded, initializing...');
     console.log('🚀 ProfielKaarten: Document ready state:', document.readyState);
-    console.log('🚀 ProfielKaarten: Elements with data-username:', document.querySelectorAll('[data-username]').length);
+    console.log('🚀 ProfielKaarten: Elements with specific selector:', document.querySelectorAll('.medewerker-kolom[data-username], .medewerker-info [data-username]').length);
+    console.log('🚀 ProfielKaarten: All elements with data-username:', document.querySelectorAll('[data-username]').length);
     ProfielKaarten.init();
 });
 
@@ -1259,7 +1270,8 @@ console.log('🎯 ProfielKaarten module loaded successfully.', {
     linkInfoAvailable: typeof linkInfo,
     getUserInfoAvailable: typeof getUserInfo,
     documentReadyState: document.readyState,
-    elementsWithDataUsername: document.querySelectorAll('[data-username]').length,
+    elementsWithSpecificSelector: document.querySelectorAll('.medewerker-kolom[data-username], .medewerker-info [data-username]').length,
+    allElementsWithDataUsername: document.querySelectorAll('[data-username]').length,
     HOVER_DELAY_MS: HOVER_DELAY_MS,
     HOVER_HIDE_DELAY_MS: HOVER_HIDE_DELAY_MS
 });

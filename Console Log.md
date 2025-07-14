@@ -1,4 +1,18 @@
-Senior data received: {FileSystemObjectType: 0, Id: 9, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ContentTypeId: '0x0100C1BBD6ABC9DF8C44980878C171723696', …}
+Y: Previous issues with profile cards opening on grid hover and rapid hide/show cycles have been resolved.
+
+Updated profielkaarten.js to:
+1. Use specific selector '.medewerker-kolom[data-username], .medewerker-info [data-username]' instead of broad '[data-username]'
+2. Increased hide delay from 300ms to 500ms for better user experience
+3. Improved mouse event handling to prevent conflicts between trigger element and card
+4. Added better positioning with 8px gap for smoother mouse movement
+5. Enhanced animation and buffer zones for more forgiving interactions
+
+Profile cards now only appear when hovering over employee names/avatars in the employee column, not when hovering over calendar cells in the grid.
+
+Previous console log entries below:
+---
+
+Senior data received: {FileSystemObjectType: 0, Id: 9, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ContentTypeId: '0x0100C1BBD6ABC9DF8C44980878C171723696', …}enior data received: {FileSystemObjectType: 0, Id: 9, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ContentTypeId: '0x0100C1BBD6ABC9DF8C44980878C171723696', …}
 profielkaarten.js:478 Using siteUrl from appConfiguratie: https://som.org.om.local/sites/MulderT/CustomPW/Verlof/
 profielkaarten.js:485 Icon base path: https://som.org.om.local/sites/MulderT/CustomPW/Verlof//cpw/Rooster/icons/profilecards
 profielkaarten.js:383 Checking for special background for normalized username: "wissinks"
