@@ -82,6 +82,17 @@ export async function maakItem(lijstNaam, itemData) {
 }
 
 /**
+ * English alias voor maakItem() - voor compatibiliteit met bestaande code
+ * Creates a new item in a SharePoint list.
+ * @param {string} listName - The name of the SharePoint list.
+ * @param {object} itemData - An object with the column values for the new item.
+ * @returns {Promise<object>} The data of the created item.
+ */
+export async function createListItem(listName, itemData) {
+    return maakItem(listName, itemData);
+}
+
+/**
  * Leest items uit een SharePoint-lijst.
  * @param {string} lijstNaam - De naam van de SharePoint-lijst.
  * @param {string} [query=""] - Optionele OData query string (bv. "?$filter=...").
@@ -93,6 +104,17 @@ export async function leesItems(lijstNaam, query = "") {
         endpoint += query;
     }
     return roepSharePointApi(endpoint, "GET");
+}
+
+/**
+ * English alias voor leesItems() - voor compatibiliteit met bestaande code
+ * Reads items from a SharePoint list.
+ * @param {string} listName - The name of the SharePoint list.
+ * @param {string} [query=""] - Optional OData query string (e.g. "?$filter=...").
+ * @returns {Promise<object>} An object with the list items.
+ */
+export async function readListItems(listName, query = "") {
+    return leesItems(listName, query);
 }
 
 /**
@@ -112,6 +134,18 @@ export async function bewerkItem(lijstNaam, itemId, itemData) {
 }
 
 /**
+ * English alias voor bewerkItem() - voor compatibiliteit met bestaande code
+ * Updates an existing item in a SharePoint list.
+ * @param {string} listName - The name of the SharePoint list.
+ * @param {number} itemId - The ID of the item to be updated.
+ * @param {object} itemData - An object with the column values to update.
+ * @returns {Promise<Response>} The fetch response.
+ */
+export async function updateListItem(listName, itemId, itemData) {
+    return bewerkItem(listName, itemId, itemData);
+}
+
+/**
  * Verwijdert een item uit een SharePoint-lijst.
  * @param {string} lijstNaam - De naam van de SharePoint-lijst.
  * @param {number} itemId - De ID van het item dat verwijderd moet worden.
@@ -124,4 +158,15 @@ export async function verwijderItem(lijstNaam, itemId) {
         "X-HTTP-Method": "DELETE"
     };
     return roepSharePointApi(endpoint, "POST", null, extraHeaders);
+}
+
+/**
+ * English alias voor verwijderItem() - voor compatibiliteit met bestaande code
+ * Deletes an item from a SharePoint list.
+ * @param {string} listName - The name of the SharePoint list.
+ * @param {number} itemId - The ID of the item to be deleted.
+ * @returns {Promise<Response>} The fetch response.
+ */
+export async function deleteListItem(listName, itemId) {
+    return verwijderItem(listName, itemId);
 }

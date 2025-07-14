@@ -1,5 +1,6 @@
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
+import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
 
 const { createElement: h, useState, useEffect } = React;
 
@@ -120,8 +121,24 @@ const ZiekteMeldingForm = ({ onSubmit, onClose, shiftTypes = {}, initialData = {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Extra security check - if user doesn't have management rights, ensure they can only submit for themselves
+        if (!canManageOthers) {
+            // Get current user
+            const currentUser = await getCurrentUserInfo();
+            if (currentUser) {
+                const loginName = currentUser.LoginName.split('|')[1];
+                const selectedMedewerker = medewerkers.find(m => m.Id === parseInt(medewerkerId, 10));
+                
+                // If not submitting for self, show error and return
+                if (selectedMedewerker && selectedMedewerker.Username !== loginName) {
+                    alert('Je kunt alleen ziekte melden voor jezelf.');
+                    return;
+                }
+            }
+        }
 
         const selectedMedewerker = medewerkers.find(m => m.Id === parseInt(medewerkerId, 10));
         const fullName = selectedMedewerker ? selectedMedewerker.Title : 'Onbekend';
@@ -139,7 +156,23 @@ const ZiekteMeldingForm = ({ onSubmit, onClose, shiftTypes = {}, initialData = {
             RedenId: String(redenId), // Convert to string as SharePoint expects Edm.String
 			Reden: 'Ziekte'
         };
-        onSubmit(formData);
+        
+        // Validate permissions before submission
+        try {
+            const operation = initialData.ID ? 'update' : 'create';
+            const validation = await validateFormSubmission(formData, operation);
+            
+            if (!validation.valid) {
+                console.warn('🚫 Ziekmelding form validation failed:', validation.errors);
+                showCRUDRestrictionMessage(operation, validation.errors.join(', '));
+                return;
+            }
+            
+            onSubmit(formData);
+        } catch (error) {
+            console.error('❌ Error validating ziekmelding form:', error);
+            alert('Er is een fout opgetreden bij het valideren van je ziekmelding.');
+        }
     };
 
     return h('form', { onSubmit: handleSubmit, className: 'form-container' },
