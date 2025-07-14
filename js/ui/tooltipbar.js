@@ -461,13 +461,14 @@ const TooltipManager = {
     
     /**
      * Automatisch tooltips toewijzen aan elementen in de DOM
+     * Excludes elements with data-username attribute to prevent conflicts with ProfielKaarten
      */
     autoAttachTooltips: function() {
         console.log('🔍 Auto-attaching tooltips to DOM elements...');
         let attachedCount = 0;
         
-        // Attach tooltips to verlof blocks
-        const verlofBloks = document.querySelectorAll('.verlof-blok');
+        // Attach tooltips to verlof blocks (exclude profile card elements)
+        const verlofBloks = document.querySelectorAll('.verlof-blok:not([data-username])');
         console.log(`Found ${verlofBloks.length} verlof blocks`);
         verlofBloks.forEach(element => {
             if (element.dataset.tooltipAttached === 'true') return;
@@ -479,8 +480,8 @@ const TooltipManager = {
             attachedCount++;
         });
         
-        // Attach tooltips to compensatie-uren blocks
-        const compensatieBloks = document.querySelectorAll('.compensatie-uur-blok, .compensatie-uur-container, [data-afkorting="CU"]');
+        // Attach tooltips to compensatie-uren blocks (exclude profile card elements)
+        const compensatieBloks = document.querySelectorAll('.compensatie-uur-blok:not([data-username]), .compensatie-uur-container:not([data-username]), [data-afkorting="CU"]:not([data-username])');
         console.log(`Found ${compensatieBloks.length} compensatie blocks`);
         compensatieBloks.forEach(element => {
             if (element.dataset.tooltipAttached === 'true') return;
@@ -492,8 +493,8 @@ const TooltipManager = {
             attachedCount++;
         });
         
-        // Attach tooltips to zittingsvrij blocks
-        const zittingsvrijBloks = document.querySelectorAll('.zittingsvrij-blok, [data-afkorting="ZV"]');
+        // Attach tooltips to zittingsvrij blocks (exclude profile card elements)
+        const zittingsvrijBloks = document.querySelectorAll('.zittingsvrij-blok:not([data-username]), [data-afkorting="ZV"]:not([data-username])');
         console.log(`Found ${zittingsvrijBloks.length} zittingsvrij blocks`);
         zittingsvrijBloks.forEach(element => {
             if (element.dataset.tooltipAttached === 'true') return;
@@ -505,8 +506,8 @@ const TooltipManager = {
             attachedCount++;
         });
         
-        // Attach tooltips to ziekte blocks
-        const ziekteBloks = document.querySelectorAll('.ziekte-blok, [data-afkorting="ZK"]');
+        // Attach tooltips to ziekte blocks (exclude profile card elements)
+        const ziekteBloks = document.querySelectorAll('.ziekte-blok:not([data-username]), [data-afkorting="ZK"]:not([data-username])');
         console.log(`Found ${ziekteBloks.length} ziekte blocks`);
         ziekteBloks.forEach(element => {
             if (element.dataset.tooltipAttached === 'true') return;
@@ -518,8 +519,8 @@ const TooltipManager = {
             attachedCount++;
         });
         
-        // Attach tooltips to holiday elements (improved selectors)
-        const feestdagElements = document.querySelectorAll('.feestdag, [data-feestdag], .dag-cel.feestdag, .feestdag-cel');
+        // Attach tooltips to holiday elements (improved selectors, exclude profile card elements)
+        const feestdagElements = document.querySelectorAll('.feestdag:not([data-username]), [data-feestdag]:not([data-username]), .dag-cel.feestdag:not([data-username]), .feestdag-cel:not([data-username])');
         console.log(`Found ${feestdagElements.length} feestdag elements`);
         feestdagElements.forEach(element => {
             if (element.dataset.tooltipAttached === 'true') return;
@@ -545,8 +546,8 @@ const TooltipManager = {
             attachedCount++;
         });
         
-        // Attach tooltips to buttons with improved descriptions
-        const buttonElements = document.querySelectorAll('button[title], button[data-tooltip], .btn[title], .btn[data-tooltip], [role="button"][title]');
+        // Attach tooltips to buttons with improved descriptions (exclude profile card elements)
+        const buttonElements = document.querySelectorAll('button[title]:not([data-username]), button[data-tooltip]:not([data-username]), .btn[title]:not([data-username]), .btn[data-tooltip]:not([data-username]), [role="button"][title]:not([data-username])');
         console.log(`Found ${buttonElements.length} button elements`);
         buttonElements.forEach(element => {
             if (element.dataset.tooltipAttached === 'true') return;
@@ -578,8 +579,8 @@ const TooltipManager = {
             }
         });
         
-        // Attach tooltips to other icons and elements with titles
-        const iconElements = document.querySelectorAll('i[title]:not([data-tooltip-attached]), .icon[title]:not([data-tooltip-attached]), img[title]:not([data-tooltip-attached]), [data-tooltip]:not([data-tooltip-attached])');
+        // Attach tooltips to other icons and elements with titles (exclude profile card elements)
+        const iconElements = document.querySelectorAll('i[title]:not([data-tooltip-attached]):not([data-username]), .icon[title]:not([data-tooltip-attached]):not([data-username]), img[title]:not([data-tooltip-attached]):not([data-username]), [data-tooltip]:not([data-tooltip-attached]):not([data-username])');
         console.log(`Found ${iconElements.length} icon/title elements`);
         iconElements.forEach(element => {
             if (element.dataset.tooltipAttached === 'true') return;
@@ -682,8 +683,8 @@ const TooltipManager = {
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
                             const hasTooltipElements = node.querySelectorAll ? 
-                                node.querySelectorAll('.verlof-blok, .compensatie-uur-blok, .compensatie-uur-container, .ziekte-blok, .zittingsvrij-blok, [data-tooltip], [title], [data-feestdag], [data-afkorting], button').length > 0 ||
-                                node.matches('.verlof-blok, .compensatie-uur-blok, .compensatie-uur-container, .ziekte-blok, .zittingsvrij-blok, [data-tooltip], [title], [data-feestdag], [data-afkorting], button') : false;
+                                node.querySelectorAll('.verlof-blok:not([data-username]), .compensatie-uur-blok:not([data-username]), .compensatie-uur-container:not([data-username]), .ziekte-blok:not([data-username]), .zittingsvrij-blok:not([data-username]), [data-tooltip]:not([data-username]), [title]:not([data-username]), [data-feestdag]:not([data-username]), [data-afkorting]:not([data-username]), button:not([data-username])').length > 0 ||
+                                node.matches('.verlof-blok:not([data-username]), .compensatie-uur-blok:not([data-username]), .compensatie-uur-container:not([data-username]), .ziekte-blok:not([data-username]), .zittingsvrij-blok:not([data-username]), [data-tooltip]:not([data-username]), [title]:not([data-username]), [data-feestdag]:not([data-username]), [data-afkorting]:not([data-username]), button:not([data-username])') : false;
                                 
                             if (hasTooltipElements) {
                                 shouldReattach = true;
@@ -927,13 +928,14 @@ const TooltipManager = {
         const testResults = {
             initialized: !!this.tooltipElement,
             elementCount: {
-                verlof: document.querySelectorAll('.verlof-blok').length,
-                compensatie: document.querySelectorAll('.compensatie-uur-blok, .compensatie-uur-container, [data-afkorting="CU"]').length,
-                zittingsvrij: document.querySelectorAll('.zittingsvrij-blok, [data-afkorting="ZV"]').length,
-                ziekte: document.querySelectorAll('.ziekte-blok, [data-afkorting="ZK"]').length,
-                feestdagen: document.querySelectorAll('.feestdag, [data-feestdag], .dag-cel.feestdag, .feestdag-cel').length,
-                buttons: document.querySelectorAll('button[title], button[data-tooltip], .btn[title], .btn[data-tooltip], [role="button"][title]').length,
-                icons: document.querySelectorAll('i[title], .icon[title], [data-tooltip], img[title]').length
+                verlof: document.querySelectorAll('.verlof-blok:not([data-username])').length,
+                compensatie: document.querySelectorAll('.compensatie-uur-blok:not([data-username]), .compensatie-uur-container:not([data-username]), [data-afkorting="CU"]:not([data-username])').length,
+                zittingsvrij: document.querySelectorAll('.zittingsvrij-blok:not([data-username]), [data-afkorting="ZV"]:not([data-username])').length,
+                ziekte: document.querySelectorAll('.ziekte-blok:not([data-username]), [data-afkorting="ZK"]:not([data-username])').length,
+                feestdagen: document.querySelectorAll('.feestdag:not([data-username]), [data-feestdag]:not([data-username]), .dag-cel.feestdag:not([data-username]), .feestdag-cel:not([data-username])').length,
+                buttons: document.querySelectorAll('button[title]:not([data-username]), button[data-tooltip]:not([data-username]), .btn[title]:not([data-username]), .btn[data-tooltip]:not([data-username]), [role="button"][title]:not([data-username])').length,
+                icons: document.querySelectorAll('i[title]:not([data-username]), .icon[title]:not([data-username]), [data-tooltip]:not([data-username]), img[title]:not([data-username])').length,
+                excludedProfileElements: document.querySelectorAll('[data-username]').length
             },
             attachedCount: document.querySelectorAll('[data-tooltip-attached="true"]').length,
             userPermissions: this.currentUserGroups,
@@ -950,6 +952,7 @@ const TooltipManager = {
         
         console.log(`📋 Found ${Object.values(testResults.elementCount).reduce((a, b) => a + b, 0)} total elements that should have tooltips`);
         console.log(`🔗 Currently ${testResults.attachedCount} elements have tooltips attached`);
+        console.log(`👤 Excluded ${testResults.elementCount.excludedProfileElements} profile card elements from tooltips`);
         
         // Show feestdagen details
         if (testResults.feestdagenDetails.length > 0) {

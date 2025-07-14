@@ -846,6 +846,12 @@ const ProfielKaarten = (() => {
                     return;
                 }
                 
+                // Skip if element already has tooltip attached to prevent conflicts
+                if (element.dataset.tooltipAttached === 'true') {
+                    console.log(`ProfielKaarten: Skipping element with existing tooltip for username "${username}"`);
+                    return;
+                }
+                
                 console.log(`ProfielKaarten: Adding hover behavior to element for username "${username}"`);
                 
                 element.addEventListener('mouseenter', (event) => {
