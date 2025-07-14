@@ -28,8 +28,20 @@ const ProfielKaarten = (() => {
         try {
             console.log(`fetchMedewerkerData: Fetching data for username "${username}"`);
             
+            // Check if fetchSharePointList is available
+            if (typeof fetchSharePointList !== 'function') {
+                console.error('fetchMedewerkerData: fetchSharePointList function not available');
+                return null;
+            }
+            
             // Use the imported fetchSharePointList function
             const medewerkers = await fetchSharePointList('Medewerkers');
+            
+            if (!medewerkers || !Array.isArray(medewerkers)) {
+                console.error('fetchMedewerkerData: Invalid response from fetchSharePointList');
+                return null;
+            }
+            
             console.log(`fetchMedewerkerData: Received ${medewerkers.length} medewerkers`);
             
             // First try exact match
@@ -101,14 +113,25 @@ const ProfielKaarten = (() => {
         try {
             console.log(`fetchWerkroosterData: Fetching data for medewerker "${medewerkerID}"`);
             
+            // Check if fetchSharePointList is available
+            if (typeof fetchSharePointList !== 'function') {
+                console.error('fetchWerkroosterData: fetchSharePointList function not available');
+                return null;
+            }
+            
             // Use the imported fetchSharePointList function
             const urenItems = await fetchSharePointList('UrenPerWeek');
+            
+            if (!urenItems || !Array.isArray(urenItems)) {
+                console.error('fetchWerkroosterData: Invalid response from fetchSharePointList');
+                return null;
+            }
+            
             console.log(`fetchWerkroosterData: Received ${urenItems.length} UrenPerWeek records`);
             
-            // Check both Username and MedewerkerID fields
+            // Check only MedewerkerID field (UrenPerWeek doesn't have Username field)
             const filteredItems = urenItems.filter(item => 
-                item.MedewerkerID === medewerkerID || 
-                item.Username === medewerkerID
+                item.MedewerkerID === medewerkerID
             );
             
             console.log(`fetchWerkroosterData: Found ${filteredItems.length} matching records`);
@@ -117,8 +140,7 @@ const ProfielKaarten = (() => {
                 // If no exact match, try a case-insensitive match
                 const lowercaseID = medewerkerID.toLowerCase();
                 const altItems = urenItems.filter(item => 
-                    (item.MedewerkerID && item.MedewerkerID.toLowerCase() === lowercaseID) || 
-                    (item.Username && item.Username.toLowerCase() === lowercaseID)
+                    (item.MedewerkerID && item.MedewerkerID.toLowerCase() === lowercaseID)
                 );
                 
                 console.log(`fetchWerkroosterData: Found ${altItems.length} case-insensitive matches`);
@@ -917,6 +939,14 @@ const ProfielKaarten = (() => {
                             
                             // Now fetch data asynchronously
                             console.log(`Fetching medewerker data for username: "${username}"`);
+                            
+                            // Add debug info about available functions
+                            console.log('Available functions check:', {
+                                fetchSharePointList: typeof fetchSharePointList,
+                                linkInfoAvailable: typeof linkInfo,
+                                getUserInfo: typeof getUserInfo
+                            });
+                            
                             const medewerkerData = await fetchMedewerkerData(username);
                             console.log('Medewerker data received:', medewerkerData);
                             
@@ -1029,6 +1059,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ProfielKaarten.init();
 });
 
+// Check if we're in a module environment before exporting
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ProfielKaarten;
+} else if (typeof window !== 'undefined') {
+    window.ProfielKaarten = ProfielKaarten;
+}
+
 export default ProfielKaarten;
 
-console.log('ProfielKaarten module loaded successfully.');
+console.log('ProfielKaarten module loaded successfully.', {
+    fetchSharePointListAvailable: typeof fetchSharePointList,
+    linkInfoAvailable: typeof linkInfo
+});
