@@ -177,7 +177,6 @@ const ZiekteMeldingForm = ({ onSubmit, onClose, shiftTypes = {}, initialData = {
     };
 
     return h('form', { onSubmit: handleSubmit, className: 'form-container' },
-        h('h2', { className: 'form-title' }, 'Ziek Melden'),
         h('input', { type: 'hidden', name: 'Status', value: status }),
 
         h('div', { className: 'form-row' },
