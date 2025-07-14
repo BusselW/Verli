@@ -17,6 +17,7 @@ import {
 } from '../../../js/services/sharepointService.js';
 
 import { getCurrentUserGroups } from '../../../js/services/permissionService.js';
+import { canManageOthersEvents } from '../../../js/ui/ContextMenu.js';
 
 // React destructuring
 const { createElement: h, useState, useEffect, useMemo, useCallback, Fragment } = React;
@@ -32,6 +33,7 @@ const MededelingenApp = () => {
     const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
     const [userPermissions, setUserPermissions] = useState([]);
+    const [canManageAnnouncements, setCanManageAnnouncements] = useState(false);
     
     // Filter and search state
     const [searchTerm, setSearchTerm] = useState('');
@@ -51,6 +53,11 @@ const MededelingenApp = () => {
 
     // Initialize app
     useEffect(() => {
+        // Initialize notification system
+        if (window.NotificationSystem) {
+            window.NotificationSystem.init();
+        }
+        
         initializeApp();
     }, []);
 
@@ -65,9 +72,22 @@ const MededelingenApp = () => {
             
             const groups = await getCurrentUserGroups();
             setUserPermissions(groups);
+            
+            // Check if user can manage announcements
+            const canManage = await canManageOthersEvents();
+            setCanManageAnnouncements(canManage);
+            console.log('🔐 User broadcast permissions:', { canManage, user: user?.LoginName });
 
             // Update UI with user info
             updateUserDisplay(user);
+            
+            // Update button visibility based on permissions
+            updateButtonVisibility(canManage);
+            
+            // Update global permissions state
+            if (window.mededelingenApp) {
+                window.mededelingenApp.updatePermissions(canManage);
+            }
             
             // Load data
             await Promise.all([
@@ -87,6 +107,14 @@ const MededelingenApp = () => {
         const userElement = document.getElementById('huidige-gebruiker');
         if (userElement && user) {
             userElement.textContent = user.Title || user.LoginName || 'Onbekende gebruiker';
+        }
+    };
+
+    const updateButtonVisibility = (canManage) => {
+        const privilegedContainer = document.getElementById('privileged-actions-container');
+        if (privilegedContainer) {
+            privilegedContainer.style.display = canManage ? 'inline-flex' : 'none';
+            console.log('🔐 Privileged actions container visibility updated:', { canManage, display: privilegedContainer.style.display });
         }
     };
 
@@ -271,6 +299,14 @@ const MededelingenApp = () => {
     };
 
     const handleSave = async (formData) => {
+        // Check permissions before saving
+        if (!canManageAnnouncements) {
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Je hebt geen rechten om mededelingen aan te maken of te bewerken.', 'Toegang geweigerd');
+            }
+            return;
+        }
+        
         try {
             const username = currentUser?.LoginName?.split('|')[1] || currentUser?.LoginName;
             
@@ -300,20 +336,43 @@ const MededelingenApp = () => {
             setShowModal(false);
             await loadMededelingen();
             
+            // Show success notification
+            if (window.NotificationSystem) {
+                const action = modalMode === 'create' ? 'aangemaakt' : 'bijgewerkt';
+                window.NotificationSystem.success(`Mededeling succesvol ${action}.`, 'Opgeslagen');
+            }
+            
         } catch (err) {
             console.error('Error saving mededeling:', err);
-            alert('Fout bij het opslaan: ' + err.message);
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Fout bij het opslaan: ' + err.message, 'Fout opgetreden');
+            }
         }
     };
 
     const handleDeleteConfirm = async () => {
+        // Check permissions before deleting
+        if (!canManageAnnouncements) {
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Je hebt geen rechten om mededelingen te verwijderen.', 'Toegang geweigerd');
+            }
+            return;
+        }
+        
         try {
             await deleteSharePointListItem('Mededeling', selectedMededeling.ID);
             setShowModal(false);
             await loadMededelingen();
+            
+            // Show success notification
+            if (window.NotificationSystem) {
+                window.NotificationSystem.success('Mededeling succesvol verwijderd.', 'Verwijderd');
+            }
         } catch (err) {
             console.error('Error deleting mededeling:', err);
-            alert('Fout bij het verwijderen: ' + err.message);
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Fout bij het verwijderen: ' + err.message, 'Fout opgetreden');
+            }
         }
     };
 
@@ -424,18 +483,20 @@ const MededelingenApp = () => {
                         h('td', null, getTeamTags(mededeling.UitzendenAan)),
                         h('td', null, mededeling.username || '-'),
                         h('td', null,
-                            h('div', { className: 'action-buttons' },
-                                h('button', {
-                                    className: 'action-btn edit',
-                                    title: 'Bewerken',
-                                    onClick: () => handleEdit(mededeling)
-                                }, h('i', { className: 'fas fa-edit' })),
-                                h('button', {
-                                    className: 'action-btn delete',
-                                    title: 'Verwijderen',
-                                    onClick: () => handleDelete(mededeling)
-                                }, h('i', { className: 'fas fa-trash' }))
-                            )
+                            canManageAnnouncements ? 
+                                h('div', { className: 'action-buttons' },
+                                    h('button', {
+                                        className: 'action-btn edit',
+                                        title: 'Bewerken',
+                                        onClick: () => handleEdit(mededeling)
+                                    }, h('i', { className: 'fas fa-edit' })),
+                                    h('button', {
+                                        className: 'action-btn delete',
+                                        title: 'Verwijderen',
+                                        onClick: () => handleDelete(mededeling)
+                                    }, h('i', { className: 'fas fa-trash' }))
+                                ) : 
+                                h('span', { style: { color: '#666', fontStyle: 'italic' } }, 'Geen rechten')
                         )
                     )
                 )
@@ -650,7 +711,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const newBtn = document.getElementById('btn-nieuwe-mededeling');
         if (newBtn) {
             newBtn.addEventListener('click', () => {
-                app.handleCreateNew();
+                // Check permissions before allowing creation
+                if (window.mededelingenApp && window.mededelingenApp.canManageAnnouncements) {
+                    app.handleCreateNew();
+                } else {
+                    if (window.NotificationSystem) {
+                        window.NotificationSystem.error('Je hebt geen rechten om mededelingen aan te maken.', 'Toegang geweigerd');
+                    }
+                }
             });
         }
 
@@ -690,13 +758,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const root = ReactDOM.createRoot(container);
         
         // Create app instance with exposed methods for DOM event handlers
+        let appInstance = null;
         window.mededelingenApp = {
             setSearchTerm: () => {},
             setStatusFilter: () => {},
             setTeamFilter: () => {},
             handleCreateNew: () => {},
             handleSort: () => {},
-            loadMededelingen: () => {}
+            loadMededelingen: () => {},
+            canManageAnnouncements: false,
+            setAppInstance: (instance) => { appInstance = instance; },
+            updatePermissions: (canManage) => { 
+                window.mededelingenApp.canManageAnnouncements = canManage; 
+                console.log('🔐 Global permissions updated:', { canManage });
+            }
         };
         
         root.render(h(MededelingenApp));

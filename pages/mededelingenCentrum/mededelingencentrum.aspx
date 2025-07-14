@@ -38,11 +38,13 @@
                 
                 <div class="navigation-buttons">
                     <div class="nav-buttons-right">
-                        <!-- Quick Actions -->
-                        <button id="btn-nieuwe-mededeling" class="btn btn-primary" title="Nieuwe mededeling aanmaken">
-                            <i class="fas fa-plus"></i>
-                            <span>Nieuwe mededeling</span>
-                        </button>
+                        <!-- Quick Actions - Only for privileged users -->
+                        <div id="privileged-actions-container" style="display: none;">
+                            <button id="btn-nieuwe-mededeling" class="btn btn-primary" title="Nieuwe mededeling aanmaken">
+                                <i class="fas fa-plus"></i>
+                                <span>Nieuwe mededeling</span>
+                            </button>
+                        </div>
                         
                         <button id="btn-refresh" class="btn btn-functional" title="Gegevens verversen">
                             <i class="fas fa-sync-alt"></i>
@@ -254,6 +256,9 @@
     <script src="../../js/config/configHelper.js"></script>
     <script src="../../js/services/sharepointService-global.js"></script>
     <script src="../../js/services/linkInfo-global.js"></script>
+    
+    <!-- Notification System -->
+    <script src="../../js/ui/NotificationSystem.js"></script>
     
     <!-- Application Scripts -->
     <script type="module" src="js/mededelingenApp.js"></script>

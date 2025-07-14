@@ -99,7 +99,9 @@ const Mededelingen = ({ teams = [] }) => {
         e.preventDefault();
         
         if (!currentUser) {
-            alert('Gebruikersinformatie niet beschikbaar');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Gebruikersinformatie niet beschikbaar', 'Fout');
+            }
             return;
         }
 
@@ -129,10 +131,15 @@ const Mededelingen = ({ teams = [] }) => {
             
             await loadAnnouncements();
             
+            if (window.NotificationSystem) {
+                window.NotificationSystem.success('Mededeling succesvol aangemaakt', 'Aangemaakt');
+            }
             console.log('✅ Announcement created successfully');
         } catch (error) {
             console.error('❌ Error creating announcement:', error);
-            alert('Fout bij het aanmaken van de mededeling: ' + error.message);
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Fout bij het aanmaken van de mededeling: ' + error.message, 'Fout opgetreden');
+            }
         }
     };
 
