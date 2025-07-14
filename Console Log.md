@@ -1,3 +1,27 @@
+<<<<<<< HEAD
+Y: Fixed context menu date selection logic to properly pass selected date ranges to modal forms.
+
+The issue was that the context menu was setting the selection state immediately before opening modals, which could cause timing issues with React state updates. 
+
+Changes made to context menu onClick handlers:
+1. Reorganized logic to determine the final selection first (using existing selection, two-click range, or single-day)
+2. Always call setSelection() to ensure state is updated 
+3. Added setTimeout() to delay modal opening until after React state update completes
+4. This ensures forms receive the correct date ranges from two-click selections
+
+Applied to all context menu "Nieuw" options:
+- Verlof aanvragen
+- Ziek melden  
+- Compensatieuren doorgeven
+- Zittingsvrij maken
+
+Context menu now works the same as Floating Action Button for date selection handling.
+
+Previous console log entries below:
+---
+
+X: Fixed "Datetimestring is not a function" error in VerlofAanvraagForm.js by adding type checking to splitDateTime function.
+=======
 {
   "lijstId": "aa8c8320-2a08-49d2-ad05-7c4b673af5b0",
   "lijstTitel": "Mededeling",
@@ -110,3 +134,4 @@
     }
   ]
 }
+>>>>>>> fbe406a2aa7a46b53a8cb097d5f6f80eded11809
