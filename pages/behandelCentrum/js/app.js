@@ -227,17 +227,11 @@ class BehandelcentrumApp {
 
         console.log('Rendering to DOM...');
         
-        // Use React 18 createRoot if available, otherwise fallback to ReactDOM.render
-        if (typeof ReactDOM.createRoot === 'function') {
-            // React 18+
-            if (!this.reactRoot) {
-                this.reactRoot = ReactDOM.createRoot(this.root);
-            }
-            this.reactRoot.render(app);
-        } else {
-            // React 17 and below
-            ReactDOM.render(app, this.root);
+        // Use React 18 createRoot
+        if (!this.reactRoot) {
+            this.reactRoot = ReactDOM.createRoot(this.root);
         }
+        this.reactRoot.render(app);
 
         // Load teamleider data after React has rendered
         setTimeout(() => {

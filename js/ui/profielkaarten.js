@@ -745,8 +745,10 @@ const ProfielKaarten = (() => {
         const viewportWidth = window.innerWidth;
         
         // Render the card to get its dimensions
-        ReactDOM.render(cardElement, cardContainer);
         document.body.appendChild(cardContainer);
+        const root = ReactDOM.createRoot(cardContainer);
+        cardContainer.reactRoot = root;
+        root.render(cardElement);
         
         const cardRect = cardContainer.getBoundingClientRect();
         
@@ -790,8 +792,10 @@ const ProfielKaarten = (() => {
     const hideProfileCard = () => {
         if (activeCard) {
             try {
-                // Safely unmount React component
-                ReactDOM.unmountComponentAtNode(activeCard);
+                // Safely unmount React component using createRoot
+                if (activeCard.reactRoot) {
+                    activeCard.reactRoot.unmount();
+                }
                 
                 // Remove the element if it's still in the DOM
                 if (document.body.contains(activeCard)) {
@@ -930,7 +934,9 @@ const ProfielKaarten = (() => {
                             }
                             
                             // Render the content into our container
-                            ReactDOM.render(cardElement, cardContainer);
+                            const root = ReactDOM.createRoot(cardContainer);
+                            cardContainer.reactRoot = root;
+                            root.render(cardElement);
                             
                             // Reposition the card now that we know its size
                             const cardRect = cardContainer.getBoundingClientRect();
