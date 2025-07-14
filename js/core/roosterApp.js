@@ -940,10 +940,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasFirstClick: !!firstClickState
                         });
                         
+                        // Determine the correct selection to use
+                        let finalSelection = null;
+                        
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('🏖️ Context menu Verlof clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is - this respects the two-click selection
+                            console.log('🏖️ Context menu Verlof: Using existing selection for same employee:', selectionData);
+                            finalSelection = selectionData;
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -951,29 +954,35 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            const rangeSelection = {
+                            finalSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏖️ Context menu Verlof: Using two-click range selection:', rangeSelection);
-                            setSelection(rangeSelection);
+                            console.log('🏖️ Context menu Verlof: Using two-click range selection:', finalSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            const currentSelection = {
+                            finalSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏖️ Context menu Verlof clicked. Creating single-day selection:', currentSelection);
+                            console.log('🏖️ Context menu Verlof: Creating single-day selection:', finalSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
-                            setSelection(currentSelection);
                         }
-                        setIsVerlofModalOpen(true);
+                        
+                        // Ensure selection is set before opening modal
+                        setSelection(finalSelection);
+                        
+                        // Use setTimeout to ensure state update completes before opening modal
+                        setTimeout(() => {
+                            console.log('🏖️ Opening Verlof modal with final selection:', finalSelection);
+                            setIsVerlofModalOpen(true);
+                        }, 0);
                         setContextMenu(null);
                     }
                 },
@@ -996,10 +1005,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasFirstClick: !!firstClickState
                         });
                         
+                        // Determine the correct selection to use
+                        let finalSelection = null;
+                        
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('🏥 Context menu Ziekte clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is - this respects the two-click selection
+                            console.log('🏥 Context menu Ziekte: Using existing selection for same employee:', selectionData);
+                            finalSelection = selectionData;
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -1007,29 +1019,35 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            const rangeSelection = {
+                            finalSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏥 Context menu Ziekte: Using two-click range selection:', rangeSelection);
-                            setSelection(rangeSelection);
+                            console.log('🏥 Context menu Ziekte: Using two-click range selection:', finalSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            const currentSelection = {
+                            finalSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏥 Context menu Ziekte clicked. Creating single-day selection:', currentSelection);
+                            console.log('🏥 Context menu Ziekte: Creating single-day selection:', finalSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
-                            setSelection(currentSelection);
                         }
-                        setIsZiekModalOpen(true);
+                        
+                        // Ensure selection is set before opening modal
+                        setSelection(finalSelection);
+                        
+                        // Use setTimeout to ensure state update completes before opening modal
+                        setTimeout(() => {
+                            console.log('🏥 Opening Ziekte modal with final selection:', finalSelection);
+                            setIsZiekModalOpen(true);
+                        }, 0);
                         setContextMenu(null);
                     }
                 },
@@ -1053,10 +1071,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasFirstClick: !!firstClickState
                         });
                         
+                        // Determine the correct selection to use
+                        let finalSelection = null;
+                        
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('⏰ Context menu Compensatie clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is - this respects the two-click selection
+                            console.log('⏰ Context menu Compensatie: Using existing selection for same employee:', selectionData);
+                            finalSelection = selectionData;
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -1064,29 +1085,35 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            const rangeSelection = {
+                            finalSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⏰ Context menu Compensatie: Using two-click range selection:', rangeSelection);
-                            setSelection(rangeSelection);
+                            console.log('⏰ Context menu Compensatie: Using two-click range selection:', finalSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            const currentSelection = {
+                            finalSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⏰ Context menu Compensatie clicked. Creating single-day selection:', currentSelection);
+                            console.log('⏰ Context menu Compensatie: Creating single-day selection:', finalSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
-                            setSelection(currentSelection);
                         }
-                        setIsCompensatieModalOpen(true);
+                        
+                        // Ensure selection is set before opening modal
+                        setSelection(finalSelection);
+                        
+                        // Use setTimeout to ensure state update completes before opening modal
+                        setTimeout(() => {
+                            console.log('⏰ Opening Compensatie modal with final selection:', finalSelection);
+                            setIsCompensatieModalOpen(true);
+                        }, 0);
                         setContextMenu(null);
                     }
                 },
@@ -1109,10 +1136,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasFirstClick: !!firstClickState
                         });
                         
+                        // Determine the correct selection to use
+                        let finalSelection = null;
+                        
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('⚖️ Context menu Zittingsvrij clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is - this respects the two-click selection
+                            console.log('⚖️ Context menu Zittingsvrij: Using existing selection for same employee:', selectionData);
+                            finalSelection = selectionData;
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -1120,29 +1150,35 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            const rangeSelection = {
+                            finalSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⚖️ Context menu Zittingsvrij: Using two-click range selection:', rangeSelection);
-                            setSelection(rangeSelection);
+                            console.log('⚖️ Context menu Zittingsvrij: Using two-click range selection:', finalSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            const currentSelection = {
+                            finalSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⚖️ Context menu Zittingsvrij clicked. Creating single-day selection:', currentSelection);
+                            console.log('⚖️ Context menu Zittingsvrij: Creating single-day selection:', finalSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
-                            setSelection(currentSelection);
                         }
-                        setIsZittingsvrijModalOpen(true);
+                        
+                        // Ensure selection is set before opening modal
+                        setSelection(finalSelection);
+                        
+                        // Use setTimeout to ensure state update completes before opening modal
+                        setTimeout(() => {
+                            console.log('⚖️ Opening Zittingsvrij modal with final selection:', finalSelection);
+                            setIsZittingsvrijModalOpen(true);
+                        }, 0);
                         setContextMenu(null);
                     }
                 }
