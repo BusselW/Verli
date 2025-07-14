@@ -12,7 +12,7 @@ Profile cards now only appear when hovering over employee names/avatars in the e
 Previous console log entries below:
 ---
 
-Senior data received: {FileSystemObjectType: 0, Id: 9, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ContentTypeId: '0x0100C1BBD6ABC9DF8C44980878C171723696', …}enior data received: {FileSystemObjectType: 0, Id: 9, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ContentTypeId: '0x0100C1BBD6ABC9DF8C44980878C171723696', …}
+Y: Senior data received: {FileSystemObjectType: 0, Id: 9, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ContentTypeId: '0x0100C1BBD6ABC9DF8C44980878C171723696', …}enior data received: {FileSystemObjectType: 0, Id: 9, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ContentTypeId: '0x0100C1BBD6ABC9DF8C44980878C171723696', …}
 profielkaarten.js:478 Using siteUrl from appConfiguratie: https://som.org.om.local/sites/MulderT/CustomPW/Verlof/
 profielkaarten.js:485 Icon base path: https://som.org.om.local/sites/MulderT/CustomPW/Verlof//cpw/Rooster/icons/profilecards
 profielkaarten.js:383 Checking for special background for normalized username: "wissinks"

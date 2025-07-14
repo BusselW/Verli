@@ -276,13 +276,13 @@ const ProfielKaarten = (() => {
     };
 
     /**
-     * Fetch senior data by username
+     * Fetch all senior data by username
      * @param {string} username - The employee's username
-     * @returns {Promise<Object|null>} - Senior data or null if not found
+     * @returns {Promise<Array>} - Array of senior data or empty array if none found
      */
-    const fetchSeniorData = async (username) => {
+    const fetchAllSeniorData = async (username) => {
         try {
-            console.log(`fetchSeniorData: Fetching senior for username "${username}"`);
+            console.log(`fetchAllSeniorData: Fetching all seniors for username "${username}"`);
             
             // Normalize username - try both formats
             let normalizedUsername = username;
@@ -291,38 +291,41 @@ const ProfielKaarten = (() => {
             if (username.includes('\\')) {
                 // If it has domain\username format, also try without domain
                 alternativeUsername = username.split('\\')[1];
-                console.log(`fetchSeniorData: Also trying alternative username "${alternativeUsername}"`);
+                console.log(`fetchAllSeniorData: Also trying alternative username "${alternativeUsername}"`);
             } else {
                 // If it doesn't have domain, also try with som\ prefix
                 alternativeUsername = `som\\${username}`;
-                console.log(`fetchSeniorData: Also trying alternative username "${alternativeUsername}"`);
+                console.log(`fetchAllSeniorData: Also trying alternative username "${alternativeUsername}"`);
             }
             
-            // Try original username first
-            console.log(`fetchSeniorData: Trying original username "${normalizedUsername}"`);
-            let senior = await linkInfo.getSeniorForEmployee(normalizedUsername);
-            
-            // If not found, try alternative format
-            if (!senior && alternativeUsername) {
-                console.log(`fetchSeniorData: Original username failed, trying alternative "${alternativeUsername}"`);
-                senior = await linkInfo.getSeniorForEmployee(alternativeUsername);
+            // First get the employee to find their team
+            const medewerkers = await fetchSharePointList('Medewerkers');
+            if (!medewerkers) {
+                console.error('fetchAllSeniorData: Could not fetch medewerkers list');
+                return [];
             }
             
-            if (senior) {
-                console.log('fetchSeniorData: Found senior:', {
-                    Username: senior.seniorInfo?.Username,
-                    Naam: senior.naam,
-                    Team: senior.Team,
-                    MedewerkerID: senior.MedewerkerID
-                });
-                return senior;
+            // Find the employee
+            let employee = medewerkers.find(m => m.Username === normalizedUsername);
+            if (!employee && alternativeUsername) {
+                employee = medewerkers.find(m => m.Username === alternativeUsername);
             }
             
-            console.log(`fetchSeniorData: No senior found for "${username}" (tried "${normalizedUsername}" and "${alternativeUsername || 'none'}")`);
-            return null;
+            if (!employee || !employee.Team) {
+                console.log(`fetchAllSeniorData: Employee not found or no team for "${username}"`);
+                return [];
+            }
+            
+            console.log(`fetchAllSeniorData: Found employee in team "${employee.Team}"`);
+            
+            // Get all seniors in the employee's team
+            const allSeniors = await linkInfo.getSeniorsInTeam(employee.Team);
+            console.log(`fetchAllSeniorData: Found ${allSeniors.length} seniors in team "${employee.Team}"`);
+            
+            return allSeniors || [];
         } catch (error) {
-            console.error('Error fetching senior data:', error);
-            return null;
+            console.error('Error fetching all senior data:', error);
+            return [];
         }
     };
 
@@ -468,10 +471,10 @@ const ProfielKaarten = (() => {
      * @param {Object} medewerker - Employee data
      * @param {Object} werkrooster - Working hours data
      * @param {Object} teamLeader - Team leader data
-     * @param {Object} senior - Senior data
+     * @param {Array} allSeniors - Array of all senior data
      * @returns {HTMLElement} - The card element
      */
-    const createProfileCard = (medewerker, werkrooster, teamLeader, senior) => {
+    const createProfileCard = (medewerker, werkrooster, teamLeader, allSeniors) => {
         if (!medewerker) return null;
         
         // Get base URL for icons
@@ -569,9 +572,9 @@ const ProfielKaarten = (() => {
                     style: specialBackground ? { position: 'relative', zIndex: '1' } : {}
                 },
                     h('div', { className: 'profile-card-name' }, medewerker.Naam || medewerker.Title || 'Onbekend'),
-                    // Check if this person is the senior or team leader themselves
+                    // Check if this person is a senior or team leader themselves
                     (() => {
-                        const isSenior = senior && (
+                        const isSenior = allSeniors && allSeniors.some(senior => 
                             (senior.seniorInfo?.Username === medewerker.Username) ||
                             (senior.seniorInfo?.Naam === medewerker.Naam) ||
                             (senior.seniorInfo?.Title === medewerker.Naam)
@@ -637,34 +640,62 @@ const ProfielKaarten = (() => {
                         }, 'TL'),
                         `${teamLeader.Title || teamLeader.Naam || teamLeader.Username}`
                     ),
-                    // Only show senior if this person is NOT the senior themselves
-                    senior && !(
-                        (senior.seniorInfo?.Username === medewerker.Username) ||
-                        (senior.seniorInfo?.Naam === medewerker.Naam) ||
-                        (senior.seniorInfo?.Title === medewerker.Naam)
-                    ) && h('div', { 
-                        className: 'profile-card-senior',
-                        style: { 
-                            fontSize: '0.85rem', 
-                            color: '#333',
-                            marginTop: '2px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                        }
-                    }, 
-                        h('span', { 
+                    // Show all seniors (excluding the person themselves if they are a senior)
+                    allSeniors && allSeniors.length > 0 && (() => {
+                        // Filter out seniors who are the same person as the current medewerker
+                        const otherSeniors = allSeniors.filter(senior => !(
+                            (senior.seniorInfo?.Username === medewerker.Username) ||
+                            (senior.seniorInfo?.Naam === medewerker.Naam) ||
+                            (senior.seniorInfo?.Title === medewerker.Naam)
+                        ));
+                        
+                        if (otherSeniors.length === 0) return null;
+                        
+                        return h('div', { 
+                            className: 'profile-card-seniors',
                             style: { 
-                                fontSize: '0.8rem',
-                                backgroundColor: '#ff8c00',
-                                color: 'white',
-                                padding: '1px 4px',
-                                borderRadius: '3px',
-                                fontWeight: 'bold'
+                                fontSize: '0.85rem', 
+                                color: '#333',
+                                marginTop: '4px'
                             }
-                        }, 'SR'),
-                        `${senior.naam || senior.seniorInfo?.Naam || 'Onbekende senior'}`
-                    ),
+                        }, 
+                            h('div', {
+                                style: {
+                                    fontWeight: 'bold',
+                                    marginBottom: '2px',
+                                    fontSize: '0.8rem',
+                                    color: '#666'
+                                }
+                            }, otherSeniors.length === 1 ? 'Senior:' : 'Senioren:'),
+                            ...otherSeniors.map((senior, index) => 
+                                h('div', {
+                                    key: `senior-${index}`,
+                                    style: {
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        marginBottom: index < otherSeniors.length - 1 ? '2px' : '0'
+                                    }
+                                },
+                                    h('span', { 
+                                        style: { 
+                                            fontSize: '0.75rem',
+                                            backgroundColor: '#ff8c00',
+                                            color: 'white',
+                                            padding: '1px 4px',
+                                            borderRadius: '3px',
+                                            fontWeight: 'bold',
+                                            minWidth: '20px',
+                                            textAlign: 'center'
+                                        }
+                                    }, 'SR'),
+                                    h('span', {
+                                        style: { flex: 1 }
+                                    }, senior.naam || senior.seniorInfo?.Naam || 'Onbekende senior')
+                                )
+                            )
+                        );
+                    })(),
                     h('div', { className: 'profile-card-email' }, 
                         h('a', { 
                             href: `mailto:${medewerker.E_x002d_mail || ''}`,
@@ -801,13 +832,13 @@ const ProfielKaarten = (() => {
         const teamLeaderData = await fetchTeamLeaderData(medewerkerData.Username);
         
         console.log(`ProfielKaarten: Fetching senior data for "${medewerkerData.Username}"`);
-        const seniorData = await fetchSeniorData(medewerkerData.Username);
+        const seniorData = await fetchAllSeniorData(medewerkerData.Username);
         
         console.log('ProfielKaarten: Data fetched:', { 
             medewerker: medewerkerData, 
             werkrooster: werkroosterData, 
             teamLeader: teamLeaderData,
-            senior: seniorData
+            allSeniors: seniorData
         });
         
         // Create card element
@@ -1113,9 +1144,9 @@ const ProfielKaarten = (() => {
                             const teamLeaderData = await fetchTeamLeaderData(medewerkerData.Username);
                             console.log('Team leader data received:', teamLeaderData);
                             
-                            console.log(`Fetching senior data for: "${medewerkerData.Username}"`);
-                            const seniorData = await fetchSeniorData(medewerkerData.Username);
-                            console.log('Senior data received:', seniorData);
+                            console.log(`Fetching all senior data for: "${medewerkerData.Username}"`);
+                            const allSeniorData = await fetchAllSeniorData(medewerkerData.Username);
+                            console.log('All senior data received:', allSeniorData);
                             
                             // Check if card is still active after async operations
                             if (activeCard !== cardContainer) {
@@ -1124,7 +1155,7 @@ const ProfielKaarten = (() => {
                             }
                             
                             // Create the actual card content
-                            const cardElement = createProfileCard(medewerkerData, werkroosterData, teamLeaderData, seniorData);
+                            const cardElement = createProfileCard(medewerkerData, werkroosterData, teamLeaderData, allSeniorData);
                             if (!cardElement) {
                                 console.warn(`Failed to create card for "${username}"`);
                                 return hideProfileCard();
