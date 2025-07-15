@@ -97,7 +97,7 @@
 
 
             const navigateTo = (page) => {
-                const baseUrl = "https://som.org.om.local/sites/verlofrooster";
+                const baseUrl = "https://som.org.om.local/sites/MulderT/customPW/Verlof/CPW/Rooster";
                 window.location.href = `${baseUrl}/${page}`;
             };
 
