@@ -176,9 +176,12 @@ export const showCRUDRestrictionMessage = (operation, reason) => {
     
     const message = `Kan item niet ${operationText[operation]}: ${reason}`;
     
-    // You can customize this to use your preferred notification system
-    alert(message);
-    console.warn(`🚫 CRUD Restriction: ${message}`);
+    // Use NotificationSystem if available, fallback to console
+    if (window.NotificationSystem) {
+        window.NotificationSystem.error(message, 'Toegang geweigerd');
+    } else {
+        console.warn(`🚫 CRUD Restriction: ${message}`);
+    }
 };
 
 /**

@@ -238,15 +238,24 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
 
         // Validate required fields
         if (!selectedMedewerker) {
-            alert('Selecteer een medewerker');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Selecteer een medewerker', 'Validatiefout');
+            }
+            setIsSubmitting(false);
             return;
         }
         if (!medewerkerUsername) {
-            alert('Medewerker username is vereist maar ontbreekt');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Medewerker username is vereist maar ontbreekt', 'Validatiefout');
+            }
+            setIsSubmitting(false);
             return;
         }
         if (!startDate || !endDate) {
-            alert('Start- en einddatum zijn vereist');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Start- en einddatum zijn vereist', 'Validatiefout');
+            }
+            setIsSubmitting(false);
             return;
         }
 
@@ -280,7 +289,9 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
             // Note: setIsSubmitting(false) is handled by parent component after successful submission
         } catch (error) {
             console.error('❌ Error validating verlof form:', error);
-            alert('Er is een fout opgetreden bij het valideren van het formulier.');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Er is een fout opgetreden bij het valideren van het formulier.', 'Validatiefout');
+            }
             setIsSubmitting(false);
         }
     };

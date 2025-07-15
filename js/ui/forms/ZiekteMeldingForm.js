@@ -135,7 +135,9 @@ const ZiekteMeldingForm = ({ onSubmit, onClose, shiftTypes = {}, initialData = {
                 
                 // If not submitting for self, show error and return
                 if (selectedMedewerker && selectedMedewerker.Username !== loginName) {
-                    alert('Je kunt alleen ziekte melden voor jezelf.');
+                    if (window.NotificationSystem) {
+                        window.NotificationSystem.error('Je kunt alleen ziekte melden voor jezelf.', 'Toegang geweigerd');
+                    }
                     return;
                 }
             }
@@ -172,7 +174,9 @@ const ZiekteMeldingForm = ({ onSubmit, onClose, shiftTypes = {}, initialData = {
             onSubmit(formData);
         } catch (error) {
             console.error('❌ Error validating ziekmelding form:', error);
-            alert('Er is een fout opgetreden bij het valideren van je ziekmelding.');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Er is een fout opgetreden bij het valideren van je ziekmelding.', 'Validatiefout');
+            }
         }
     };
 

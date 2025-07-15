@@ -179,7 +179,9 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
                     
                     // If not submitting for self, show error and return
                     if (selectedMedewerker && selectedMedewerker.Username !== loginName) {
-                        alert('Je kunt alleen zittingsvrij registreren voor jezelf.');
+                        if (window.NotificationSystem) {
+                            window.NotificationSystem.error('Je kunt alleen zittingsvrij registreren voor jezelf.', 'Toegang geweigerd');
+                        }
                         return;
                     }
                     
@@ -188,7 +190,9 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
                 }
             }).catch(error => {
                 console.error('Error checking current user for zittingsvrij:', error);
-                alert('Er is een fout opgetreden bij het controleren van je gebruikersrechten.');
+                if (window.NotificationSystem) {
+                    window.NotificationSystem.error('Er is een fout opgetreden bij het controleren van je gebruikersrechten.', 'Fout');
+                }
             });
         } else {
             // User has management rights, proceed normally
@@ -233,7 +237,9 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
             onSubmit(formData);
         } catch (error) {
             console.error('❌ Error validating zittingsvrij form:', error);
-            alert('Er is een fout opgetreden bij het valideren van het formulier.');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Er is een fout opgetreden bij het valideren van het formulier.', 'Validatiefout');
+            }
         }
     };
 

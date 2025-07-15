@@ -197,7 +197,9 @@ const CompensatieUrenForm = ({ onSubmit, onClose, initialData = {}, medewerkers 
             onSubmit(formData);
         } catch (error) {
             console.error('❌ Error validating compensatie form:', error);
-            alert('Er is een fout opgetreden bij het valideren van het formulier.');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Er is een fout opgetreden bij het valideren van het formulier.', 'Validatiefout');
+            }
         }
     };
 

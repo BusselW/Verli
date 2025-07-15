@@ -144,7 +144,11 @@ export async function addAccessWarning(elementSelector, section, warningMessage 
             element.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                alert(warningMessage);
+                if (window.NotificationSystem) {
+                    window.NotificationSystem.warning(warningMessage, 'Toegang beperkt');
+                } else {
+                    alert(warningMessage);
+                }
             }, true);
         }
 
@@ -168,8 +172,16 @@ export async function enforcePageAccess(section, redirectUrl = null, errorMessag
             const message = errorMessage || `U heeft geen toegang tot deze pagina. Vereiste rechten: ${section}`;
             
             if (redirectUrl) {
-                alert(message);
-                window.location.href = redirectUrl;
+                if (window.NotificationSystem) {
+                    window.NotificationSystem.error(message, 'Toegang geweigerd');
+                    // Give time for notification to show before redirect
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 2000);
+                } else {
+                    alert(message);
+                    window.location.href = redirectUrl;
+                }
             } else {
                 // Toon error op huidige pagina
                 document.body.innerHTML = `
@@ -268,7 +280,11 @@ export async function executeWithPermission(section, callback, errorCallback = n
             if (errorCallback) {
                 await errorCallback();
             } else {
-                alert(`U heeft geen toegang tot deze functie. Vereiste rechten: ${section}`);
+                if (window.NotificationSystem) {
+                    window.NotificationSystem.error(`U heeft geen toegang tot deze functie. Vereiste rechten: ${section}`, 'Toegang geweigerd');
+                } else {
+                    alert(`U heeft geen toegang tot deze functie. Vereiste rechten: ${section}`);
+                }
             }
         }
     } catch (error) {
