@@ -9,14 +9,14 @@ import { fetchSharePointList, createSharePointListItem, updateSharePointListItem
 import { getCurrentUserInfo } from '../services/sharepointService.js';
 import { canManageOthersEvents } from './ContextMenu.js';
 
-const { createElement: h, useState, useEffect, useRef } = React;
+const { createElement: h, useState, useEffect, useRef, forwardRef, useImperativeHandle } = React;
 
 /**
  * Mededelingen Component
  * @param {Object} props - Component props
  * @param {Array} props.teams - Available teams for targeting announcements
  */
-const Mededelingen = ({ teams = [] }) => {
+const Mededelingen = forwardRef(({ teams = [] }, ref) => {
     const [announcements, setAnnouncements] = useState([]);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [canManageAnnouncements, setCanManageAnnouncements] = useState(false);
@@ -35,6 +35,13 @@ const Mededelingen = ({ teams = [] }) => {
     // Edit state
     const [editingAnnouncement, setEditingAnnouncement] = useState(null);
     const [showEditForm, setShowEditForm] = useState(false);
+
+    // Expose methods to parent component
+    useImperativeHandle(ref, () => ({
+        showCreateForm: () => {
+            setShowCreateForm(true);
+        }
+    }), []);
 
     useEffect(() => {
         initializeComponent();
@@ -279,14 +286,6 @@ const Mededelingen = ({ teams = [] }) => {
             h('h3', { className: 'mededelingen-title' },
                 h('i', { className: 'fas fa-bullhorn' }),
                 ' Mededelingen'
-            ),
-            canManageAnnouncements && h('button', {
-                className: 'btn-create-announcement',
-                onClick: () => setShowCreateForm(!showCreateForm),
-                title: 'Nieuwe mededeling aanmaken'
-            },
-                h('i', { className: 'fas fa-plus' }),
-                ' Nieuwe mededeling'
             )
         ),
 
@@ -509,7 +508,7 @@ const Mededelingen = ({ teams = [] }) => {
             )
         )
     );
-};
+});
 
 export default Mededelingen;
 

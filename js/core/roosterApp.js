@@ -41,7 +41,7 @@ import RoosterGrid from '../ui/RoosterGrid.js';
 import TooltipManager from '../ui/tooltipbar.js';
 import Mededelingen from '../ui/Mededelingen.js';
 
-const { useState, useEffect, useMemo, useCallback, createElement: h, Fragment } = React;
+const { useState, useEffect, useMemo, useCallback, useRef, createElement: h, Fragment } = React;
 
 // =====================
 // Hoofd RoosterApp Component
@@ -175,6 +175,8 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
         isTaakbeheer: false,
         loading: true
     });
+    const [canManageAnnouncements, setCanManageAnnouncements] = useState(false);
+    const mededelingenRef = useRef(null);
     const [userInfo, setUserInfo] = useState({
         naam: currentUser?.Title || '',
         pictureUrl: '',
@@ -203,13 +205,14 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                 const taakbeheerGroups = ["1. Sharepoint beheer", "1.1. Mulder MT", "2.6 Roosteraars", "2.3. Senioren beoordelen", "2.4. Senioren administratie"];
                 
                 // Check permissions for each group
-                const [isAdmin, isFunctional, isTaakbeheer] = await Promise.all([
+                const [isAdmin, isFunctional, isTaakbeheer, canManage] = await Promise.all([
                     isUserInAnyGroup(adminGroups),
                     isUserInAnyGroup(functionalGroups),
-                    isUserInAnyGroup(taakbeheerGroups)
+                    isUserInAnyGroup(taakbeheerGroups),
+                    canManageOthersEvents()
                 ]);
                 
-                console.log('🔐 Permissions loaded:', { isAdmin, isFunctional, isTaakbeheer });
+                console.log('🔐 Permissions loaded:', { isAdmin, isFunctional, isTaakbeheer, canManage });
                 
                 setPermissions({
                     isAdmin,
@@ -217,6 +220,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                     isTaakbeheer,
                     loading: false
                 });
+                setCanManageAnnouncements(canManage);
             } catch (error) {
                 console.error('❌ Error loading permissions:', error);
                 setPermissions({
@@ -1580,6 +1584,14 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
         setIsZittingsvrijModalOpen(true);
     }, []);
 
+    const handleNieuweMededeling = useCallback(() => {
+        console.log('🔔 Nieuwe mededeling button clicked');
+        // Call the Mededelingen component to show the create form
+        if (mededelingenRef.current && mededelingenRef.current.showCreateForm) {
+            mededelingenRef.current.showCreateForm();
+        }
+    }, []);
+
     // Calendar cell click handler with two-click selection support
     function handleCellClick(medewerker, dag, specificItem = null) {
         // If a specific item is provided (e.g., compensatie item), open the appropriate modal directly
@@ -1979,10 +1991,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                     setZoekTerm,
                     geselecteerdTeam,
                     setGeselecteerdTeam,
-                    teams
+                    teams,
+                    canManageAnnouncements,
+                    onNieuweMededeling: handleNieuweMededeling
                 }),
                 h(Mededelingen, {
-                    teams
+                    teams,
+                    ref: mededelingenRef
                 }),
                 h(Legenda, {
                     shiftTypes,
