@@ -180,81 +180,85 @@ const ZiekteMeldingForm = ({ onSubmit, onClose, shiftTypes = {}, initialData = {
         }
     };
 
-    return h('form', { onSubmit: handleSubmit, className: 'form-container' },
-        h('input', { type: 'hidden', name: 'Status', value: status }),
+    return h('div', { className: 'modal-form-wrapper' },
+        h('form', { onSubmit: handleSubmit, className: 'form-container' },
+            h('div', { className: 'form-fields' },
+                h('input', { type: 'hidden', name: 'Status', value: status }),
 
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-medewerker' }, 'Medewerker'),
-                canManageOthers 
-                    ? h('select', { 
-                        className: 'form-select', 
-                        id: 'ziekte-medewerker', 
-                        value: medewerkerId, 
-                        onChange: handleMedewerkerChange, 
-                        required: true 
-                      },
-                        h('option', { value: '', disabled: true }, 'Selecteer medewerker'),
-                        medewerkers.map(m => h('option', { key: m.Id, value: m.Id }, m.Title))
-                      )
-                    : h('input', { 
-                        className: 'form-input readonly-field', 
-                        type: 'text', 
-                        id: 'ziekte-medewerker', 
-                        value: (medewerkers.find(m => m.Id === parseInt(medewerkerId, 10)) || {}).Title || 'Laden...', 
-                        readOnly: true,
-                        title: 'U kunt alleen ziekte melden voor uzelf'
-                      })
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-medewerker' }, 'Medewerker'),
+                        canManageOthers 
+                            ? h('select', { 
+                                className: 'form-select', 
+                                id: 'ziekte-medewerker', 
+                                value: medewerkerId, 
+                                onChange: handleMedewerkerChange, 
+                                required: true 
+                              },
+                                h('option', { value: '', disabled: true }, 'Selecteer medewerker'),
+                                medewerkers.map(m => h('option', { key: m.Id, value: m.Id }, m.Title))
+                              )
+                            : h('input', { 
+                                className: 'form-input readonly-field', 
+                                type: 'text', 
+                                id: 'ziekte-medewerker', 
+                                value: (medewerkers.find(m => m.Id === parseInt(medewerkerId, 10)) || {}).Title || 'Laden...', 
+                                readOnly: true,
+                                title: 'U kunt alleen ziekte melden voor uzelf'
+                              })
+                    ),
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-medewerker-id' }, 'Medewerker ID'),
+                        h('input', { className: 'form-input', type: 'text', id: 'ziekte-medewerker-id', value: medewerkerUsername, readOnly: true, disabled: true })
+                    )
+                ),
+
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-start-datum' }, 'Eerste ziektedag *'),
+                        h('input', { className: 'form-input', type: 'date', id: 'ziekte-start-datum', value: startDate, onChange: (e) => setStartDate(e.target.value), required: true })
+                    ),
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-start-tijd' }, 'Starttijd *'),
+                        h('input', { className: 'form-input', type: 'time', id: 'ziekte-start-tijd', value: startTime, onChange: (e) => setStartTime(e.target.value), required: true })
+                    )
+                ),
+
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-eind-datum' }, 'Laatste ziektedag (optioneel)'),
+                        h('input', { className: 'form-input', type: 'date', id: 'ziekte-eind-datum', value: endDate, onChange: (e) => setEndDate(e.target.value), min: startDate })
+                    ),
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-eind-tijd' }, 'Eindtijd'),
+                        h('input', { className: 'form-input', type: 'time', id: 'ziekte-eind-tijd', value: endTime, onChange: (e) => setEndTime(e.target.value) })
+                    )
+                ),
+
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-reden' }, 'Reden'),
+                        h('input', { className: 'form-input', id: 'ziekte-reden', type: 'text', value: 'Ziekte', disabled: true })
+                    ),
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-reden-id' }, 'Reden ID'),
+                        h('input', { className: 'form-input', id: 'ziekte-reden-id', type: 'text', value: redenId, disabled: true })
+                    )
+                ),
+
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'ziekte-omschrijving' }, 'Omschrijving (optioneel)'),
+                        h('textarea', { className: 'form-textarea', id: 'ziekte-omschrijving', rows: 4, value: omschrijving, onChange: (e) => setOmschrijving(e.target.value), placeholder: 'Eventuele toelichting bij je ziekmelding.' })
+                    )
+                )
             ),
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-medewerker-id' }, 'Medewerker ID'),
-                h('input', { className: 'form-input', type: 'text', id: 'ziekte-medewerker-id', value: medewerkerUsername, readOnly: true, disabled: true })
-            )
-        ),
 
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-start-datum' }, 'Eerste ziektedag *'),
-                h('input', { className: 'form-input', type: 'date', id: 'ziekte-start-datum', value: startDate, onChange: (e) => setStartDate(e.target.value), required: true })
-            ),
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-start-tijd' }, 'Starttijd *'),
-                h('input', { className: 'form-input', type: 'time', id: 'ziekte-start-tijd', value: startTime, onChange: (e) => setStartTime(e.target.value), required: true })
+            h('div', { className: 'form-acties' },
+                h('button', { type: 'button', className: 'btn btn-secondary', onClick: onClose }, 'Sluiten'),
+                h('button', { type: 'submit', className: 'btn btn-primary' }, 'Ziekmelding Indienen')
             )
-        ),
-
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-eind-datum' }, 'Laatste ziektedag (optioneel)'),
-                h('input', { className: 'form-input', type: 'date', id: 'ziekte-eind-datum', value: endDate, onChange: (e) => setEndDate(e.target.value), min: startDate })
-            ),
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-eind-tijd' }, 'Eindtijd'),
-                h('input', { className: 'form-input', type: 'time', id: 'ziekte-eind-tijd', value: endTime, onChange: (e) => setEndTime(e.target.value) })
-            )
-        ),
-
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-reden' }, 'Reden'),
-                h('input', { className: 'form-input', id: 'ziekte-reden', type: 'text', value: 'Ziekte', disabled: true })
-            ),
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-reden-id' }, 'Reden ID'),
-                h('input', { className: 'form-input', id: 'ziekte-reden-id', type: 'text', value: redenId, disabled: true })
-            )
-        ),
-
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'ziekte-omschrijving' }, 'Omschrijving (optioneel)'),
-                h('textarea', { className: 'form-textarea', id: 'ziekte-omschrijving', rows: 4, value: omschrijving, onChange: (e) => setOmschrijving(e.target.value), placeholder: 'Eventuele toelichting bij je ziekmelding.' })
-            )
-        ),
-
-        h('div', { className: 'form-acties' },
-            h('button', { type: 'button', className: 'btn btn-secondary', onClick: onClose }, 'Sluiten'),
-            h('button', { type: 'submit', className: 'btn btn-primary' }, 'Ziekmelding Indienen')
         )
     );
 };
