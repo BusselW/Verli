@@ -106,6 +106,7 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
     const [endTime, setEndTime] = useState('');
     const [redenId, setRedenId] = useState(2); // Fixed RedenID for Verlof/vakantie
     const [omschrijving, setOmschrijving] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState('Nieuw');
     const [canManageOthers, setCanManageOthers] = useState(false);
 
@@ -215,6 +216,15 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        
+        // Prevent double submission
+        if (isSubmitting) {
+            console.log('Form submission already in progress, ignoring...');
+            return;
+        }
+        
+        setIsSubmitting(true);
         const selectedMedewerker = medewerkers.find(m => m.Id === parseInt(medewerkerId, 10));
         const fullName = selectedMedewerker ? selectedMedewerker.Title : 'Onbekend';
         const currentDate = new Date().toLocaleDateString('nl-NL');
@@ -262,13 +272,16 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
             if (!validation.valid) {
                 console.warn('🚫 Form validation failed:', validation.errors);
                 showCRUDRestrictionMessage(operation, validation.errors.join(', '));
+                setIsSubmitting(false);
                 return;
             }
             
             onSubmit(formData);
+            // Note: setIsSubmitting(false) is handled by parent component after successful submission
         } catch (error) {
             console.error('❌ Error validating verlof form:', error);
             alert('Er is een fout opgetreden bij het valideren van het formulier.');
+            setIsSubmitting(false);
         }
     };
 
@@ -345,12 +358,16 @@ const VerlofAanvraagForm = ({ onSubmit, onClose, initialData = {}, medewerkers =
                         h('textarea', { className: 'form-textarea', id: 'verlof-omschrijving', rows: 4, value: omschrijving, onChange: (e) => setOmschrijving(e.target.value), placeholder: 'Eventuele toelichting bij je verlofaanvraag.' })
                     )
                 )
-            )
-        ),
+            ),
 
-        h('div', { className: 'form-acties' },
-            h('button', { type: 'button', className: 'btn btn-secondary', onClick: onClose }, 'Sluiten'),
-            h('button', { type: 'submit', className: 'btn btn-primary', form: 'verlof-form' }, 'Verlofaanvraag Indienen')
+            h('div', { className: 'form-acties' },
+                h('button', { type: 'button', className: 'btn btn-secondary', onClick: onClose }, 'Sluiten'),
+                h('button', { 
+                    type: 'submit', 
+                    className: 'btn btn-primary',
+                    disabled: isSubmitting
+                }, isSubmitting ? 'Bezig met indienen...' : 'Verlofaanvraag Indienen')
+            )
         )
     );
 };
