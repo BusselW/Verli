@@ -27,12 +27,9 @@ const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, on
     
     // Debug logging for teams
     useEffect(() => {
-        console.log('📝 Mededelingen: Teams received:', teams);
-        console.log('📝 Mededelingen: Teams count:', teams.length);
-        if (teams.length > 0) {
-            console.log('📝 Mededelingen: Sample team:', teams[0]);
-        }
-    }, [teams]);
+        console.log('📝 Mededelingen: Teams received:', teams.length, 'teams');
+        console.log('📝 Mededelingen: Medewerkers received:', medewerkers.length, 'medewerkers');
+    }, [teams, medewerkers]);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -104,18 +101,14 @@ const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, on
                 try {
                     const sanitizedLoginName = getFullLoginName(userToCheck.LoginName);
                     
-                    console.log('📝 Original LoginName:', userToCheck.LoginName);
-                    console.log('📝 Sanitized LoginName:', sanitizedLoginName);
-                    
                     const userRecord = medewerkers.find(m => 
                         m.Username && m.Username.toLowerCase() === sanitizedLoginName.toLowerCase()
                     );
                     if (userRecord && userRecord.Team) {
                         userTeam = userRecord.Team;
-                        console.log('📝 User team found:', userTeam, 'for user:', sanitizedLoginName);
+                        console.log('📝 User team found:', userTeam);
                     } else {
                         console.log('📝 No team found for user:', sanitizedLoginName);
-                        console.log('📝 Available usernames in Medewerkers:', medewerkers.map(m => m.Username).filter(u => u));
                     }
                 } catch (teamError) {
                     console.warn('Could not fetch user team:', teamError);
@@ -132,9 +125,6 @@ const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, on
     const filterActiveAnnouncements = (announcements, userTeam = null) => {
         const now = new Date();
         
-        console.log('📝 Filtering announcements for user team:', userTeam);
-        console.log('📝 Total announcements to filter:', announcements.length);
-        
         const filtered = announcements.filter(announcement => {
             // Check if announcement is within date range
             const startDate = announcement.DatumTijdStart ? new Date(announcement.DatumTijdStart) : null;
@@ -146,31 +136,25 @@ const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, on
             if (announcement.UitzendenAan && announcement.UitzendenAan.trim()) {
                 const targetTeams = announcement.UitzendenAan.split(';').map(team => team.trim());
                 
-                console.log(`📝 Announcement "${announcement.Title}" targets:`, targetTeams);
-                
                 // If "Alle teams" is in the target list, show to everyone
                 if (targetTeams.includes('Alle teams')) {
-                    console.log(`📝 Showing "${announcement.Title}" - targets "Alle teams"`);
                     return isActive;
                 }
                 
                 // If user has a team, check if their team is in the target list
                 if (userTeam && targetTeams.includes(userTeam)) {
-                    console.log(`📝 Showing "${announcement.Title}" - user team "${userTeam}" is in target list`);
                     return isActive;
                 }
                 
                 // If user's team is not in the target list, hide the announcement
-                console.log(`📝 Hiding "${announcement.Title}" - user team "${userTeam}" not in target list`);
                 return false;
             }
             
             // If no targeting specified, show to everyone
-            console.log(`📝 Showing "${announcement.Title}" - no team targeting`);
             return isActive;
         });
         
-        console.log('📝 Filtered announcements count:', filtered.length);
+        console.log('📝 Filtered', filtered.length, 'announcements for team:', userTeam);
         return filtered;
     };
 
