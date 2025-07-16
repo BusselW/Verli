@@ -168,35 +168,57 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1050;
     padding: 12px;
-    animation: fadeIn 0.2s ease-out;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .modal {
-    background: #ffffff;
-    border-radius: 12px;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
     box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.25),
-        0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        0 40px 80px -12px rgba(15, 23, 42, 0.3),
+        0 20px 40px -8px rgba(15, 23, 42, 0.2),
+        0 8px 16px -4px rgba(15, 23, 42, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(226, 232, 240, 0.3);
     max-width: 90vw;
     max-height: 90vh;
     min-width: 320px;
     overflow: hidden;
-    transform: scale(0.95);
-    transition: all 0.2s ease-out;
-    animation: modalSlideIn 0.3s ease-out forwards;
+    transform: scale(0.92);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     position: relative;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' 32;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(59, 130, 246, 0.6) 25%, 
+        rgba(99, 102, 241, 0.6) 50%, 
+        rgba(139, 92, 246, 0.6) 75%, 
+        transparent 100%);
+    z-index: 1;
+    border-radius: 20px 20px 0 0;
 }
 
 /* ===== MODAL HEADER ===== */
@@ -204,11 +226,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid #e2e8f0;
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    padding: 20px 24px;
+    border-bottom: none;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 100%);
     color: white;
     position: relative;
+    overflow: hidden;
 }
 
 .modal-header::before {
@@ -218,22 +241,47 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
     pointer-events: none;
+}
+
+.modal-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+    animation: modal-header-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes modal-header-shimmer {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
 }
 
 .modal-header h2,
 .modal-header .form-title {
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 1.375rem;
+    font-weight: 700;
     color: white;
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     position: relative;
     z-index: 1;
     letter-spacing: -0.025em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header h2::before,
+.modal-header .form-title::before {
+    content: '⚡';
+    font-size: 1.125rem;
+    opacity: 0.9;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
 /* ===== MODAL CLOSE BUTTON ===== */
@@ -241,75 +289,110 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border: none;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
     color: white !important;
-    border-radius: 8px;
+    border-radius: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     z-index: 1;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 1.25rem;
+    font-weight: 400;
 }
 
 .modal-close:hover {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
     color: white !important;
-    transform: scale(1.05);
+    transform: translateY(-2px) scale(1.08);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .modal-close:active {
-    transform: scale(0.95);
+    transform: translateY(0) scale(0.95);
 }
 
 .modal-close svg {
-    width: 18px;
-    height: 18px;
-    filter: invert(100%) brightness(2);
+    width: 20px;
+    height: 20px;
+    filter: invert(100%) brightness(2) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 /* ===== MODAL BODY ===== */
 .modal-body,
 .form-body {
-    padding: 20px;
+    padding: 24px;
     max-height: calc(90vh - 140px);
     overflow-y: auto;
-    background: #ffffff;
+    background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+    position: relative;
 }
 
-/* Custom scrollbar for modal body */
+.modal-body::before,
+.form-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(226, 232, 240, 0.8) 50%, transparent 100%);
+    z-index: 1;
+}
+
+/* Enhanced scrollbar for modal body */
 .modal-body::-webkit-scrollbar,
 .form-body::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 .modal-body::-webkit-scrollbar-track,
 .form-body::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 3px;
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 4px;
+    margin: 4px 0;
 }
 
 .modal-body::-webkit-scrollbar-thumb,
 .form-body::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 3px;
+    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+    border-radius: 4px;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .modal-body::-webkit-scrollbar-thumb:hover,
 .form-body::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* ===== MODAL FOOTER ===== */
 .modal-footer,
 .form-actions {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     justify-content: flex-end;
-    padding: 16px 20px;
-    border-top: 1px solid #e2e8f0;
-    background: #f8fafc;
+    padding: 20px 24px;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    position: relative;
+}
+
+.modal-footer::before,
+.form-actions::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(226, 232, 240, 0.8) 50%, transparent 100%);
 }
 
 /* ===== MODAL ANIMATIONS ===== */
@@ -319,13 +402,20 @@
 }
 
 @keyframes modalSlideIn {
-    from {
+    0% {
         opacity: 0;
-        transform: scale(0.9) translateY(-20px);
+        transform: scale(0.88) translateY(-40px) rotate(-1deg);
+        filter: blur(8px);
     }
-    to {
+    60% {
+        opacity: 0.9;
+        transform: scale(1.02) translateY(5px) rotate(0.5deg);
+        filter: blur(2px);
+    }
+    100% {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: scale(1) translateY(0) rotate(0deg);
+        filter: blur(0px);
     }
 }
 
