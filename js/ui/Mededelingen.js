@@ -61,8 +61,8 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
             const hasPermissions = await canManageOthersEvents();
             setCanManageAnnouncements(hasPermissions);
 
-            // Load announcements
-            await loadAnnouncements();
+            // Load announcements with user info
+            await loadAnnouncements(user);
         } catch (error) {
             console.error('Error initializing Mededelingen component:', error);
         } finally {
@@ -70,20 +70,45 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
         }
     };
 
-    const loadAnnouncements = async () => {
+    const loadAnnouncements = async (user = null) => {
         try {
             const allAnnouncements = await fetchSharePointList('Mededeling');
-            const activeAnnouncements = filterActiveAnnouncements(allAnnouncements);
+            
+            // Get current user's team from Medewerkers list
+            let userTeam = null;
+            const userToCheck = user || currentUser;
+            
+            if (userToCheck && userToCheck.LoginName) {
+                try {
+                    const medewerkers = await fetchSharePointList('Medewerkers');
+                    const userRecord = medewerkers.find(m => 
+                        m.Username && m.Username.toLowerCase() === userToCheck.LoginName.toLowerCase()
+                    );
+                    if (userRecord && userRecord.Team) {
+                        userTeam = userRecord.Team;
+                        console.log('📝 User team found:', userTeam, 'for user:', userToCheck.LoginName);
+                    } else {
+                        console.log('📝 No team found for user:', userToCheck.LoginName);
+                    }
+                } catch (teamError) {
+                    console.warn('Could not fetch user team:', teamError);
+                }
+            }
+            
+            const activeAnnouncements = filterActiveAnnouncements(allAnnouncements, userTeam);
             setAnnouncements(activeAnnouncements);
         } catch (error) {
             console.error('Error loading announcements:', error);
         }
     };
 
-    const filterActiveAnnouncements = (announcements) => {
+    const filterActiveAnnouncements = (announcements, userTeam = null) => {
         const now = new Date();
         
-        return announcements.filter(announcement => {
+        console.log('📝 Filtering announcements for user team:', userTeam);
+        console.log('📝 Total announcements to filter:', announcements.length);
+        
+        const filtered = announcements.filter(announcement => {
             // Check if announcement is within date range
             const startDate = announcement.DatumTijdStart ? new Date(announcement.DatumTijdStart) : null;
             const endDate = announcement.DatumTijdEinde ? new Date(announcement.DatumTijdEinde) : null;
@@ -94,19 +119,32 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
             if (announcement.UitzendenAan && announcement.UitzendenAan.trim()) {
                 const targetTeams = announcement.UitzendenAan.split(';').map(team => team.trim());
                 
+                console.log(`📝 Announcement "${announcement.Title}" targets:`, targetTeams);
+                
                 // If "Alle teams" is in the target list, show to everyone
                 if (targetTeams.includes('Alle teams')) {
+                    console.log(`📝 Showing "${announcement.Title}" - targets "Alle teams"`);
                     return isActive;
                 }
                 
-                // TODO: When user team info becomes available, check if user's team is in targetTeams
-                // For now, show all active announcements that have team targeting
-                return isActive;
+                // If user has a team, check if their team is in the target list
+                if (userTeam && targetTeams.includes(userTeam)) {
+                    console.log(`📝 Showing "${announcement.Title}" - user team "${userTeam}" is in target list`);
+                    return isActive;
+                }
+                
+                // If user's team is not in the target list, hide the announcement
+                console.log(`📝 Hiding "${announcement.Title}" - user team "${userTeam}" not in target list`);
+                return false;
             }
             
             // If no targeting specified, show to everyone
+            console.log(`📝 Showing "${announcement.Title}" - no team targeting`);
             return isActive;
         });
+        
+        console.log('📝 Filtered announcements count:', filtered.length);
+        return filtered;
     };
 
     const handleCreateAnnouncement = async (e) => {
