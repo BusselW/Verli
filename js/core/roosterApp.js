@@ -1803,7 +1803,23 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
     // Navigation function with proper base URL handling
     const navigateTo = (page) => {
         const baseUrl = linkInfo.getBaseUrl();
-        window.location.href = `${baseUrl}/${page}`;
+        const fullUrl = `${baseUrl}/${page}`;
+        
+        // Debug logging for org\busselw
+        const currentUser = window.currentUser || {};
+        const isDebugUser = currentUser.LoginName?.toLowerCase().includes('busselw') || 
+                           currentUser.Email?.toLowerCase().includes('busselw');
+        
+        if (isDebugUser) {
+            console.log('🔗 NavigateTo Debug Info:', {
+                page,
+                baseUrl,
+                fullUrl,
+                currentLocation: window.location.href
+            });
+        }
+        
+        window.location.href = fullUrl;
     };
 
     // Render de roosterkop en de medewerkerrijen
