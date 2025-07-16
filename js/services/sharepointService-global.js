@@ -455,6 +455,13 @@ if (typeof window.appConfiguratie === "undefined") {
                 return 0;
             }
             
+            // Check if current user is org\busselw for debug mode
+            const currentUser = await getCurrentUser();
+            const isDebugUser = currentUser && (
+                currentUser.LoginName?.toLowerCase().includes('busselw') ||
+                currentUser.Email?.toLowerCase().includes('busselw')
+            );
+            
             // Find vacation-related reasons (exclude 'Ziekte')
             const vacationReasons = verlofredenen.filter(reason => 
                 reason.Titel && !reason.Titel.toLowerCase().includes('ziekte')
@@ -463,8 +470,40 @@ if (typeof window.appConfiguratie === "undefined") {
             const vacationReasonIds = vacationReasons.map(reason => reason.ID?.toString());
             const vacationReasonTitles = vacationReasons.map(reason => reason.Titel);
             
+            if (isDebugUser) {
+                console.log('🔍 DEBUG MODE for org\\busselw - Detailed vacation count analysis:');
+                console.log('📋 Total verlof items found:', verlofItems.length);
+                console.log('📝 Total verlofredenen found:', verlofredenen.length);
+                console.log('🏖️ Vacation reasons (excluding Ziekte):', vacationReasons.map(r => ({ ID: r.ID, Titel: r.Titel })));
+                console.log('🔢 Vacation reason IDs:', vacationReasonIds);
+                console.log('📃 Vacation reason titles:', vacationReasonTitles);
+                
+                // Show all verlof items with detailed analysis
+                console.log('📊 All verlof items analysis:');
+                verlofItems.forEach((item, index) => {
+                    const isNewStatus = item.Status === 'Nieuw';
+                    const isVacationReason = item.RedenId && vacationReasonIds.includes(item.RedenId.toString()) ||
+                                           item.Reden && vacationReasonTitles.some(title => 
+                                               item.Reden.toLowerCase().includes(title.toLowerCase())
+                                           );
+                    const matchesFilters = isNewStatus && isVacationReason;
+                    
+                    console.log(`   ${index + 1}. ID: ${item.ID}`, {
+                        Medewerker: item.Medewerker,
+                        Status: item.Status,
+                        Reden: item.Reden,
+                        RedenId: item.RedenId,
+                        StartDatum: item.StartDatum,
+                        EindDatum: item.EindDatum,
+                        isNewStatus,
+                        isVacationReason,
+                        matchesFilters: matchesFilters ? '✅ COUNTED' : '❌ EXCLUDED'
+                    });
+                });
+            }
+            
             // Count pending requests (Status = 'Nieuw') for vacation reasons only
-            const pendingVacationCount = verlofItems.filter(item => {
+            const pendingVacationItems = verlofItems.filter(item => {
                 const isNewStatus = item.Status === 'Nieuw';
                 const isVacationReason = item.RedenId && vacationReasonIds.includes(item.RedenId.toString()) ||
                                        item.Reden && vacationReasonTitles.some(title => 
@@ -472,9 +511,25 @@ if (typeof window.appConfiguratie === "undefined") {
                                        );
                 
                 return isNewStatus && isVacationReason;
-            }).length;
+            });
             
-            console.log(`Found ${pendingVacationCount} pending vacation requests`);
+            const pendingVacationCount = pendingVacationItems.length;
+            
+            if (isDebugUser) {
+                console.log('🎯 FINAL RESULTS:');
+                console.log(`   Total pending vacation requests: ${pendingVacationCount}`);
+                console.log('   Counted items:', pendingVacationItems.map(item => ({
+                    ID: item.ID,
+                    Medewerker: item.Medewerker,
+                    Status: item.Status,
+                    Reden: item.Reden,
+                    StartDatum: item.StartDatum,
+                    EindDatum: item.EindDatum
+                })));
+            } else {
+                console.log(`Found ${pendingVacationCount} pending vacation requests`);
+            }
+            
             return pendingVacationCount;
             
         } catch (error) {

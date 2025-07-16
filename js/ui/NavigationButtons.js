@@ -42,14 +42,25 @@ const NavigationButtons = ({ userPermissions, currentUser }) => {
         }
     }, [currentUser]);
 
-    // Load pending vacation count for taakbeheer users
+    // Load pending vacation count for taakbeheer users and debug user (org\busselw)
     useEffect(() => {
         const loadVacationCount = async () => {
-            if (userPermissions.isTaakbeheer && window.SharePointService?.countPendingVacationRequests) {
+            // Check if user is debug user (org\busselw)
+            const isDebugUser = currentUser && (
+                currentUser.LoginName?.toLowerCase().includes('busselw') ||
+                currentUser.Email?.toLowerCase().includes('busselw')
+            );
+            
+            if ((userPermissions.isTaakbeheer || isDebugUser) && window.SharePointService?.countPendingVacationRequests) {
                 try {
                     setCountLoading(true);
                     const count = await window.SharePointService.countPendingVacationRequests();
                     setPendingVacationCount(count);
+                    
+                    if (isDebugUser) {
+                        console.log('🔍 DEBUG: Vacation count loaded for org\\busselw:', count);
+                        console.log('🔍 DEBUG: Check browser console for detailed analysis of all counted items');
+                    }
                 } catch (error) {
                     console.error('Error loading vacation count:', error);
                     setPendingVacationCount(0);
@@ -61,10 +72,10 @@ const NavigationButtons = ({ userPermissions, currentUser }) => {
             }
         };
 
-        if (!userPermissions.loading) {
+        if (!userPermissions.loading && currentUser) {
             loadVacationCount();
         }
-    }, [userPermissions.isTaakbeheer, userPermissions.loading]);
+    }, [userPermissions.isTaakbeheer, userPermissions.loading, currentUser]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -107,29 +118,37 @@ const NavigationButtons = ({ userPermissions, currentUser }) => {
                 h('i', { className: 'fas fa-tools' }),
                 'Beheer'
             ),
-            userPermissions.isTaakbeheer && h('button', {
-                className: 'btn btn-taakbeheer',
-                onClick: () => navigateTo('pages/behandelCentrum/behandelCentrumN.aspx'),
-                title: `Behandel Centrum${pendingVacationCount > 0 ? ` - ${pendingVacationCount} lopende verlofaanvragen` : ''}`
-            },
-                h('i', { className: 'fas fa-tasks' }),
-                'Behandelen',
-                pendingVacationCount > 0 && !countLoading && h('span', {
-                    className: 'btn-badge',
-                    style: {
-                        marginLeft: '8px',
-                        backgroundColor: '#ff4444',
-                        color: 'white',
-                        borderRadius: '12px',
-                        padding: '2px 8px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        minWidth: '20px',
-                        textAlign: 'center',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }
-                }, pendingVacationCount)
-            ),
+            (() => {
+                // Check if user is debug user (org\busselw)
+                const isDebugUser = currentUser && (
+                    currentUser.LoginName?.toLowerCase().includes('busselw') ||
+                    currentUser.Email?.toLowerCase().includes('busselw')
+                );
+                
+                return (userPermissions.isTaakbeheer || isDebugUser) && h('button', {
+                    className: 'btn btn-taakbeheer',
+                    onClick: () => navigateTo('pages/behandelCentrum/behandelCentrumN.aspx'),
+                    title: `Behandel Centrum${pendingVacationCount > 0 ? ` - ${pendingVacationCount} lopende verlofaanvragen` : ''}${isDebugUser ? ' (DEBUG MODE)' : ''}`
+                },
+                    h('i', { className: 'fas fa-tasks' }),
+                    isDebugUser ? 'Debug Behandelen' : 'Behandelen',
+                    pendingVacationCount > 0 && !countLoading && h('span', {
+                        className: 'btn-badge',
+                        style: {
+                            marginLeft: '8px',
+                            backgroundColor: isDebugUser ? '#ff8800' : '#ff4444',
+                            color: 'white',
+                            borderRadius: '12px',
+                            padding: '2px 8px',
+                            fontSize: '0.75rem',
+                            fontWeight: '600',
+                            minWidth: '20px',
+                            textAlign: 'center',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }
+                    }, pendingVacationCount)
+                );
+            })(),
             h('div', { className: 'help-dropdown' },
                 h('button', {
                     className: 'btn btn-help',
