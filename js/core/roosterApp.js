@@ -40,6 +40,7 @@ import RoosterHeader from '../ui/RoosterHeader.js';
 import RoosterGrid from '../ui/RoosterGrid.js';
 import TooltipManager from '../ui/tooltipbar.js';
 import Mededelingen from '../ui/Mededelingen.js';
+import NavigationButtons from '../ui/NavigationButtons.js';
 
 const { useState, useEffect, useMemo, useCallback, createElement: h, Fragment } = React;
 
@@ -1799,6 +1800,12 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
         );
     }
 
+    // Navigation function with proper base URL handling
+    const navigateTo = (page) => {
+        const baseUrl = linkInfo.getBaseUrl();
+        window.location.href = `${baseUrl}/${page}`;
+    };
+
     // Render de roosterkop en de medewerkerrijen
     return h('div', { className: 'app-container' },
         // Subtle background refresh indicator
@@ -1841,7 +1848,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                     h('div', { className: 'header-left' },
                         h('button', {
                             className: 'btn btn-melding',
-                            onClick: () => window.location.href = 'pages/meldingMaken.aspx',
+                            onClick: () => navigateTo('pages/meldingMaken.aspx'),
                             title: 'Melding Maken'
                         },
                             h('i', { className: 'fas fa-exclamation-triangle' }),
@@ -1855,7 +1862,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                         h('div', { className: 'nav-buttons-right' },
                             permissions && !permissions.loading && permissions.isAdmin && h('button', {
                                 className: 'btn btn-admin',
-                                onClick: () => window.location.href = 'pages/adminCentrum/adminCentrumN.aspx',
+                                onClick: () => navigateTo('pages/adminCentrum/adminCentrumN.aspx'),
                                 title: 'Administratie Centrum'
                             },
                                 h('i', { className: 'fas fa-cog' }),
@@ -1864,7 +1871,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             
                             permissions && !permissions.loading && permissions.isFunctional && h('button', {
                                 className: 'btn btn-functional',
-                                onClick: () => window.location.href = 'pages/beheerCentrum/beheerCentrumN.aspx',
+                                onClick: () => navigateTo('pages/beheerCentrum/beheerCentrumN.aspx'),
                                 title: 'Beheer Centrum'
                             },
                                 h('i', { className: 'fas fa-tools' }),
@@ -1873,7 +1880,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             
                             permissions && !permissions.loading && permissions.isTaakbeheer && h('button', {
                                 className: 'btn btn-taakbeheer',
-                                onClick: () => window.location.href = 'pages/behandelCentrum/behandelCentrumN.aspx',
+                                onClick: () => navigateTo('pages/behandelCentrum/behandelCentrumN.aspx'),
                                 title: 'Behandel Centrum'
                             },
                                 h('i', { className: 'fas fa-clipboard-check' }),
@@ -1948,10 +1955,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                     h('div', { className: 'dropdown-item-group' },
                                         h('button', {
                                             className: 'dropdown-item',
-                                            onClick: () => {
-                                                const baseUrl = linkInfo.getBaseUrl();
-                                                window.location.href = `${baseUrl}/pages/instellingenCentrum/instellingenCentrumN.aspx`;
-                                            }
+                                            onClick: () => navigateTo('pages/instellingenCentrum/instellingenCentrumN.aspx')
                                         },
                                             h('i', { className: 'fas fa-user-edit' }),
                                             h('div', { className: 'dropdown-item-content' },
