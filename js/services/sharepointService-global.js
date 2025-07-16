@@ -510,10 +510,30 @@ if (typeof window.appConfiguratie === "undefined") {
                                            item.Reden.toLowerCase().includes(title.toLowerCase())
                                        );
                 
+                // For debugging - let's see all Status === 'Nieuw' items first
+                if (isDebugUser && isNewStatus) {
+                    console.log(`🔍 Found Nieuw status item:`, {
+                        ID: item.ID,
+                        Medewerker: item.Medewerker,
+                        Status: item.Status,
+                        Reden: item.Reden,
+                        RedenId: item.RedenId,
+                        isVacationReason
+                    });
+                }
+                
                 return isNewStatus && isVacationReason;
             });
             
-            const pendingVacationCount = pendingVacationItems.length;
+            // Also count ALL 'Nieuw' items for comparison
+            const allNewItems = verlofItems.filter(item => item.Status === 'Nieuw');
+            
+            if (isDebugUser) {
+                console.log(`🔍 COMPARISON: All 'Nieuw' items: ${allNewItems.length}, Vacation 'Nieuw' items: ${pendingVacationItems.length}`);
+            }
+            
+            // Temporarily use all 'Nieuw' items to see if badge shows up
+            const pendingVacationCount = isDebugUser ? allNewItems.length : pendingVacationItems.length;
             
             if (isDebugUser) {
                 console.log('🎯 FINAL RESULTS:');

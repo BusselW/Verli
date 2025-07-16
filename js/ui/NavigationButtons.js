@@ -1,5 +1,6 @@
 // NavigationButtons component for the application header
 import { getProfilePhotoUrl } from '../utils/userUtils.js';
+import { getBaseUrl } from '../services/linkInfo.js';
 
 const { useState, useEffect, createElement: h } = React;
 
@@ -92,7 +93,7 @@ const NavigationButtons = ({ userPermissions, currentUser }) => {
     }, [settingsDropdownOpen, helpDropdownOpen]);
 
     const navigateTo = (page) => {
-        const baseUrl = "https://som.org.om.local/sites/verlofrooster";
+        const baseUrl = getBaseUrl();
         window.location.href = `${baseUrl}/${page}`;
     };
 
