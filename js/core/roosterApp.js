@@ -364,7 +364,12 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             }
 
             console.log('✅ Data fetched successfully, processing...');
-            const teamsMapped = (teamsData || []).map(item => ({ id: item.Title || item.ID?.toString(), naam: item.Naam || item.Title, kleur: item.Kleur || '#cccccc' }));
+            const teamsMapped = (teamsData || []).map(item => ({ 
+                id: item.Title || item.ID?.toString(), 
+                naam: item.Naam || item.Title, 
+                Naam: item.Naam || item.Title, // Add both versions for compatibility
+                kleur: item.Kleur || '#cccccc' 
+            }));
             console.log(`👥 Loaded ${teamsMapped.length} teams:`, teamsMapped.map(t => `${t.naam} (${t.id})`));
             setTeams(teamsMapped);
             const teamNameToIdMap = teamsMapped.reduce((acc, t) => { acc[t.naam] = t.id; return acc; }, {});
@@ -534,7 +539,12 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             }
 
             console.log('✅ Silent data refresh complete, updating state...');
-            const teamsMapped = (teamsData || []).map(item => ({ id: item.Title || item.ID?.toString(), naam: item.Naam || item.Title, kleur: item.Kleur || '#cccccc' }));
+            const teamsMapped = (teamsData || []).map(item => ({ 
+                id: item.Title || item.ID?.toString(), 
+                naam: item.Naam || item.Title, 
+                Naam: item.Naam || item.Title, // Add both versions for compatibility
+                kleur: item.Kleur || '#cccccc' 
+            }));
             setTeams(teamsMapped);
             const teamNameToIdMap = teamsMapped.reduce((acc, t) => { acc[t.naam] = t.id; return acc; }, {});
             const transformedShiftTypes = (verlofredenenData || []).reduce((acc, item) => {

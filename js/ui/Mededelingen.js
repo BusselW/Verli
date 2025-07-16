@@ -23,6 +23,15 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
     const [canManageAnnouncements, setCanManageAnnouncements] = useState(false);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState(null);
+    
+    // Debug logging for teams
+    useEffect(() => {
+        console.log('📝 Mededelingen: Teams received:', teams);
+        console.log('📝 Mededelingen: Teams count:', teams.length);
+        if (teams.length > 0) {
+            console.log('📝 Mededelingen: Sample team:', teams[0]);
+        }
+    }, [teams]);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -245,12 +254,29 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
     };
 
     const handleTeamToggle = (teamName) => {
-        setFormData(prev => ({
-            ...prev,
-            targetTeams: prev.targetTeams.includes(teamName)
-                ? prev.targetTeams.filter(t => t !== teamName)
-                : [...prev.targetTeams, teamName]
-        }));
+        setFormData(prev => {
+            let newTargetTeams;
+            
+            if (teamName === 'Alle teams') {
+                // If "Alle teams" is selected, clear all other selections
+                newTargetTeams = prev.targetTeams.includes('Alle teams') 
+                    ? [] 
+                    : ['Alle teams'];
+            } else {
+                // If a specific team is selected, remove "Alle teams" and toggle the team
+                const withoutAlleTeams = prev.targetTeams.filter(t => t !== 'Alle teams');
+                newTargetTeams = withoutAlleTeams.includes(teamName)
+                    ? withoutAlleTeams.filter(t => t !== teamName)
+                    : [...withoutAlleTeams, teamName];
+            }
+            
+            console.log('📝 Team toggle:', teamName, 'New selection:', newTargetTeams);
+            
+            return {
+                ...prev,
+                targetTeams: newTargetTeams
+            };
+        });
     };
 
     const formatDate = (dateString) => {
@@ -331,9 +357,9 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
                 h('div', { className: 'form-group' },
                     h('label', null, 'Doelgroep teams:'),
                     h('div', { className: 'team-checkboxes' },
-                        teams.map(team => 
+                        teams.length > 0 ? teams.map(team => 
                             h('label', { 
-                                key: team.Id || team.Naam,
+                                key: team.Id || team.ID || team.Naam,
                                 className: 'team-checkbox'
                             },
                                 h('input', {
@@ -343,7 +369,7 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
                                 }),
                                 h('span', null, team.Naam)
                             )
-                        ),
+                        ) : h('div', { style: { color: '#666', fontSize: '0.9em' } }, 'Geen teams beschikbaar...'),
                         h('label', { className: 'team-checkbox' },
                             h('input', {
                                 type: 'checkbox',
@@ -416,9 +442,9 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
                 h('div', { className: 'form-group' },
                     h('label', null, 'Doelgroep:'),
                     h('div', { className: 'team-checkboxes' },
-                        teams.map(team => 
+                        teams.length > 0 ? teams.map(team => 
                             h('label', { 
-                                key: team.ID, 
+                                key: team.Id || team.ID || team.Naam,
                                 className: 'team-checkbox'
                             },
                                 h('input', {
@@ -428,7 +454,7 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
                                 }),
                                 h('span', null, team.Naam)
                             )
-                        ),
+                        ) : h('div', { style: { color: '#666', fontSize: '0.9em' } }, 'Geen teams beschikbaar...'),
                         h('label', { className: 'team-checkbox' },
                             h('input', {
                                 type: 'checkbox',
@@ -477,7 +503,10 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
                             ),
                             announcement.UitzendenAan && h('span', { className: 'announcement-audience' },
                                 h('i', { className: 'fas fa-users' }),
-                                ` Voor: ${announcement.UitzendenAan}`
+                                ' Voor: ',
+                                h('span', { 
+                                    dangerouslySetInnerHTML: { __html: announcement.UitzendenAan } 
+                                })
                             )
                         )
                     ),
