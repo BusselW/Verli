@@ -439,6 +439,50 @@ if (typeof window.appConfiguratie === "undefined") {
         return null;
     }
 
+    /**
+     * Counts pending vacation requests ('Verlof/vakantie') with status 'Nieuw'
+     * Excludes 'Ziekte' requests as specified
+     * @returns {Promise<number>} Number of pending vacation requests
+     */
+    async function countPendingVacationRequests() {
+        try {
+            // Get both Verlof items and Verlofredenen to determine vacation vs sick leave
+            const verlofItems = await fetchSharePointList('Verlof');
+            const verlofredenen = await fetchSharePointList('Verlofredenen');
+            
+            if (!verlofItems || !verlofredenen) {
+                console.warn('Could not fetch required lists for vacation count');
+                return 0;
+            }
+            
+            // Find vacation-related reasons (exclude 'Ziekte')
+            const vacationReasons = verlofredenen.filter(reason => 
+                reason.Titel && !reason.Titel.toLowerCase().includes('ziekte')
+            );
+            
+            const vacationReasonIds = vacationReasons.map(reason => reason.ID?.toString());
+            const vacationReasonTitles = vacationReasons.map(reason => reason.Titel);
+            
+            // Count pending requests (Status = 'Nieuw') for vacation reasons only
+            const pendingVacationCount = verlofItems.filter(item => {
+                const isNewStatus = item.Status === 'Nieuw';
+                const isVacationReason = item.RedenId && vacationReasonIds.includes(item.RedenId.toString()) ||
+                                       item.Reden && vacationReasonTitles.some(title => 
+                                           item.Reden.toLowerCase().includes(title.toLowerCase())
+                                       );
+                
+                return isNewStatus && isVacationReason;
+            }).length;
+            
+            console.log(`Found ${pendingVacationCount} pending vacation requests`);
+            return pendingVacationCount;
+            
+        } catch (error) {
+            console.error('Error counting pending vacation requests:', error);
+            return 0;
+        }
+    }
+
     // Expose functions to global scope
     window.SharePointService = {
         fetchSharePointList,
@@ -447,6 +491,7 @@ if (typeof window.appConfiguratie === "undefined") {
         updateListItem,
         updateListItemSimple,
         getEntityTypeName,
-        getEntityTypeFromExistingItem
+        getEntityTypeFromExistingItem,
+        countPendingVacationRequests
     };
 })();

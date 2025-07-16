@@ -6,6 +6,8 @@ const { useState, useEffect, createElement: h } = React;
 const NavigationButtons = ({ userPermissions, currentUser }) => {
     const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
     const [helpDropdownOpen, setHelpDropdownOpen] = useState(false);
+    const [pendingVacationCount, setPendingVacationCount] = useState(0);
+    const [countLoading, setCountLoading] = useState(true);
     const [userInfo, setUserInfo] = useState({
         naam: '',
         pictureUrl: '',
@@ -39,6 +41,30 @@ const NavigationButtons = ({ userPermissions, currentUser }) => {
             }
         }
     }, [currentUser]);
+
+    // Load pending vacation count for taakbeheer users
+    useEffect(() => {
+        const loadVacationCount = async () => {
+            if (userPermissions.isTaakbeheer && window.SharePointService?.countPendingVacationRequests) {
+                try {
+                    setCountLoading(true);
+                    const count = await window.SharePointService.countPendingVacationRequests();
+                    setPendingVacationCount(count);
+                } catch (error) {
+                    console.error('Error loading vacation count:', error);
+                    setPendingVacationCount(0);
+                } finally {
+                    setCountLoading(false);
+                }
+            } else {
+                setCountLoading(false);
+            }
+        };
+
+        if (!userPermissions.loading) {
+            loadVacationCount();
+        }
+    }, [userPermissions.isTaakbeheer, userPermissions.loading]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -84,10 +110,25 @@ const NavigationButtons = ({ userPermissions, currentUser }) => {
             userPermissions.isTaakbeheer && h('button', {
                 className: 'btn btn-taakbeheer',
                 onClick: () => navigateTo('pages/behandelCentrum/behandelCentrumN.aspx'),
-                title: 'Behandel Centrum'
+                title: `Behandel Centrum${pendingVacationCount > 0 ? ` - ${pendingVacationCount} lopende verlofaanvragen` : ''}`
             },
                 h('i', { className: 'fas fa-tasks' }),
-                'Behandelen'
+                'Behandelen',
+                pendingVacationCount > 0 && !countLoading && h('span', {
+                    className: 'btn-badge',
+                    style: {
+                        marginLeft: '8px',
+                        backgroundColor: '#ff4444',
+                        color: 'white',
+                        borderRadius: '12px',
+                        padding: '2px 8px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        minWidth: '20px',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }
+                }, pendingVacationCount)
             ),
             h('div', { className: 'help-dropdown' },
                 h('button', {
