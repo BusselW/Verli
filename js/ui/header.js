@@ -1,5 +1,6 @@
 // Header.js - Navigation header with admin buttons and user menu
 import { getProfilePhotoUrl } from '../utils/userUtils.js';
+import { getBaseUrl } from '../services/linkInfo.js';
 
 const { useState, useEffect, createElement: h } = React;
 
@@ -61,7 +62,7 @@ const Header = ({ userPermissions, currentUser }) => {
     }, [userDropdownOpen]);
 
     const navigateTo = (page) => {
-        const baseUrl = "https://som.org.om.local/sites/MulderT/customPW/Verlof/CPW/Rooster";
+        const baseUrl = getBaseUrl();
         window.location.href = `${baseUrl}/${page}`;
     };
 

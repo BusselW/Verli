@@ -1949,7 +1949,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                         h('button', {
                                             className: 'dropdown-item',
                                             onClick: () => {
-                                                const baseUrl = "https://som.org.om.local/sites/verlofrooster";
+                                                const baseUrl = linkInfo.getBaseUrl();
                                                 window.location.href = `${baseUrl}/pages/instellingenCentrum/instellingenCentrumN.aspx`;
                                             }
                                         },
