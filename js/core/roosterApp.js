@@ -41,7 +41,7 @@ import RoosterGrid from '../ui/RoosterGrid.js';
 import TooltipManager from '../ui/tooltipbar.js';
 import Mededelingen, { CreateAnnouncementButton } from '../ui/Mededelingen.js';
 import NavigationButtons from '../ui/NavigationButtons.js';
-import { roosterTutorial } from '../tutorial/roosterTutorial.js';
+import { roosterTutorial } from '../tutorial/roosterTutorialOrange.js';
 import { openHandleiding } from '../tutorial/roosterHandleiding.js';
 
 const { useState, useEffect, useMemo, useCallback, createElement: h, Fragment } = React;
