@@ -1064,6 +1064,163 @@
     }
 }
 
+/* ==============================
+   HANDLEIDING DEMO COMPONENTS
+   ============================== */
+
+/* Demo component container */
+.demo-component {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+}
+
+/* FAB Demo Styling */
+.fab-demo {
+    position: relative;
+    width: 200px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.fab-container-demo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.fab-main-demo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: not-allowed;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+}
+
+.fab-menu-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    opacity: 0.9;
+}
+
+.fab-item-demo {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #495057;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Context Menu Demo Styling */
+.contextmenu-demo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 150px;
+}
+
+.contextmenu-container {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    min-width: 180px;
+    opacity: 0.9;
+}
+
+.contextmenu-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.contextmenu-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #495057;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: default;
+    pointer-events: none;
+    transition: background-color 0.2s ease;
+}
+
+.contextmenu-item:last-child {
+    border-bottom: none;
+}
+
+.contextmenu-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Mobile responsiveness for demo components */
+@media (max-width: 768px) {
+    .demo-component {
+        padding: 15px;
+        margin: 10px 0;
+    }
+    
+    .fab-demo {
+        width: 150px;
+        height: 120px;
+    }
+    
+    .fab-main-demo {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    
+    .fab-item-demo {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    
+    .contextmenu-demo {
+        width: 150px;
+        height: 120px;
+    }
+    
+    .contextmenu-container {
+        min-width: 140px;
+    }
+    
+    .contextmenu-header,
+    .contextmenu-item {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
 /* Help dropdown arrow animation */
 .btn-help i:last-child {
     transition: transform 0.2s ease;
