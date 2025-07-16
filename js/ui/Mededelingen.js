@@ -15,10 +15,11 @@ const { createElement: h, useState, useEffect, useRef } = React;
  * Mededelingen Component
  * @param {Object} props - Component props
  * @param {Array} props.teams - Available teams for targeting announcements
+ * @param {boolean} props.showCreateForm - External control for create form visibility
+ * @param {Function} props.onCreateFormToggle - Callback when create form should be toggled
  */
-const Mededelingen = ({ teams = [] }) => {
+const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }) => {
     const [announcements, setAnnouncements] = useState([]);
-    const [showCreateForm, setShowCreateForm] = useState(false);
     const [canManageAnnouncements, setCanManageAnnouncements] = useState(false);
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState(null);
@@ -131,7 +132,7 @@ const Mededelingen = ({ teams = [] }) => {
                 endDate: '',
                 targetTeams: []
             });
-            setShowCreateForm(false);
+            if (onCreateFormToggle) onCreateFormToggle(false);
             
             await loadAnnouncements();
             
@@ -160,7 +161,7 @@ const Mededelingen = ({ teams = [] }) => {
                 announcement.UitzendenAan.split(';').map(team => team.trim()) : []
         });
         setShowEditForm(true);
-        setShowCreateForm(false);
+        if (onCreateFormToggle) onCreateFormToggle(false);
     };
 
     const handleUpdateAnnouncement = async (e) => {
@@ -268,25 +269,17 @@ const Mededelingen = ({ teams = [] }) => {
         );
     }
 
-    // Don't render if no announcements and user can't manage them
-    if (announcements.length === 0 && !canManageAnnouncements) {
+    // Hide the mededelingen-container completely until we have an active broadcast or creating one
+    if (announcements.length === 0 && !showCreateForm) {
         return null;
     }
 
     return h('div', { className: 'mededelingen-container' },
-        // Header with title and create button
+        // Header with title only (button moved to main header)
         h('div', { className: 'mededelingen-header' },
             h('h3', { className: 'mededelingen-title' },
                 h('i', { className: 'fas fa-bullhorn' }),
                 ' Mededelingen'
-            ),
-            canManageAnnouncements && h('button', {
-                className: 'btn-create-announcement',
-                onClick: () => setShowCreateForm(!showCreateForm),
-                title: 'Nieuwe mededeling aanmaken'
-            },
-                h('i', { className: 'fas fa-plus' }),
-                ' Nieuwe mededeling'
             )
         ),
 
@@ -365,7 +358,7 @@ const Mededelingen = ({ teams = [] }) => {
                     h('button', {
                         type: 'button',
                         className: 'btn-cancel',
-                        onClick: () => setShowCreateForm(false)
+                        onClick: () => onCreateFormToggle && onCreateFormToggle(false)
                     }, 'Annuleren'),
                     h('button', {
                         type: 'submit',
@@ -508,6 +501,25 @@ const Mededelingen = ({ teams = [] }) => {
                 )
             )
         )
+    );
+};
+
+/**
+ * Create Announcement Button Component
+ * @param {Object} props - Component props
+ * @param {Function} props.onCreateClick - Callback when create button is clicked
+ * @param {boolean} props.canManage - Whether user can manage announcements
+ */
+export const CreateAnnouncementButton = ({ onCreateClick, canManage }) => {
+    if (!canManage) return null;
+    
+    return h('button', {
+        className: 'btn-create-announcement',
+        onClick: onCreateClick,
+        title: 'Nieuwe mededeling aanmaken'
+    },
+        h('i', { className: 'fas fa-plus' }),
+        ' Nieuwe mededeling'
     );
 };
 

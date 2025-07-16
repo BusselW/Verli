@@ -39,8 +39,10 @@ import Legenda from '../ui/Legenda.js';
 import RoosterHeader from '../ui/RoosterHeader.js';
 import RoosterGrid from '../ui/RoosterGrid.js';
 import TooltipManager from '../ui/tooltipbar.js';
-import Mededelingen from '../ui/Mededelingen.js';
+import Mededelingen, { CreateAnnouncementButton } from '../ui/Mededelingen.js';
 import NavigationButtons from '../ui/NavigationButtons.js';
+import { roosterTutorial } from '../tutorial/roosterTutorial.js';
+import { openHandleiding } from '../tutorial/roosterHandleiding.js';
 
 const { useState, useEffect, useMemo, useCallback, createElement: h, Fragment } = React;
 
@@ -168,6 +170,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
     // Header dropdown states
     const [helpDropdownOpen, setHelpDropdownOpen] = useState(false);
     const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
+    
+    // Announcement create form state
+    const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
     
     // Permission states for proper SharePoint group checking
     const [permissions, setPermissions] = useState({
@@ -1531,13 +1536,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
     // Expose tutorial functions globally
     useEffect(() => {
         window.startTutorial = () => {
-            if (typeof roosterTutorial !== 'undefined' && roosterTutorial.start) {
+            if (roosterTutorial && roosterTutorial.start) {
                 roosterTutorial.start();
             }
         };
 
         window.openHandleiding = (section = 'algemeen') => {
-            if (typeof openHandleiding === 'function') {
+            if (openHandleiding) {
                 openHandleiding(section);
             }
         };
@@ -1860,7 +1865,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
         h('div', { className: 'sticky-header-container' },
             h('header', { id: 'header', className: 'header' },
                 h('div', { className: 'header-content' },
-                    // Left side - Melding button and title
+                    // Left side - Melding button, title, and announcement button
                     h('div', { className: 'header-left' },
                         h('button', {
                             className: 'btn btn-melding',
@@ -1870,7 +1875,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             h('i', { className: 'fas fa-exclamation-triangle' }),
                             'Melding'
                         ),
-                        h('h1', null, 'Verlofrooster')
+                        h('h1', null, 'Verlofrooster'),
+                        h(CreateAnnouncementButton, {
+                            onCreateClick: () => setShowAnnouncementForm(!showAnnouncementForm),
+                            canManage: permissions.isAdmin || permissions.isFunctional
+                        })
                     ),
                     
                     // Right side - Admin buttons and dropdowns
@@ -2002,7 +2011,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                     teams
                 }),
                 h(Mededelingen, {
-                    teams
+                    teams,
+                    showCreateForm: showAnnouncementForm,
+                    onCreateFormToggle: setShowAnnouncementForm
                 }),
                 h(Legenda, {
                     shiftTypes,
