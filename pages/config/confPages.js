@@ -66,7 +66,7 @@ export const AccessDenied = () => {
  * Default navigation function to go back to main application
  */
 export const navigateBack = () => {
-    window.location.href = '../../verlofRooster.aspx';
+    window.location.href = '../../CPW/Rooster/Verlofrooster.aspx';
 };
 
 console.log('Admin page configuration loaded successfully.');

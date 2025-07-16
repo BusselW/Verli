@@ -34,7 +34,7 @@
                 
                 <div class="navigation-buttons">
                     <div class="nav-buttons-right">
-                        <a href="../../verlofRooster.aspx" class="btn btn-functional">
+                        <a href="../../CPW/Rooster/Verlofrooster.aspx" class="btn btn-functional">
                             <i class="fas fa-arrow-left"></i>
                             <span>Terug naar rooster</span>
                         </a>

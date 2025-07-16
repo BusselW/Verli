@@ -283,7 +283,7 @@
                     
                     // Immediately redirect to the main app instead of showing completion screen
                     console.log('Registration completed, redirecting to main app...');
-                    window.location.href = '../../verlofRooster.aspx';
+                    window.location.href = '../../CPW/Rooster/Verlofrooster.aspx';
                     
                 } catch (error) {
                     console.error('Registration failed:', error);
@@ -353,7 +353,7 @@
                                 document.body.appendChild(successDiv);
                                 
                                 setTimeout(() => {
-                                    window.location.href = '../../verlofRooster.aspx';
+                                    window.location.href = '../../CPW/Rooster/Verlofrooster.aspx';
                                 }, 1500);
                             }
                         }
