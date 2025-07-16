@@ -2022,6 +2022,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                 }),
                 h(Mededelingen, {
                     teams,
+                    medewerkers,
                     showCreateForm: showAnnouncementForm,
                     onCreateFormToggle: setShowAnnouncementForm
                 }),

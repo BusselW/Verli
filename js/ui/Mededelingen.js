@@ -15,10 +15,11 @@ const { createElement: h, useState, useEffect, useRef } = React;
  * Mededelingen Component
  * @param {Object} props - Component props
  * @param {Array} props.teams - Available teams for targeting announcements
+ * @param {Array} props.medewerkers - Medewerkers data from main app
  * @param {boolean} props.showCreateForm - External control for create form visibility
  * @param {Function} props.onCreateFormToggle - Callback when create form should be toggled
  */
-const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }) => {
+const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, onCreateFormToggle }) => {
     const [announcements, setAnnouncements] = useState([]);
     const [canManageAnnouncements, setCanManageAnnouncements] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -49,6 +50,13 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
     useEffect(() => {
         initializeComponent();
     }, []);
+
+    // Reload announcements when medewerkers data changes
+    useEffect(() => {
+        if (currentUser && medewerkers.length > 0) {
+            loadAnnouncements();
+        }
+    }, [medewerkers, currentUser]);
 
     const initializeComponent = async () => {
         try {
@@ -88,13 +96,12 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
         try {
             const allAnnouncements = await fetchSharePointList('Mededeling');
             
-            // Get current user's team from Medewerkers list
+            // Get current user's team from passed Medewerkers data
             let userTeam = null;
             const userToCheck = user || currentUser;
             
-            if (userToCheck && userToCheck.LoginName) {
+            if (userToCheck && userToCheck.LoginName && medewerkers.length > 0) {
                 try {
-                    const medewerkers = await fetchSharePointList('Medewerkers');
                     const sanitizedLoginName = getFullLoginName(userToCheck.LoginName);
                     
                     console.log('📝 Original LoginName:', userToCheck.LoginName);
