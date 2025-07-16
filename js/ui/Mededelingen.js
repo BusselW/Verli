@@ -70,6 +70,20 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
         }
     };
 
+    // Helper function to get full domain\username format from SharePoint LoginName
+    const getFullLoginName = (loginName) => {
+        if (!loginName) return '';
+        
+        // Remove claim prefix if present (i:0#.w|domain\username -> domain\username)
+        let processed = loginName;
+        if (processed.startsWith('i:0#.w|')) {
+            processed = processed.substring(7);
+        }
+        
+        // Return the full domain\username format
+        return processed;
+    };
+
     const loadAnnouncements = async (user = null) => {
         try {
             const allAnnouncements = await fetchSharePointList('Mededeling');
@@ -81,14 +95,20 @@ const Mededelingen = ({ teams = [], showCreateForm = false, onCreateFormToggle }
             if (userToCheck && userToCheck.LoginName) {
                 try {
                     const medewerkers = await fetchSharePointList('Medewerkers');
+                    const sanitizedLoginName = getFullLoginName(userToCheck.LoginName);
+                    
+                    console.log('📝 Original LoginName:', userToCheck.LoginName);
+                    console.log('📝 Sanitized LoginName:', sanitizedLoginName);
+                    
                     const userRecord = medewerkers.find(m => 
-                        m.Username && m.Username.toLowerCase() === userToCheck.LoginName.toLowerCase()
+                        m.Username && m.Username.toLowerCase() === sanitizedLoginName.toLowerCase()
                     );
                     if (userRecord && userRecord.Team) {
                         userTeam = userRecord.Team;
-                        console.log('📝 User team found:', userTeam, 'for user:', userToCheck.LoginName);
+                        console.log('📝 User team found:', userTeam, 'for user:', sanitizedLoginName);
                     } else {
-                        console.log('📝 No team found for user:', userToCheck.LoginName);
+                        console.log('📝 No team found for user:', sanitizedLoginName);
+                        console.log('📝 Available usernames in Medewerkers:', medewerkers.map(m => m.Username).filter(u => u));
                     }
                 } catch (teamError) {
                     console.warn('Could not fetch user team:', teamError);
