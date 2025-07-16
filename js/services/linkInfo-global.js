@@ -345,8 +345,8 @@
     function getVerlofRoosterUrl() {
         const baseUrl = getBaseUrl();
         
-        // The verlofRooster page is located at: baseUrl/cpw/Rooster/Verlofrooster.aspx
-        return `${baseUrl}/cpw/Rooster/Verlofrooster.aspx`;
+        // The verlofRooster page is located at: baseUrl/CPW/Rooster/Verlofrooster.aspx
+        return `${baseUrl}/CPW/Rooster/Verlofrooster.aspx`;
     }
 
     /**
@@ -427,7 +427,7 @@
             getEmployeesInTeam: async () => [],
             invalidateCache: () => {},
             getBaseUrl: () => 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof',
-            getVerlofRoosterUrl: () => 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof/cpw/Rooster/Verlofrooster.aspx'
+            getVerlofRoosterUrl: () => 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof/CPW/Rooster/Verlofrooster.aspx'
         };
     }
 })();

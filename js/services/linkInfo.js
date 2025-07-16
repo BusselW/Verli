@@ -587,8 +587,8 @@ export function getBaseUrl() {
 export function getVerlofRoosterUrl() {
     const baseUrl = getBaseUrl();
     
-    // The verlofRooster page is located at: baseUrl/cpw/Rooster/Verlofrooster.aspx
-    return `${baseUrl}/cpw/Rooster/Verlofrooster.aspx`;
+    // The verlofRooster page is located at: baseUrl/CPW/Rooster/Verlofrooster.aspx
+    return `${baseUrl}/CPW/Rooster/Verlofrooster.aspx`;
 }
 
 export default {
