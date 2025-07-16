@@ -254,7 +254,7 @@
             if (btnTerugRooster) {
                 btnTerugRooster.addEventListener('click', function() {
                     // Use global linkInfo service to get verlofRooster URL
-                    const targetUrl = window.linkInfo ? window.linkInfo.getVerlofRoosterUrl() : '../../verlofRooster.aspx';
+                    const targetUrl = window.linkInfo ? window.linkInfo.getVerlofRoosterUrl() : '/sites/mulderT/CustomPW/Verlof/CPW/Rooster/Verlofrooster.aspx';
                     window.location.href = targetUrl;
                 });
             }
