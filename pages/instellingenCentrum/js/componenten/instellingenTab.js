@@ -138,7 +138,7 @@ export const SettingsTab = ({ user, data, isRegistration = false, onDataUpdate, 
                 }
             },
                 h('a', {
-                    href: '../../verlofRooster.aspx',
+                    href: '../../CPW/Rooster/Verlofrooster.aspx',
                     className: 'btn btn-secondary',
                     style: {
                         display: 'inline-flex',
