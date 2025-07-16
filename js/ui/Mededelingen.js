@@ -89,6 +89,22 @@ const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, on
         return processed;
     };
 
+    // Helper function to escape HTML but preserve newlines
+    const escapeHtmlWithNewlines = (text) => {
+        if (!text) return '';
+        
+        // First escape HTML entities
+        const escaped = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        
+        // Then convert newlines to <br> tags
+        return escaped.replace(/\n/g, '<br>');
+    };
+
     const loadAnnouncements = async (user = null) => {
         try {
             const allAnnouncements = await fetchSharePointList('Mededeling');
@@ -539,7 +555,7 @@ const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, on
                         h('h4', { className: 'announcement-title' }, announcement.Title),
                         h('div', { 
                             className: 'announcement-description',
-                            dangerouslySetInnerHTML: { __html: announcement.Aanvulling || '' }
+                            dangerouslySetInnerHTML: { __html: escapeHtmlWithNewlines(announcement.Aanvulling || '') }
                         }),
                         h('div', { className: 'announcement-meta' },
                             announcement.DatumTijdStart && h('span', { className: 'announcement-date' },
@@ -554,7 +570,7 @@ const Mededelingen = ({ teams = [], medewerkers = [], showCreateForm = false, on
                                 h('i', { className: 'fas fa-users' }),
                                 ' Voor: ',
                                 h('span', { 
-                                    dangerouslySetInnerHTML: { __html: announcement.UitzendenAan } 
+                                    dangerouslySetInnerHTML: { __html: escapeHtmlWithNewlines(announcement.UitzendenAan) } 
                                 })
                             )
                         )

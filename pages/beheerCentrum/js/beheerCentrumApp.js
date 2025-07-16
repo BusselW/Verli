@@ -3,6 +3,7 @@ import { getListItems, createListItem, updateListItem, deleteListItem } from './
 import { initializeSharePointContext } from './sharepointContext.js';
 import { Modal } from './ui/modal.js';
 import { getFormComponent } from './forms/index.js';
+import * as linkInfo from '../../../js/services/linkInfo.js';
 
 const { useState, useEffect, createElement: h, useCallback } = React;
 
@@ -36,7 +37,15 @@ const PageBanner = () => {
                 h('p', { className: 'banner-subtitle' }, 'Beheer medewerkers, teams, verlofredenen en andere kerngegevens')
             ),
             h('div', { className: 'banner-right' },
-                h('a', { href: '../../verlofRooster.aspx', className: 'btn-back' },
+                h('button', { 
+                    onClick: () => {
+                        const baseUrl = linkInfo.getBaseUrl();
+                        const targetUrl = baseUrl ? `${baseUrl}/verlofRooster.aspx` : '../../verlofRooster.aspx';
+                        window.location.href = targetUrl;
+                    },
+                    className: 'btn-back',
+                    style: { border: 'none', cursor: 'pointer' }
+                },
                     h('svg', { className: 'icon-small', fill: 'currentColor', viewBox: '0 0 20 20', width: '16', height: '16' },
                         h('path', { 'fillRule': 'evenodd', d: 'M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z', 'clipRule': 'evenodd' })
                     ),

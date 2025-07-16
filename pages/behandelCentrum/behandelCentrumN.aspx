@@ -34,10 +34,10 @@
                 
                 <div class="navigation-buttons">
                     <div class="nav-buttons-right">
-                        <a href="../../verlofRooster.aspx" class="btn btn-functional">
+                        <button id="btn-terug-rooster" class="btn btn-functional">
                             <i class="fas fa-arrow-left"></i>
                             <span>Terug naar rooster</span>
-                        </a>
+                        </button>
                         <div class="user-info">
                             <span class="user-name" id="huidige-gebruiker">Gebruiker wordt geladen...</span>
                         </div>
@@ -69,6 +69,19 @@
     <script>
         // Declare h as global variable for React
         const h = React.createElement;
+        
+        // Setup navigation for "Terug naar rooster" button
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnTerugRooster = document.getElementById('btn-terug-rooster');
+            if (btnTerugRooster) {
+                btnTerugRooster.addEventListener('click', function() {
+                    // Use global linkInfo service to get base URL
+                    const baseUrl = window.linkInfo ? window.linkInfo.getBaseUrl() : '';
+                    const targetUrl = baseUrl ? `${baseUrl}/verlofRooster.aspx` : '../../verlofRooster.aspx';
+                    window.location.href = targetUrl;
+                });
+            }
+        });
     </script>
     
     <script src="../../js/config/configLijst.js"></script>

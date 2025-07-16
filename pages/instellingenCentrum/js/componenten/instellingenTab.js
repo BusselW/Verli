@@ -6,6 +6,7 @@
  */
 
 import { getSharePointListItems, createSharePointListItem, updateSharePointListItem } from '../../../../js/services/sharepointService.js';
+import * as linkInfo from '../../../../js/services/linkInfo.js';
 
 const { useState, useEffect, createElement: h } = React;
 
@@ -137,8 +138,12 @@ export const SettingsTab = ({ user, data, isRegistration = false, onDataUpdate, 
                     alignItems: 'center'
                 }
             },
-                h('a', {
-                    href: '../../verlofRooster.aspx',
+                h('button', {
+                    onClick: () => {
+                        const baseUrl = linkInfo.getBaseUrl();
+                        const targetUrl = baseUrl ? `${baseUrl}/verlofRooster.aspx` : '../../verlofRooster.aspx';
+                        window.location.href = targetUrl;
+                    },
                     className: 'btn btn-secondary',
                     style: {
                         display: 'inline-flex',
@@ -146,7 +151,9 @@ export const SettingsTab = ({ user, data, isRegistration = false, onDataUpdate, 
                         gap: '0.5rem',
                         textDecoration: 'none',
                         padding: '8px 16px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        border: 'none',
+                        cursor: 'pointer'
                     }
                 },
                     h('svg', {

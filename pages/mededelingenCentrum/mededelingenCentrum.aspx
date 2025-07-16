@@ -51,10 +51,10 @@
                             <span>Verversen</span>
                         </button>
                         
-                        <a href="../../verlofRooster.aspx" class="btn btn-functional">
+                        <button id="btn-terug-rooster" class="btn btn-functional">
                             <i class="fas fa-arrow-left"></i>
                             <span>Terug naar rooster</span>
-                        </a>
+                        </button>
                         
                         <div class="user-info">
                             <span class="user-name" id="huidige-gebruiker">Gebruiker wordt geladen...</span>
@@ -248,6 +248,17 @@
         // Set current year in footer
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('huidig-jaar').textContent = new Date().getFullYear();
+            
+            // Setup navigation for "Terug naar rooster" button
+            const btnTerugRooster = document.getElementById('btn-terug-rooster');
+            if (btnTerugRooster) {
+                btnTerugRooster.addEventListener('click', function() {
+                    // Use global linkInfo service to get base URL
+                    const baseUrl = window.linkInfo ? window.linkInfo.getBaseUrl() : '';
+                    const targetUrl = baseUrl ? `${baseUrl}/verlofRooster.aspx` : '../../verlofRooster.aspx';
+                    window.location.href = targetUrl;
+                });
+            }
         });
     </script>
     
