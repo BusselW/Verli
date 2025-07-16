@@ -1961,7 +1961,14 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                         h('button', {
                                             className: 'dropdown-item',
                                             onClick: () => {
-                                                const baseUrl = "https://som.org.om.local/sites/MulderT/customPW/Verlof/CPW/Rooster";
+                                                // Use consistent navigation with proper base URL
+                                                const getBaseUrl = () => {
+                                                    if (window.appConfiguratie?.instellingen?.siteUrl) {
+                                                        return window.appConfiguratie.instellingen.siteUrl.replace(/\/$/, '');
+                                                    }
+                                                    return 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof';
+                                                };
+                                                const baseUrl = getBaseUrl();
                                                 window.location.href = `${baseUrl}/pages/instellingenCentrum/instellingenCentrumN.aspx`;
                                             }
                                         },

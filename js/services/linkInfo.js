@@ -533,26 +533,51 @@ if (mySenior) {
  * @returns {string} The base URL for the application
  */
 export function getBaseUrl() {
-    // Get the base URL from SharePoint configuration
+    let baseUrl = null;
+    let source = 'unknown';
+    
+    // Method 1: Get the base URL from SharePoint configuration
     if (window.appConfiguratie?.instellingen?.siteUrl) {
-        return window.appConfiguratie.instellingen.siteUrl.replace(/\/$/, '');
+        baseUrl = window.appConfiguratie.instellingen.siteUrl.replace(/\/$/, '');
+        source = 'appConfiguratie';
     }
     
-    // Fallback to current location if configuration is not available
-    const currentUrl = window.location.href;
-    const urlParts = currentUrl.split('/');
-    
-    // Extract the base part up to the site collection
-    // Expected pattern: https://som.org.om.local/sites/MulderT/CustomPW/Verlof/
-    const baseUrlPattern = /^(https?:\/\/[^\/]+\/sites\/[^\/]+\/[^\/]+\/[^\/]+)/;
-    const match = currentUrl.match(baseUrlPattern);
-    
-    if (match) {
-        return match[1];
+    // Method 2: Fallback to current location if configuration is not available
+    if (!baseUrl) {
+        const currentUrl = window.location.href;
+        
+        // Extract the base part up to the site collection
+        // Expected pattern: https://som.org.om.local/sites/MulderT/CustomPW/Verlof/
+        const baseUrlPattern = /^(https?:\/\/[^\/]+\/sites\/[^\/]+\/[^\/]+\/[^\/]+)/;
+        const match = currentUrl.match(baseUrlPattern);
+        
+        if (match) {
+            baseUrl = match[1];
+            source = 'currentUrl';
+        }
     }
     
-    // Last resort fallback
-    return 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof';
+    // Method 3: Last resort fallback
+    if (!baseUrl) {
+        baseUrl = 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof';
+        source = 'fallback';
+    }
+    
+    // Debug logging for org\busselw
+    const currentUser = window.currentUser || {};
+    const isDebugUser = currentUser.LoginName?.toLowerCase().includes('busselw') || 
+                       currentUser.Email?.toLowerCase().includes('busselw');
+    
+    if (isDebugUser) {
+        console.log('🔗 getBaseUrl() Debug Info:', {
+            baseUrl,
+            source,
+            configSiteUrl: window.appConfiguratie?.instellingen?.siteUrl,
+            currentLocation: window.location.href
+        });
+    }
+    
+    return baseUrl;
 }
 
 export default {
