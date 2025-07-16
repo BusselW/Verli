@@ -580,6 +580,17 @@ export function getBaseUrl() {
     return baseUrl;
 }
 
+/**
+ * Gets the full URL for the verlofRooster page
+ * @returns {string} The full URL to the verlofRooster page
+ */
+export function getVerlofRoosterUrl() {
+    const baseUrl = getBaseUrl();
+    
+    // The verlofRooster page is located at: baseUrl/cpw/Rooster/Verlofrooster.aspx
+    return `${baseUrl}/cpw/Rooster/Verlofrooster.aspx`;
+}
+
 export default {
     getTeamForEmployee,
     getTeamLeaderForEmployee,
@@ -599,6 +610,7 @@ export default {
     setCurrentUserSenior,
     getCurrentUserSenior,
     invalidateCache,
-    // Navigation helper
-    getBaseUrl
+    // Navigation helpers
+    getBaseUrl,
+    getVerlofRoosterUrl
 };

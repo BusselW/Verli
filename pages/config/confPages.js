@@ -69,8 +69,7 @@ export const AccessDenied = () => {
  * Default navigation function to go back to main application
  */
 export const navigateBack = () => {
-    const baseUrl = linkInfo.getBaseUrl();
-    const targetUrl = baseUrl ? `${baseUrl}/verlofRooster.aspx` : '../../verlofRooster.aspx';
+    const targetUrl = linkInfo.getVerlofRoosterUrl();
     window.location.href = targetUrl;
 };
 

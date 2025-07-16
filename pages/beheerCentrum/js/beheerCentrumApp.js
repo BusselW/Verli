@@ -39,8 +39,7 @@ const PageBanner = () => {
             h('div', { className: 'banner-right' },
                 h('button', { 
                     onClick: () => {
-                        const baseUrl = linkInfo.getBaseUrl();
-                        const targetUrl = baseUrl ? `${baseUrl}/verlofRooster.aspx` : '../../verlofRooster.aspx';
+                        const targetUrl = linkInfo.getVerlofRoosterUrl();
                         window.location.href = targetUrl;
                     },
                     className: 'btn-back',

@@ -75,9 +75,8 @@
             const btnTerugRooster = document.getElementById('btn-terug-rooster');
             if (btnTerugRooster) {
                 btnTerugRooster.addEventListener('click', function() {
-                    // Use global linkInfo service to get base URL
-                    const baseUrl = window.linkInfo ? window.linkInfo.getBaseUrl() : '';
-                    const targetUrl = baseUrl ? `${baseUrl}/verlofRooster.aspx` : '../../verlofRooster.aspx';
+                    // Use global linkInfo service to get verlofRooster URL
+                    const targetUrl = window.linkInfo ? window.linkInfo.getVerlofRoosterUrl() : '../../verlofRooster.aspx';
                     window.location.href = targetUrl;
                 });
             }
