@@ -235,6 +235,143 @@
             color: var(--success);
         }
 
+        /* Enhanced color and status displays */
+        .color-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-box {
+            position: relative;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .color-box:hover {
+            transform: scale(1.1);
+        }
+
+        .color-hex {
+            user-select: all;
+            cursor: pointer;
+        }
+
+        .color-hex:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Tag styles for usernames and other identifiers */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .tag-neutral {
+            background-color: rgba(107, 114, 128, 0.1);
+            color: rgb(107, 114, 128);
+            border: 1px solid rgba(107, 114, 128, 0.2);
+        }
+
+        .tag-user {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: rgb(99, 102, 241);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        /* Status badges with proper color coding */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .status-success {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: rgb(34, 197, 94);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .status-warning {
+            background-color: rgba(251, 146, 60, 0.1);
+            color: rgb(251, 146, 60);
+            border: 1px solid rgba(251, 146, 60, 0.2);
+        }
+
+        .status-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: rgb(239, 68, 68);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-neutral {
+            background-color: rgba(107, 114, 128, 0.1);
+            color: rgb(107, 114, 128);
+            border: 1px solid rgba(107, 114, 128, 0.2);
+        }
+
+        /* Date and time displays */
+        .datetime-display {
+            min-width: 120px;
+        }
+
+        .date-display {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Email links */
+        .email-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--accent, #FF6D22);
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+
+        .email-link:hover {
+            background-color: rgba(255, 109, 34, 0.1);
+            text-decoration: underline;
+        }
+
+        /* Empty value styling */
+        .empty-value {
+            color: var(--text-secondary, #9CA3AF);
+            font-style: italic;
+            font-size: 0.875rem;
+        }
+
+        /* Table cell improvements */
+        .data-table td {
+            vertical-align: middle;
+            max-width: 200px;
+            overflow: hidden;
+        }
+
+        .data-table td[title] {
+            cursor: help;
+        }
+
+        /* Boolean toggle improvements */
+        .boolean-display {
+            min-width: 140px;
+            justify-content: flex-start;
+        }
+
         /* Modal and form styling */
         .modal-overlay {
             position: fixed;
@@ -459,79 +596,296 @@
             return columns;
         };
 
-        // Keep the existing formatValue function (it's quite extensive)
+        // Enhanced formatValue function with all requested improvements
         const formatValue = (value, column) => {
-            // All the existing formatting logic stays the same...
-            if (typeof value === 'boolean' || column.type === 'boolean' || 
-                (value !== null && value !== undefined && typeof value === 'string' && 
-                 ['true', 'false', 'ja', 'nee', 'yes', 'no', '1', '0', 'actief', 'inactief'].includes(value.toLowerCase()))) {
-                
-                let boolValue = false;
-                
-                if (typeof value === 'boolean') {
-                    boolValue = value;
-                } else if (value === null || value === undefined) {
-                    boolValue = false;
-                } else if (typeof value === 'string') {
-                    const lowerValue = value.toLowerCase();
-                    boolValue = lowerValue === 'true' || lowerValue === 'ja' || lowerValue === 'yes' || lowerValue === '1' || lowerValue === 'actief';
-                } else if (typeof value === 'number') {
-                    boolValue = value === 1;
+            // Handle null/undefined values
+            if (value === null || value === undefined || value === '') {
+                if (column.type === 'boolean') {
+                    return createBooleanToggle(false);
                 }
-                
-                return h('div', { className: 'boolean-display', style: { display: 'flex', alignItems: 'center', gap: '8px', minWidth: '120px' } },
-                    h('label', { className: 'toggle-switch' },
-                        h('input', { 
-                            type: 'checkbox', 
-                            checked: boolValue,
-                            disabled: true
-                        }),
-                        h('span', { className: 'toggle-slider' })
-                    ),
-                    h('span', { 
-                        className: `status-indicator ${boolValue ? 'status-active' : 'status-inactive'}`,
-                        style: { 
-                            fontSize: '12px', 
-                            fontWeight: '500',
-                            color: boolValue ? 'var(--success)' : 'var(--text-secondary)'
-                        }
-                    }, boolValue ? 'Actief' : 'Inactief')
-                );
+                return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '—');
             }
-            
-            if (!value && column.type !== 'boolean') return '';
-            
-            // Handle other value types...
-            if (column.type === 'date' || column.accessor.toLowerCase().includes('datum')) {
-                const date = new Date(value);
-                if (!isNaN(date.getTime())) {
-                    return date.toLocaleDateString('nl-NL', { 
-                        year: 'numeric', 
-                        month: '2-digit', 
-                        day: '2-digit' 
-                    });
-                }
-            }
-            
+
+            // a. Color fields - show hex value with color box
             if (column.type === 'color' || column.accessor.toLowerCase().includes('kleur')) {
-                if (!value) return h('span', { className: 'tag' }, 'Geen kleur');
-                
-                const colorValue = value.startsWith('#') ? value : `#${value}`;
-                
-                return h('div', { className: 'color-display', style: { display: 'flex', alignItems: 'center', gap: '0.5rem' } },
-                    h('span', { 
-                        style: { 
-                            backgroundColor: colorValue,
-                            width: '20px',
-                            height: '20px',
-                            borderRadius: '4px',
-                            border: '1px solid var(--border)'
-                        }
-                    }),
-                    h('span', null, colorValue.toUpperCase())
-                );
+                return createColorDisplay(value);
+            }
+
+            // b. Username/ID fields - display as subtle tags
+            if (isUsernameField(column.accessor)) {
+                return createUsernameTag(value);
+            }
+
+            // c. Boolean values - handled with sliders
+            if (column.type === 'boolean' || isBooleanValue(value)) {
+                return createBooleanToggle(value);
+            }
+
+            // d. Date+time values - human readable format
+            if (column.type === 'datetime' || isDateTimeField(column.accessor)) {
+                return createDateTimeDisplay(value);
+            }
+
+            // e. Date values (no time) - dd-mm-yyyy format
+            if (column.type === 'date' || isDateField(column.accessor)) {
+                return createDateDisplay(value);
+            }
+
+            // f. Status columns - green/orange/red based on content
+            if (column.accessor.toLowerCase().includes('status')) {
+                return createStatusDisplay(value);
+            }
+
+            // g. Email columns - clickable mailto links
+            if (column.type === 'email' || isEmailField(column.accessor)) {
+                return createEmailLink(value);
+            }
+
+            // Default text display
+            return createTextDisplay(value);
+        };
+
+        // Helper function to create color display with hex value box
+        const createColorDisplay = (colorValue) => {
+            if (!colorValue) return h('span', { className: 'tag tag-neutral' }, 'Geen kleur');
+            
+            const normalizedColor = colorValue.startsWith('#') ? colorValue : `#${colorValue}`;
+            
+            return h('div', { 
+                className: 'color-display', 
+                style: { display: 'flex', alignItems: 'center', gap: '0.5rem' } 
+            },
+                h('span', { 
+                    className: 'color-box',
+                    style: { 
+                        backgroundColor: normalizedColor,
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '4px',
+                        border: '2px solid var(--border)',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        flexShrink: 0
+                    }
+                }),
+                h('code', { 
+                    className: 'color-hex',
+                    style: { 
+                        fontSize: '0.875rem',
+                        fontFamily: 'monospace',
+                        fontWeight: '600',
+                        color: 'var(--text-primary)'
+                    } 
+                }, normalizedColor.toUpperCase())
+            );
+        };
+
+        // Helper function to check if field is a username field
+        const isUsernameField = (accessor) => {
+            const usernameFields = ['username', 'gebruikersnaam', 'teamleiderid', 'medewerkerid'];
+            return usernameFields.some(field => accessor.toLowerCase().includes(field));
+        };
+
+        // Helper function to create username tag
+        const createUsernameTag = (username) => {
+            if (!username) return h('span', { className: 'tag tag-neutral' }, 'Geen gebruiker');
+            
+            return h('span', { 
+                className: 'tag tag-user',
+                style: {
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    color: 'rgb(99, 102, 241)',
+                    border: '1px solid rgba(99, 102, 241, 0.2)',
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '1rem',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    fontFamily: 'monospace'
+                }
+            }, username);
+        };
+
+        // Helper function to check if value is boolean
+        const isBooleanValue = (value) => {
+            if (typeof value === 'boolean') return true;
+            if (typeof value === 'string') {
+                const lowerValue = value.toLowerCase();
+                return ['true', 'false', 'ja', 'nee', 'yes', 'no', '1', '0', 'actief', 'inactief'].includes(lowerValue);
+            }
+            return false;
+        };
+
+        // Helper function to create boolean toggle display
+        const createBooleanToggle = (value) => {
+            let boolValue = false;
+            
+            if (typeof value === 'boolean') {
+                boolValue = value;
+            } else if (value !== null && value !== undefined && typeof value === 'string') {
+                const lowerValue = value.toLowerCase();
+                boolValue = lowerValue === 'true' || lowerValue === 'ja' || lowerValue === 'yes' || lowerValue === '1' || lowerValue === 'actief';
+            } else if (typeof value === 'number') {
+                boolValue = value === 1;
             }
             
+            return h('div', { 
+                className: 'boolean-display', 
+                style: { display: 'flex', alignItems: 'center', gap: '8px', minWidth: '120px' } 
+            },
+                h('label', { className: 'toggle-switch' },
+                    h('input', { 
+                        type: 'checkbox', 
+                        checked: boolValue,
+                        disabled: true
+                    }),
+                    h('span', { className: 'toggle-slider' })
+                ),
+                h('span', { 
+                    className: `status-badge ${boolValue ? 'status-active' : 'status-inactive'}`,
+                    style: { 
+                        fontSize: '12px', 
+                        fontWeight: '600',
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: '0.75rem',
+                        backgroundColor: boolValue ? 'rgba(34, 197, 94, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                        color: boolValue ? 'rgb(34, 197, 94)' : 'rgb(107, 114, 128)',
+                        border: `1px solid ${boolValue ? 'rgba(34, 197, 94, 0.2)' : 'rgba(156, 163, 175, 0.2)'}`
+                    }
+                }, boolValue ? 'Actief' : 'Inactief')
+            );
+        };
+
+        // Helper function to check if field is datetime
+        const isDateTimeField = (accessor) => {
+            const dateTimeFields = ['tijdstip', 'datetime', 'timestamp'];
+            return dateTimeFields.some(field => accessor.toLowerCase().includes(field));
+        };
+
+        // Helper function to create datetime display
+        const createDateTimeDisplay = (dateValue) => {
+            const date = new Date(dateValue);
+            if (isNaN(date.getTime())) return h('span', { style: { color: 'var(--danger)' } }, 'Ongeldige datum');
+            
+            const dateStr = date.toLocaleDateString('nl-NL', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            });
+            const timeStr = date.toLocaleTimeString('nl-NL', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            return h('div', { className: 'datetime-display', style: { display: 'flex', flexDirection: 'column', gap: '2px' } },
+                h('span', { style: { fontWeight: '600', fontSize: '0.875rem' } }, dateStr),
+                h('span', { style: { color: 'var(--text-secondary)', fontSize: '0.75rem' } }, timeStr)
+            );
+        };
+
+        // Helper function to check if field is date only
+        const isDateField = (accessor) => {
+            const dateFields = ['datum', 'date', 'geboortedatum'];
+            return dateFields.some(field => accessor.toLowerCase().includes(field)) && !isDateTimeField(accessor);
+        };
+
+        // Helper function to create date display
+        const createDateDisplay = (dateValue) => {
+            const date = new Date(dateValue);
+            if (isNaN(date.getTime())) return h('span', { style: { color: 'var(--danger)' } }, 'Ongeldige datum');
+            
+            return h('span', { 
+                className: 'date-display',
+                style: { fontWeight: '500', fontSize: '0.875rem' }
+            }, date.toLocaleDateString('nl-NL', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit' 
+            }));
+        };
+
+        // Helper function to create status display with colors
+        const createStatusDisplay = (status) => {
+            if (!status) return h('span', { className: 'tag tag-neutral' }, 'Geen status');
+            
+            const statusLower = status.toLowerCase();
+            let statusClass = 'status-neutral';
+            let statusColor = 'rgb(107, 114, 128)';
+            let statusBg = 'rgba(107, 114, 128, 0.1)';
+            
+            // Green statuses
+            if (['goedgekeurd', 'actief', 'approved', 'active', 'voltooid', 'completed', 'success'].includes(statusLower)) {
+                statusClass = 'status-success';
+                statusColor = 'rgb(34, 197, 94)';
+                statusBg = 'rgba(34, 197, 94, 0.1)';
+            }
+            // Orange statuses  
+            else if (['in behandeling', 'pending', 'wachtend', 'processing', 'nieuw', 'new'].includes(statusLower)) {
+                statusClass = 'status-warning';
+                statusColor = 'rgb(251, 146, 60)';
+                statusBg = 'rgba(251, 146, 60, 0.1)';
+            }
+            // Red statuses
+            else if (['afgekeurd', 'rejected', 'fout', 'error', 'failed', 'inactief', 'inactive'].includes(statusLower)) {
+                statusClass = 'status-danger';
+                statusColor = 'rgb(239, 68, 68)';
+                statusBg = 'rgba(239, 68, 68, 0.1)';
+            }
+            
+            return h('span', { 
+                className: `status-badge ${statusClass}`,
+                style: {
+                    backgroundColor: statusBg,
+                    color: statusColor,
+                    border: `1px solid ${statusColor}33`,
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '1rem',
+                    fontSize: '0.75rem',
+                    fontWeight: '600'
+                }
+            }, status);
+        };
+
+        // Helper function to check if field is email
+        const isEmailField = (accessor) => {
+            return accessor.toLowerCase().includes('mail') || accessor.toLowerCase().includes('email');
+        };
+
+        // Helper function to create email link
+        const createEmailLink = (email) => {
+            if (!email) return h('span', { className: 'tag tag-neutral' }, 'Geen email');
+            
+            return h('a', {
+                href: `mailto:${email}`,
+                className: 'email-link',
+                style: {
+                    color: 'var(--accent)',
+                    textDecoration: 'none',
+                    fontWeight: '500',
+                    padding: '0.25rem 0.5rem',
+                    borderRadius: '0.375rem',
+                    transition: 'all 0.2s ease'
+                },
+                onMouseEnter: (e) => {
+                    e.target.style.backgroundColor = 'rgba(255, 109, 34, 0.1)';
+                    e.target.style.textDecoration = 'underline';
+                },
+                onMouseLeave: (e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.textDecoration = 'none';
+                }
+            }, 
+                h('i', { className: 'fas fa-envelope', style: { marginRight: '0.5rem' } }),
+                email
+            );
+        };
+
+        // Helper function to create text display
+        const createTextDisplay = (value) => {
+            if (typeof value === 'string' && value.length > 50) {
+                return h('span', { 
+                    title: value,
+                    style: { cursor: 'help' }
+                }, `${value.substring(0, 47)}...`);
+            }
             return value;
         };
 

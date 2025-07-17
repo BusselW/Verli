@@ -21,7 +21,9 @@ const {
     Seniors, 
     statuslijstOpties,
     Siteactiva,
-    FoutenLogboek
+    FoutenLogboek,
+    Mededeling,
+    ZittingsVrijOpmaak
 } = window.appConfiguratie;
 
 export const beheerTabs = [
@@ -351,6 +353,60 @@ export const beheerTabs = [
         ],
         formFields: [
             { name: 'Title', label: 'Status Titel', type: 'text' },
+        ]
+    },
+
+    // Mededeling - Announcements
+    {
+        id: 'mededeling',
+        label: 'Mededeling',
+        listConfig: Mededeling,
+        columns: [
+            { Header: 'Titel', accessor: 'Title', type: 'text' },
+            { Header: 'Aanvulling', accessor: 'Aanvulling', type: 'text' },
+            { Header: 'Start', accessor: 'DatumTijdStart', type: 'datetime' },
+            { Header: 'Einde', accessor: 'DatumTijdEinde', type: 'datetime' },
+            { Header: 'Uitzenden Aan', accessor: 'UitzendenAan', type: 'text' },
+            { Header: 'Gebruiker', accessor: 'username', type: 'text' },
+            { Header: 'Acties', accessor: 'actions', isAction: true },
+        ],
+        formFields: [
+            { name: 'Title', label: 'Titel', type: 'text' },
+            { name: 'Aanvulling', label: 'Aanvulling', type: 'textarea' },
+            { name: 'DatumTijdStart', label: 'Start Datum/Tijd', type: 'datetime-local' },
+            { name: 'DatumTijdEinde', label: 'Eind Datum/Tijd', type: 'datetime-local' },
+            { name: 'UitzendenAan', label: 'Uitzenden Aan (Teams)', type: 'textarea' },
+            { name: 'username', label: 'Gebruikersnaam', type: 'text' },
+        ]
+    },
+
+    // ZittingsVrijOpmaak - Session-free formatting
+    {
+        id: 'zittingsvrijopmaak',
+        label: 'ZittingsVrij Opmaak',
+        listConfig: ZittingsVrijOpmaak,
+        columns: [
+            { Header: 'Titel', accessor: 'Title', type: 'text' },
+            { Header: 'Kleur', accessor: 'Kleur', type: 'color' },
+            { Header: 'Patroon', accessor: 'Patroon', type: 'text' },
+            { Header: 'Transparantie', accessor: 'Transparantie', type: 'number' },
+            { Header: 'Border Style', accessor: 'BorderStyle', type: 'text' },
+            { Header: 'Border Width', accessor: 'BorderWidth', type: 'number' },
+            { Header: 'Text Color', accessor: 'TextColor', type: 'color' },
+            { Header: 'Font Size', accessor: 'FontSize', type: 'number' },
+            { Header: 'Actief', accessor: 'Actief', type: 'boolean' },
+            { Header: 'Acties', accessor: 'actions', isAction: true },
+        ],
+        formFields: [
+            { name: 'Title', label: 'Titel', type: 'text' },
+            { name: 'Kleur', label: 'Achtergrond Kleur', type: 'color' },
+            { name: 'Patroon', label: 'Patroon', type: 'text' },
+            { name: 'Transparantie', label: 'Transparantie (%)', type: 'number' },
+            { name: 'BorderStyle', label: 'Border Style', type: 'text' },
+            { name: 'BorderWidth', label: 'Border Width (px)', type: 'number' },
+            { name: 'TextColor', label: 'Text Kleur', type: 'color' },
+            { name: 'FontSize', label: 'Font Size (px)', type: 'number' },
+            { name: 'Actief', label: 'Actief', type: 'checkbox' },
         ]
     },
 ];

@@ -677,6 +677,30 @@ Otherwise, extract values from DagenIndicators.Title
           type: "Text" 
         } /* Gebruikersnaam van degene die de mededeling heeft aangemaakt (domein\gebruikersnaam formaat) */
       ]
+    },
+
+    /**
+     * @section ZittingsVrijOpmaak
+     * @description Beheert de opmaak en styling voor zittingsvrije periodes in de kalenderweergave.
+     * Definieert hoe zittingsvrije dagen visueel worden weergegeven in het rooster.
+     */
+    ZittingsVrijOpmaak: {
+      lijstId: "new-guid-needed-for-zittingsvrij-opmaak",
+      lijstTitel: "ZittingsVrijOpmaak",
+      verborgen: false,
+      baseTemplate: 100,
+      velden: [
+        { titel: "Id", interneNaam: "ID", type: "Counter" },
+        { titel: "Titel", interneNaam: "Title", type: "Text" },
+        { titel: "Kleur", interneNaam: "Kleur", type: "Text" },
+        { titel: "Patroon", interneNaam: "Patroon", type: "Choice" },
+        { titel: "Transparantie", interneNaam: "Transparantie", type: "Number" },
+        { titel: "BorderStyle", interneNaam: "BorderStyle", type: "Choice" },
+        { titel: "BorderWidth", interneNaam: "BorderWidth", type: "Number" },
+        { titel: "TextColor", interneNaam: "TextColor", type: "Text" },
+        { titel: "FontSize", interneNaam: "FontSize", type: "Number" },
+        { titel: "Actief", interneNaam: "Actief", type: "Boolean" }
+      ]
     }
   };
 }
