@@ -12,6 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registratie - Verlofrooster</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="icon" href="data:," />
 
     <!-- React Libraries -->
@@ -122,7 +123,8 @@
 
     <script type="module">
         // Import services (adjust paths as needed)
-        import { fetchSharePointList, getCurrentUser, getUserInfo } from '../../js/services/sharepointService.js';
+        import { fetchSharePointList, getCurrentUser, getUserInfo, trimLoginNaamPrefix } from '../../js/services/sharepointService.js';
+        import { getCurrentUserGroups, isUserInAnyGroup } from '../../js/services/permissionService.js';
         
         // Import tab components
         import { ProfileTab } from './js/componenten/profielTab.js';
@@ -140,6 +142,7 @@
             const [error, setError] = useState(null);
             const [user, setUser] = useState(null);
             const [data, setData] = useState({});
+            const [debugMode, setDebugMode] = useState(false);
 
             // Initialize application
             useEffect(() => {
@@ -152,9 +155,21 @@
                         const currentUser = await getCurrentUser();
                         setUser(currentUser);
 
-                        // Load additional data as needed
-                        // const someData = await fetchSharePointList('SomeList');
-                        // setData({ someData });
+                        // Check if user is in SharePoint admin group for debug mode
+                        const userGroups = await getCurrentUserGroups();
+                        const isAdmin = userGroups.some(group => 
+                            group.toLowerCase().includes('sharepoint beheer') || 
+                            group.toLowerCase().includes('1. sharepoint beheer')
+                        );
+                        setDebugMode(isAdmin);
+
+                        // Check if user exists in Medewerkers list
+                        const shouldRedirect = await checkUserInMedewerkersList(currentUser, isAdmin);
+                        if (shouldRedirect) {
+                            console.log('User found in Medewerkers list, redirecting to verlofrooster...');
+                            window.location.href = '/sites/mulderT/CustomPW/Verlof/CPW/Rooster/Verlofrooster.aspx';
+                            return; // Stop execution if redirecting
+                        }
 
                         console.log('App initialized successfully');
                     } catch (err) {
@@ -167,6 +182,78 @@
 
                 initializeApp();
             }, []);
+
+            // Function to check if user exists in Medewerkers list
+            const checkUserInMedewerkersList = async (currentUser, isAdmin) => {
+                if (!currentUser || !currentUser.LoginName) {
+                    console.log('No current user or login name found');
+                    return false;
+                }
+
+                try {
+                    // Get normalized username (remove domain prefix)
+                    const normalizedUsername = trimLoginNaamPrefix(currentUser.LoginName);
+                    console.log('🔍 Checking user registration:', {
+                        originalLoginName: currentUser.LoginName,
+                        normalizedUsername: normalizedUsername,
+                        isAdmin: isAdmin,
+                        debugMode: isAdmin
+                    });
+
+                    // Fetch Medewerkers list
+                    const medewerkers = await fetchSharePointList('Medewerkers');
+                    console.log('📋 Medewerkers list loaded:', medewerkers.length, 'entries');
+
+                    // Check for match in Medewerkers list
+                    const userMatch = medewerkers.find(medewerker => {
+                        if (!medewerker.Username) return false;
+                        
+                        const medewerkerNormalizedUsername = trimLoginNaamPrefix(medewerker.Username);
+                        const match = medewerkerNormalizedUsername.toLowerCase() === normalizedUsername.toLowerCase();
+                        
+                        if (match) {
+                            console.log('✅ User match found:', {
+                                medewerkerUsername: medewerker.Username,
+                                normalizedMedewerkerUsername: medewerkerNormalizedUsername,
+                                userNormalizedUsername: normalizedUsername,
+                                medewerkerNaam: medewerker.Naam,
+                                medewerkerActief: medewerker.Actief
+                            });
+                        }
+                        
+                        return match;
+                    });
+
+                    if (userMatch) {
+                        console.log('✅ User found in Medewerkers list:', {
+                            naam: userMatch.Naam,
+                            actief: userMatch.Actief,
+                            redirecting: true
+                        });
+                        return true; // User found, should redirect
+                    } else {
+                        console.log('❌ User not found in Medewerkers list');
+                        
+                        // Debug mode: Allow SharePoint admins to bypass the check
+                        if (isAdmin) {
+                            console.log('🔧 DEBUG MODE: User is in "1. Sharepoint beheer" group, bypassing registration check');
+                            return false; // Don't redirect, let admin continue with registration
+                        }
+                        
+                        return false; // User not found, stay on registration page
+                    }
+                } catch (error) {
+                    console.error('❌ Error checking user in Medewerkers list:', error);
+                    
+                    // Debug mode: Allow admins to continue even if check fails
+                    if (isAdmin) {
+                        console.log('🔧 DEBUG MODE: Error occurred but user is admin, allowing registration');
+                        return false;
+                    }
+                    
+                    return false; // On error, stay on registration page
+                }
+            };
 
             // Handle loading state
             if (loading) {
@@ -190,7 +277,7 @@
 
             // Main application render
             return h('div', null,
-                h(Header, { user }),
+                h(Header, { user, debugMode }),
                 h('div', { className: 'container' },
                     h(MainContent, { user, data })
                 )
@@ -200,11 +287,26 @@
         // =====================
         // Header Component
         // =====================
-        const Header = ({ user }) => {
+        const Header = ({ user, debugMode }) => {
             return h('div', { className: 'header' },
                 h('div', { className: 'container' },
                     h('h1', null, 'Account registratie'),
-                    h('p', null, `Welkom ${user?.Title || 'nieuwe gebruiker'}! Stel je account in voor het verlofrooster.`)
+                    h('p', null, `Welkom ${user?.Title || 'nieuwe gebruiker'}! Stel je account in voor het verlofrooster.`),
+                    debugMode && h('div', {
+                        style: {
+                            marginTop: '10px',
+                            padding: '8px 12px',
+                            backgroundColor: '#fff3cd',
+                            color: '#856404',
+                            border: '1px solid #ffeaa7',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                        }
+                    }, 
+                        h('i', { className: 'fas fa-tools', style: { marginRight: '8px' } }),
+                        'DEBUG MODE: SharePoint beheer gebruiker - registratie controle omzeild'
+                    )
                 )
             );
         };
