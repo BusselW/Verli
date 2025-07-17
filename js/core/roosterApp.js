@@ -1428,40 +1428,109 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
         return compensatieMomentenByDate[key] || [];
     }, [compensatieMomentenByDate]);
 
-    const getVerlofVoorDag = useCallback((medewerkerUsername, datum) => {
-        if (!medewerkerUsername) return null;
-        const datumCheck = new Date(datum).setHours(12, 0, 0, 0);
-        return verlofItems.find(v => v.MedewerkerID === medewerkerUsername && v.Status !== 'Afgewezen' && datumCheck >= new Date(v.StartDatum).setHours(12, 0, 0, 0) && datumCheck <= new Date(v.EindDatum).setHours(12, 0, 0, 0));
+    // ==================================================================
+    // PERFORMANCE OPTIMIZATION: Memoized maps for fast data lookups
+    // ==================================================================
+
+    const verlofMap = useMemo(() => {
+        console.log("🔄 Recalculating Verlof Map");
+        const map = new Map();
+        for (const item of verlofItems) {
+            if (!item.MedewerkerID || item.Status === 'Afgewezen') continue;
+
+            if (!map.has(item.MedewerkerID)) {
+                map.set(item.MedewerkerID, new Map());
+            }
+            const userMap = map.get(item.MedewerkerID);
+            
+            let currentDate = new Date(item.StartDatum);
+            const endDate = new Date(item.EindDatum);
+
+            while (currentDate <= endDate) {
+                const dateKey = toISODate(currentDate);
+                if (!userMap.has(dateKey)) { // Avoid overwriting if multiple items on same day
+                    userMap.set(dateKey, item);
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        return map;
     }, [verlofItems]);
 
-    const getZittingsvrijVoorDag = useCallback((medewerkerUsername, datum) => {
-        if (!medewerkerUsername) return null;
-        const datumCheck = new Date(datum).setHours(12, 0, 0, 0);
-        return zittingsvrijItems.find(z => z.Gebruikersnaam === medewerkerUsername && datumCheck >= new Date(z.StartDatum).setHours(12, 0, 0, 0) && datumCheck <= new Date(z.EindDatum).setHours(12, 0, 0, 0));
+    const zittingsvrijMap = useMemo(() => {
+        console.log("🔄 Recalculating Zittingsvrij Map");
+        const map = new Map();
+        for (const item of zittingsvrijItems) {
+            if (!item.Gebruikersnaam) continue;
+
+            if (!map.has(item.Gebruikersnaam)) {
+                map.set(item.Gebruikersnaam, new Map());
+            }
+            const userMap = map.get(item.Gebruikersnaam);
+
+            let currentDate = new Date(item.StartDatum);
+            const endDate = new Date(item.EindDatum);
+
+            while (currentDate <= endDate) {
+                const dateKey = toISODate(currentDate);
+                 if (!userMap.has(dateKey)) { // Avoid overwriting
+                    userMap.set(dateKey, item);
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        return map;
     }, [zittingsvrijItems]);
 
-    const getCompensatieUrenVoorDag = useCallback((medewerkerUsername, dag) => {
-        if (!medewerkerUsername || !compensatieUrenItems || compensatieUrenItems.length === 0) {
-            return [];
-        }
+    const compensatieUrenMap = useMemo(() => {
+        console.log("🔄 Recalculating Compensatie Uren Map");
+        const map = new Map();
+        for (const item of compensatieUrenItems) {
+            if (!item.MedewerkerID) continue;
 
-        // Normalize the calendar day to a UTC start and end for accurate comparison
-        const dagStartUTC = new Date(Date.UTC(dag.getFullYear(), dag.getMonth(), dag.getDate(), 0, 0, 0));
-        const dagEindUTC = new Date(Date.UTC(dag.getFullYear(), dag.getMonth(), dag.getDate(), 23, 59, 59));
-
-        return compensatieUrenItems.filter(item => {
-            if (item.MedewerkerID !== medewerkerUsername) {
-                return false;
+            if (!map.has(item.MedewerkerID)) {
+                map.set(item.MedewerkerID, new Map());
             }
+            const userMap = map.get(item.MedewerkerID);
 
-            // Parse SharePoint dates directly as Date objects (they are already in UTC)
             const startCompensatie = new Date(item.StartCompensatieUren);
             const eindeCompensatie = new Date(item.EindeCompensatieUren);
 
-            // Check if the compensation period overlaps with the current day (in UTC)
-            return startCompensatie <= dagEindUTC && eindeCompensatie >= dagStartUTC;
-        });
+            let currentDate = new Date(startCompensatie);
+
+            while (currentDate <= eindeCompensatie) {
+                const dateKey = toISODate(currentDate);
+                if (!userMap.has(dateKey)) {
+                    userMap.set(dateKey, []);
+                }
+                userMap.get(dateKey).push(item);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+        return map;
     }, [compensatieUrenItems]);
+
+    // ==================================================================
+    // OPTIMIZED LOOKUP FUNCTIONS
+    // ==================================================================
+
+    const getVerlofVoorDag = useCallback((medewerkerUsername, datum) => {
+        if (!medewerkerUsername) return null;
+        const dateKey = toISODate(datum);
+        return verlofMap.get(medewerkerUsername)?.get(dateKey) || null;
+    }, [verlofMap]);
+
+    const getZittingsvrijVoorDag = useCallback((medewerkerUsername, datum) => {
+        if (!medewerkerUsername) return null;
+        const dateKey = toISODate(datum);
+        return zittingsvrijMap.get(medewerkerUsername)?.get(dateKey) || null;
+    }, [zittingsvrijMap]);
+
+    const getCompensatieUrenVoorDag = useCallback((medewerkerUsername, dag) => {
+        if (!medewerkerUsername) return [];
+        const dateKey = toISODate(dag);
+        return compensatieUrenMap.get(medewerkerUsername)?.get(dateKey) || [];
+    }, [compensatieUrenMap]);
 
     const periodeData = useMemo(() => {
         return weergaveType === 'week' ? getDagenInWeek(huidigWeek, huidigJaar) : getDagenInMaand(huidigMaand, huidigJaar);
