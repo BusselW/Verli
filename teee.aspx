@@ -72,21 +72,30 @@
                     if (cleanSubsitePath.endsWith('/')) {
                         cleanSubsitePath = cleanSubsitePath.slice(0, -1);
                     }
-                     if (cleanSubsitePath === '/') {
+                    if (cleanSubsitePath === '/') {
                         cleanSubsitePath = ''; // Root site case
                     }
 
                     const cleanLibraryName = libraryName.trim();
                     const baseSiteUrl = getBaseSiteUrl();
                     const webUrl = baseSiteUrl + cleanSubsitePath;
-                    const folderPath = (cleanSubsitePath ? cleanSubsitePath : '') + '/' + cleanLibraryName;
+                    
+                    // Fix folder path construction - use proper SharePoint relative URL format
+                    const folderPath = cleanSubsitePath + '/' + cleanLibraryName;
 
+                    // Get current user for filtering checked out files
                     const currentUserResponse = await fetch(`${webUrl}/_api/web/currentUser`, {
                         headers: { 'Accept': 'application/json;odata=verbose' }
                     });
+                    
+                    if (!currentUserResponse.ok) {
+                        throw new Error(`Failed to get current user: ${currentUserResponse.status} ${currentUserResponse.statusText}`);
+                    }
+                    
                     const currentUserData = await currentUserResponse.json();
                     const currentUserId = currentUserData.d.Id;
 
+                    // Construct CAML query based on search mode
                     let whereClause = '';
                     if (searchMode === 'checkedOut') {
                         whereClause = `
@@ -95,7 +104,7 @@
                                     <IsNotNull><FieldRef Name='CheckoutUser' /></IsNotNull>
                                     <Eq>
                                         <FieldRef Name='CheckoutUser' LookupId='TRUE' />
-                                        <Value Type='Integer'><UserID /></Value>
+                                        <Value Type='Integer'>${currentUserId}</Value>
                                     </Eq>
                                 </And>
                             </Where>
@@ -103,7 +112,7 @@
                     }
 
                     const camlQuery = `
-                        <View Scope="${includeSubfolders ? 'RecursiveAll' : 'Default'}">
+                        <View Scope="${includeSubfolders ? 'RecursiveAll' : 'FilesOnly'}">
                             <Query>${whereClause}</Query>
                             <ViewFields>
                                 <FieldRef Name='ID' />
@@ -112,6 +121,7 @@
                                 <FieldRef Name='Title' />
                                 <FieldRef Name='Category' />
                                 <FieldRef Name='CheckoutUser' />
+                                <FieldRef Name='File_x0020_Type' />
                             </ViewFields>
                             <RowLimit>5000</RowLimit>
                         </View>
@@ -120,11 +130,16 @@
                     const queryPayload = {
                         'query': {
                             '__metadata': { 'type': 'SP.CamlQuery' },
-                            'ViewXml': camlQuery,
-                            'FolderServerRelativeUrl': folderPath
+                            'ViewXml': camlQuery
                         }
                     };
+                    
+                    // Don't set FolderServerRelativeUrl unless we have a specific folder
+                    if (folderPath && folderPath !== '/') {
+                        queryPayload.query.FolderServerRelativeUrl = folderPath;
+                    }
 
+                    // Execute the query to get files from the document library
                     const apiUrl = `${webUrl}/_api/web/lists/GetByTitle('${cleanLibraryName}')/GetItems`;
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -137,9 +152,25 @@
                     });
 
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        const errorMessage = errorData.error.message.value;
-                        throw new Error(`Failed to query library: ${errorMessage}`);
+                        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                        
+                        try {
+                            const errorData = await response.json();
+                            if (errorData.error && errorData.error.message) {
+                                errorMessage = errorData.error.message.value || errorData.error.message;
+                            }
+                        } catch (e) {
+                            // If we can't parse the error JSON, use the status text
+                        }
+                        
+                        // Provide helpful error messages for common issues
+                        if (response.status === 404) {
+                            errorMessage = `Library '${cleanLibraryName}' not found in the specified location. Please verify the library name and subsite path.`;
+                        } else if (response.status === 403) {
+                            errorMessage = `Access denied to library '${cleanLibraryName}'. Please verify you have permission to access this library.`;
+                        }
+                        
+                        throw new Error(errorMessage);
                     }
 
                     const data = await response.json();
@@ -152,12 +183,15 @@
                         isEditable: item.CheckoutUser && item.CheckoutUser.LookupId === currentUserId,
                         title: item.Title || '',
                         category: item.Category || '',
+                        fileType: item.File_x0020_Type || ''
                     }));
 
                     if (allFoundFiles.length === 0) {
-                         setStatus({ message: 'No matching files were found in this location.', type: 'info' });
+                        const searchType = searchMode === 'checkedOut' ? 'checked-out files' : 'files';
+                        setStatus({ message: `No ${searchType} were found in this library location.`, type: 'info' });
                     } else {
-                         setStatus({ message: `Search complete. Found ${allFoundFiles.length} file(s).`, type: 'success' });
+                        const searchType = searchMode === 'checkedOut' ? 'checked-out file(s)' : 'file(s)';
+                        setStatus({ message: `Search complete. Found ${allFoundFiles.length} ${searchType}.`, type: 'success' });
                     }
 
                     setFiles(allFoundFiles);
@@ -210,7 +244,20 @@
                             throw new Error(`Could not determine List Name for file ${file.name}.`);
                         }
                         
-                        const fileSubsitePath = file.serverRelativeUrl.substring(0, file.serverRelativeUrl.toLowerCase().indexOf('/' + listTitle.toLowerCase()));
+                        // Better logic to determine the subsite path from the file URL
+                        let fileSubsitePath = '';
+                        const basePath = new URL(baseSiteUrl).pathname;
+                        const fullPath = file.serverRelativeUrl;
+                        
+                        // Find the library name in the path to determine the subsite
+                        const libraryIndex = fullPath.toLowerCase().indexOf('/' + listTitle.toLowerCase() + '/');
+                        if (libraryIndex !== -1) {
+                            fileSubsitePath = fullPath.substring(0, libraryIndex);
+                        } else {
+                            // Fallback: use the current subsite path
+                            fileSubsitePath = subsitePath || '';
+                        }
+                        
                         const webUrl = baseSiteUrl + fileSubsitePath;
 
                         const updateUrl = `${webUrl}/_api/web/lists/GetByTitle('${listTitle}')/items(${file.id})`;
@@ -232,9 +279,16 @@
                         });
 
                         if (!updateResponse.ok) {
-                             const errorData = await updateResponse.json();
-                             const errorMessage = errorData.error.message.value;
-                             throw new Error(`Failed to update metadata for ${file.name}: ${errorMessage}`);
+                            let errorMessage = `HTTP ${updateResponse.status}: ${updateResponse.statusText}`;
+                            try {
+                                const errorData = await updateResponse.json();
+                                if (errorData.error && errorData.error.message) {
+                                    errorMessage = errorData.error.message.value || errorData.error.message;
+                                }
+                            } catch (e) {
+                                // Use status text if can't parse error
+                            }
+                            throw new Error(`Failed to update metadata for ${file.name}: ${errorMessage}`);
                         }
                         
                         setStatus({ message: `Checking in ${file.name}...`, type: 'info' });
@@ -247,7 +301,18 @@
                             }
                         });
 
-                        if (!checkInResponse.ok) throw new Error(`Failed to check in ${file.name}`);
+                        if (!checkInResponse.ok) {
+                            let checkInErrorMessage = `HTTP ${checkInResponse.status}: ${checkInResponse.statusText}`;
+                            try {
+                                const errorData = await checkInResponse.json();
+                                if (errorData.error && errorData.error.message) {
+                                    checkInErrorMessage = errorData.error.message.value || errorData.error.message;
+                                }
+                            } catch (e) {
+                                // Use status text if can't parse error
+                            }
+                            throw new Error(`Failed to check in ${file.name}: ${checkInErrorMessage}`);
+                        }
                         
                         successCount++;
 
@@ -454,34 +519,45 @@
 
         function initializeAndStartApp() {
             // This function runs once the DOM is ready.
-            fetch('./_api/contextinfo', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json;odata=verbose' }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    // Try fetching from the root if the relative path fails
-                    return fetch('/_api/contextinfo', {
-                        method: 'POST',
-                        headers: { 'Accept': 'application/json;odata=verbose' }
-                    });
+            // Try to get the context info from the current site
+            const contextPaths = ['./_api/contextinfo', '/_api/contextinfo'];
+            
+            async function tryFetchContext() {
+                for (const path of contextPaths) {
+                    try {
+                        const response = await fetch(path, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json;odata=verbose' }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            const requestDigest = data.d.GetContextWebInformation.FormDigestValue;
+                            const siteFullUrl = data.d.GetContextWebInformation.SiteFullUrl;
+                            const root = ReactDOM.createRoot(document.getElementById('root'));
+                            root.render(<App baseSiteUrl={siteFullUrl} requestDigest={requestDigest} />);
+                            return;
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to fetch context from ${path}:`, error);
+                        // Continue to next path
+                    }
                 }
-                return response;
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Failed to fetch request digest from both relative and root paths.');
-                return response.json();
-            })
-            .then(data => {
-                const requestDigest = data.d.GetContextWebInformation.FormDigestValue;
-                const siteFullUrl = data.d.GetContextWebInformation.SiteFullUrl;
-                const root = ReactDOM.createRoot(document.getElementById('root'));
-                root.render(<App baseSiteUrl={siteFullUrl} requestDigest={requestDigest} />);
-            })
-            .catch(error => {
+                
+                // If we get here, all context fetch attempts failed
+                throw new Error('Could not fetch SharePoint context from any known endpoint');
+            }
+            
+            tryFetchContext().catch(error => {
                 console.error("Fatal Error: Could not initialize app.", error);
                 const rootDiv = document.getElementById('root');
-                rootDiv.innerHTML = `<div class="p-4 bg-red-100 text-red-800 rounded">Fatal Error: Could not initialize app. Check console for details.</div>`;
+                rootDiv.innerHTML = `
+                    <div class="p-4 bg-red-100 text-red-800 rounded">
+                        <h3 class="font-bold">Fatal Error: Could not initialize app</h3>
+                        <p class="mt-2">This utility requires SharePoint context. Please ensure you're running this from within a SharePoint site.</p>
+                        <p class="mt-1 text-sm">Error details: ${error.message}</p>
+                    </div>
+                `;
             });
         }
 

@@ -168,7 +168,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.85) !important;
+    background-color: rgba(15, 23, 42, 0.85) !important;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     display: flex;
@@ -177,10 +178,14 @@
     z-index: 1050;
     padding: 12px;
     animation: fadeIn 0.3s ease-out;
+    /* Ensure solid background fallback */
+    background-image: none !important;
 }
 
 .modal {
-    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
     border-radius: 20px;
     box-shadow: 
         0 40px 80px -12px rgba(15, 23, 42, 0.3),
@@ -329,7 +334,9 @@
     padding: 24px;
     max-height: calc(90vh - 140px);
     overflow-y: auto;
-    background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
     position: relative;
 }
 
@@ -380,7 +387,9 @@
     justify-content: flex-end;
     padding: 20px 24px;
     border-top: 1px solid rgba(226, 232, 240, 0.6);
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
     position: relative;
 }
 
@@ -852,4 +861,81 @@
 
 .modal {
     z-index: 1050;
+}
+
+/* ===== ADDITIONAL SOLID BACKGROUND ENFORCEMENTS ===== */
+/* Ensure all modal-related elements have solid backgrounds */
+.modal,
+.modal * {
+    background-image: none !important;
+}
+
+.modal-overlay,
+.modal-container,
+.modal-backdrop {
+    background: rgba(15, 23, 42, 0.85) !important;
+    background-color: rgba(15, 23, 42, 0.85) !important;
+    background-image: none !important;
+}
+
+.modal,
+.modal-content,
+.modal-dialog {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.modal-body,
+.form-body,
+.modal-footer,
+.form-actions {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* Override any potential gradient backgrounds in sections */
+.form-section,
+.autocomplete-section {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+/* Ensure form inputs have solid backgrounds too */
+.modal .form-input,
+.modal .form-select,
+.modal .form-textarea,
+.modal input,
+.modal select,
+.modal textarea {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* Override any body configurations that might use gradients */
+.modal-body.bg-canvas { 
+    background: #f8fafc !important; 
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.modal-body.bg-surface { 
+    background: #ffffff !important; 
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.modal-footer.bg-canvas { 
+    background: #f8fafc !important; 
+    background-color: #f8fafc !important;
+    background-image: none !important;
+}
+
+.modal-footer.bg-surface { 
+    background: #ffffff !important; 
+    background-color: #ffffff !important;
+    background-image: none !important;
 }
