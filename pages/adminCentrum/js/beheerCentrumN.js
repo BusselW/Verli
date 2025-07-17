@@ -359,14 +359,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export functions and constants for use in other modules
-export {
-    initialiseerSharePointVerbinding,
-    laadHuidigeGebruiker,
-    pasThemaToe,
-    toonNotificatie,
-    verbergNotificatie,
-    toonLaden,
-    verbergLaden,
-    LIJST_CONFIGURATIE,
-    sharePointContext
-};
+export { };

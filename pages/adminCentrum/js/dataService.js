@@ -246,17 +246,22 @@ async function getBlokkenCounts() {
     try {
         const today = new Date();
         const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
 
-        // Format dates to ISO string for SharePoint filter (YYYY-MM-DD)
-        const formatSharePointDate = (date) => date.toISOString().split('T')[0];
+        // Format dates to ISO 8601 for SharePoint filter
+        const formatSharePointDateTime = (date) => date.toISOString();
 
-        const filter = `ge '${formatSharePointDate(firstDayOfMonth)}' and le '${formatSharePointDate(lastDayOfMonth)}'`;
+        const filterStart = formatSharePointDateTime(firstDayOfMonth);
+        const filterEnd = formatSharePointDateTime(lastDayOfMonth);
+
+        // Constructing the filter query for date ranges
+        const dateRangeFilter = (startField, endField) => 
+            `${startField} ge datetime'${filterStart}' and ${endField} le datetime'${filterEnd}'`;
 
         const [verlofItems, compensatieItems, zittingsvrijItems] = await Promise.all([
-            getListItems('Verlof', 'Id', `StartDatum ${filter}`),
-            getListItems('CompensatieUren', 'Id', `StartCompensatieUren ${filter}`),
-            getListItems('IncidenteelZittingVrij', 'Id', `ZittingsVrijeDagTijd ${filter}`)
+            getListItems('Verlof', 'Id', dateRangeFilter('StartDatum', 'EindDatum')),
+            getListItems('CompensatieUren', 'Id', dateRangeFilter('StartCompensatieUren', 'EindeCompensatieUren')),
+            getListItems('IncidenteelZittingVrij', 'Id', dateRangeFilter('ZittingsVrijeDagTijd', 'ZittingsVrijeDagTijdEind'))
         ]);
 
         return {
