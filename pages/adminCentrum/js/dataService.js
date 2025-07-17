@@ -238,11 +238,44 @@ async function getChoiceFieldOptions(listName, fieldName) {
     }
 }
 
+/**
+ * Get counts of items for Verlof, CompensatieUren, and IncidenteelZittingVrij for the current month.
+ * @returns {Promise<{verlof: number, compensatie: number, zittingsvrij: number}>} Object with counts.
+ */
+async function getBlokkenCounts() {
+    try {
+        const today = new Date();
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+        // Format dates to ISO string for SharePoint filter (YYYY-MM-DD)
+        const formatSharePointDate = (date) => date.toISOString().split('T')[0];
+
+        const filter = `ge '${formatSharePointDate(firstDayOfMonth)}' and le '${formatSharePointDate(lastDayOfMonth)}'`;
+
+        const [verlofItems, compensatieItems, zittingsvrijItems] = await Promise.all([
+            getListItems('Verlof', 'Id', `StartDatum ${filter}`),
+            getListItems('CompensatieUren', 'Id', `StartCompensatieUren ${filter}`),
+            getListItems('IncidenteelZittingVrij', 'Id', `ZittingsVrijeDagTijd ${filter}`)
+        ]);
+
+        return {
+            verlof: verlofItems.length,
+            compensatie: compensatieItems.length,
+            zittingsvrij: zittingsvrijItems.length,
+        };
+    } catch (error) {
+        console.error("Fout bij ophalen blokken tellingen:", error);
+        throw error;
+    }
+}
+
 // Export functions
 export {
     getListItems,
     createListItem,
     updateListItem,
     deleteListItem,
-    getChoiceFieldOptions
+    getChoiceFieldOptions,
+    getBlokkenCounts
 };

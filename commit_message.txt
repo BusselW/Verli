@@ -1,1 +1,1 @@
-feat: Optimize data lookups for performance
+refactor: Remove excessive console logging

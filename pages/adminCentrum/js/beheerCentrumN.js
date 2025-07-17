@@ -271,7 +271,7 @@ async function initializeUserInfo() {
     document.getElementById('verbinding-status').textContent = 'Verbonden';
     document.getElementById('verbinding-status').classList.add('connected');
   } catch (error) {
-    console.error('Error loading user info:', error);
+    
     document.getElementById('huidige-gebruiker').textContent = 'Gebruiker niet geladen';
     document.getElementById('verbinding-status').textContent = 'Niet verbonden';
     document.getElementById('verbinding-status').classList.add('disconnected');

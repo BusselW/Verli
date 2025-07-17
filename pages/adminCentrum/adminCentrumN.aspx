@@ -165,14 +165,11 @@
     <div id="root"></div>
 
     <script type="module">
-        console.log('🚀 Admin Centrum (Full-Width) starting execution...');
-        
-        // Make React available to imported ES6 modules
-        window.React = React;
-        
         // Import required components and functions
         import { getCurrentUser } from '../../js/services/sharepointService.js';
         import { getCurrentUserGroups } from '../../js/services/permissionService.js';
+
+        import BlokkenMonitor from './js/adminCentrumApp.js';
 
         // React destructuring
         const { createElement: h, useState, useEffect } = React;
@@ -270,153 +267,10 @@
             };
 
             const renderMonitoringTab = () => {
-                return h('div', { className: 'admin-tab-panel admin-tab-active', id: 'monitoring' },
-                    h('div', { style: { display: 'grid', gap: '1.5rem' } },
-                        // System Status Section
-                        h('fieldset', null,
-                            h('legend', null, 'Systeem Status'),
-                            h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' } },
-                                h('div', { 
-                                    style: { 
-                                        padding: '1rem', 
-                                        backgroundColor: 'var(--bg-secondary)', 
-                                        border: '1px solid var(--border)', 
-                                        borderRadius: '0.5rem' 
-                                    } 
-                                },
-                                    h('h4', { style: { margin: '0 0 0.5rem', fontSize: '0.875rem' } }, 'SharePoint Verbinding'),
-                                    h('div', { className: 'status-indicator status-online' },
-                                        h('i', { className: 'fas fa-circle' }),
-                                        'Online'
-                                    ),
-                                    h('p', { style: { margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' } }, 
-                                        'Laatste controle: ' + new Date().toLocaleTimeString('nl-NL'))
-                                ),
-                                h('div', { 
-                                    style: { 
-                                        padding: '1rem', 
-                                        backgroundColor: 'var(--bg-secondary)', 
-                                        border: '1px solid var(--border)', 
-                                        borderRadius: '0.5rem' 
-                                    } 
-                                },
-                                    h('h4', { style: { margin: '0 0 0.5rem', fontSize: '0.875rem' } }, 'Database Status'),
-                                    h('div', { className: 'status-indicator status-online' },
-                                        h('i', { className: 'fas fa-circle' }),
-                                        'Actief'
-                                    ),
-                                    h('p', { style: { margin: '0.5rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' } }, 
-                                        'Response tijd: < 50ms')
-                                ),
-                                h('div', { 
-                                    style: { 
-                                        padding: '1rem', 
-                                        backgroundColor: 'var(--bg-secondary)', 
-                                        border: '1px solid var(--border)', 
-                                        borderRadius: '0.5rem' 
-                                    } 
-                                },
-                                    h('h4', { style: { margin: '0 0 0.5rem', fontSize: '0.875rem' } }, 'Actieve Gebruikers'),
-                                    h('div', { style: { fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)' } }, '23'),
-                                    h('p', { style: { margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' } }, 
-                                        'Vandaag actief')
-                                )
-                            )
-                        ),
-
-                        // Real-time Monitoring
-                        h('fieldset', null,
-                            h('legend', null, 'Real-time Monitoring'),
-                            h('div', { style: { display: 'grid', gap: '1rem' } },
-                                h('div', { 
-                                    style: { 
-                                        padding: '1rem', 
-                                        backgroundColor: 'var(--bg-secondary)', 
-                                        border: '1px solid var(--border)', 
-                                        borderRadius: '0.5rem' 
-                                    } 
-                                },
-                                    h('h4', { style: { margin: '0 0 1rem', fontSize: '0.875rem' } }, 'Server Prestaties'),
-                                    h('div', { style: { display: 'grid', gap: '0.75rem' } },
-                                        h('div', null,
-                                            h('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' } },
-                                                h('span', { style: { fontSize: '0.75rem' } }, 'CPU Gebruik'),
-                                                h('span', { style: { fontSize: '0.75rem', fontWeight: '600' } }, '34%')
-                                            ),
-                                            h('div', { className: 'verli-progress' },
-                                                h('div', { className: 'verli-progress-bar verli-progress-primary', style: { width: '34%' } })
-                                            )
-                                        ),
-                                        h('div', null,
-                                            h('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' } },
-                                                h('span', { style: { fontSize: '0.75rem' } }, 'Geheugen'),
-                                                h('span', { style: { fontSize: '0.75rem', fontWeight: '600' } }, '68%')
-                                            ),
-                                            h('div', { className: 'verli-progress' },
-                                                h('div', { className: 'verli-progress-bar verli-progress-warning', style: { width: '68%' } })
-                                            )
-                                        ),
-                                        h('div', null,
-                                            h('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' } },
-                                                h('span', { style: { fontSize: '0.75rem' } }, 'Netwerk'),
-                                                h('span', { style: { fontSize: '0.75rem', fontWeight: '600' } }, '12%')
-                                            ),
-                                            h('div', { className: 'verli-progress' },
-                                                h('div', { className: 'verli-progress-bar verli-progress-success', style: { width: '12%' } })
-                                            )
-                                        )
-                                    )
-                                ),
-                                h('div', { 
-                                    style: { 
-                                        padding: '1rem', 
-                                        backgroundColor: 'var(--bg-secondary)', 
-                                        border: '1px solid var(--border)', 
-                                        borderRadius: '0.5rem' 
-                                    } 
-                                },
-                                    h('h4', { style: { margin: '0 0 1rem', fontSize: '0.875rem' } }, 'Recente Activiteit'),
-                                    h('div', { style: { display: 'grid', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' } },
-                                        h('div', { style: { fontSize: '0.75rem', padding: '0.5rem', backgroundColor: 'var(--bg-primary)', borderRadius: '0.25rem' } },
-                                            h('strong', null, new Date().toLocaleTimeString('nl-NL')), ' - Gebruiker login: ', currentUser?.Title || 'Admin'
-                                        ),
-                                        h('div', { style: { fontSize: '0.75rem', padding: '0.5rem', backgroundColor: 'var(--bg-primary)', borderRadius: '0.25rem' } },
-                                            h('strong', null, '14:23'), ' - Verlof aanvraag ingediend'
-                                        ),
-                                        h('div', { style: { fontSize: '0.75rem', padding: '0.5rem', backgroundColor: 'var(--bg-primary)', borderRadius: '0.25rem' } },
-                                            h('strong', null, '14:18'), ' - Lijst synchronisatie voltooid'
-                                        ),
-                                        h('div', { style: { fontSize: '0.75rem', padding: '0.5rem', backgroundColor: 'var(--bg-primary)', borderRadius: '0.25rem' } },
-                                            h('strong', null, '14:15'), ' - Cache gecleared'
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                );
+                return h(BlokkenMonitor);
             };
 
-            const renderPlaceholderTab = () => {
-                return h('div', { className: 'admin-tab-panel', id: 'placeholder' },
-                    h('div', { style: { textAlign: 'center', padding: '3rem' } },
-                        h('i', { 
-                            className: 'fas fa-tools', 
-                            style: { fontSize: '3rem', color: 'var(--text-secondary)', marginBottom: '1rem' } 
-                        }),
-                        h('h3', { style: { color: 'var(--text-primary)', marginBottom: '0.5rem' } }, 'Functionaliteit in Ontwikkeling'),
-                        h('p', { style: { color: 'var(--text-secondary)' } }, 
-                            'Deze sectie wordt binnenkort beschikbaar gesteld met aanvullende beheersfuncties.'
-                        ),
-                        h('div', { style: { marginTop: '2rem' } },
-                            h('button', { 
-                                className: 'btn btn-secondary',
-                                onClick: () => setActiveTab('monitoring')
-                            }, 'Terug naar Monitoring')
-                        )
-                    )
-                );
-            };
+            
 
             // Handle tab switching
             const switchTab = (tabId) => {
@@ -538,7 +392,7 @@
                         ),
 
                         // Tab Panels
-                        activeTab === 'monitoring' ? renderMonitoringTab() : renderPlaceholderTab()
+                        activeTab === 'monitoring' ? renderMonitoringTab() : null
                     )
                 )
             );
@@ -563,7 +417,7 @@
             )
         );
 
-        console.log('🎉 Admin Centrum (Full-Width) initialized successfully');
+        
     </script>
 </body>
 
