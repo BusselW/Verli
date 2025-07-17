@@ -293,8 +293,8 @@ export const ProfileTab = ({ user, data, isRegistration = false, onDataUpdate, o
         try {
             // Map form data to SharePoint column names based on configLijst.js
             const updateData = {
-                Title: formData.naam, // Title is required for SharePoint
-                Naam: formData.naam,
+                Title: user?.Title || formData.naam, // Use SharePoint user's Title (e.g., "Bussel, van W.") or fallback to form name
+                Naam: formData.naam, // Use the filled-in full name (e.g., "Wesley van Bussel")
                 Geboortedatum: formData.geboortedatum ? new Date(formData.geboortedatum).toISOString() : null,
                 E_x002d_mail: formData.email, // SharePoint encodes hyphens as _x002d_
                 Functie: formData.functie,
@@ -302,6 +302,13 @@ export const ProfileTab = ({ user, data, isRegistration = false, onDataUpdate, o
                 Username: formData.username,
                 Actief: true // Set as active user
             };
+            
+            console.log('🔍 Profile data mapping:', {
+                sharePointTitle: user?.Title,
+                filledInName: formData.naam,
+                finalTitle: updateData.Title,
+                finalNaam: updateData.Naam
+            });
 
             console.log('Saving user data:', updateData);
 
