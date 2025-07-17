@@ -4,8 +4,8 @@
  * This module handles CRUD operations for SharePoint lists
  */
 
-// Import core context
-import { sharePointContext } from './beheerCentrumN.js';
+// Import shared SharePoint context
+import { getSharePointContext, initializeSharePointContext } from '../../js/sharePointContext.js';
 
 /**
  * Get items from a SharePoint list
@@ -18,7 +18,8 @@ import { sharePointContext } from './beheerCentrumN.js';
  */
 async function getListItems(listName, selectFields = '*', filterQuery = '', orderBy = 'Id', top = 1000) {
     try {
-        let url = `${sharePointContext.siteUrl}/_api/web/lists/getbytitle('${listName}')/items`;
+        const context = getSharePointContext();
+        let url = `${context.siteUrl}/_api/web/lists/getbytitle('${listName}')/items`;
         const queryParams = [];
         
         if (selectFields && selectFields !== '*') {
@@ -68,14 +69,15 @@ async function getListItems(listName, selectFields = '*', filterQuery = '', orde
  */
 async function createListItem(listName, itemData) {
     try {
-        const url = `${sharePointContext.siteUrl}/_api/web/lists/getbytitle('${listName}')/items`;
+        const context = getSharePointContext();
+        const url = `${context.siteUrl}/_api/web/lists/getbytitle('${listName}')/items`;
         
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json;odata=verbose',
                 'Content-Type': 'application/json;odata=verbose',
-                'X-RequestDigest': sharePointContext.requestDigest
+                'X-RequestDigest': context.requestDigest
             },
             body: JSON.stringify({ 
                 '__metadata': { 'type': `SP.Data.${listName}ListItem` },
@@ -104,9 +106,10 @@ async function createListItem(listName, itemData) {
  */
 async function updateListItem(listName, itemId, itemData) {
     try {
+        const context = getSharePointContext();
         // First, get the item's metadata type
         const getItemResponse = await fetch(
-            `${sharePointContext.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
+            `${context.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json;odata=verbose'
@@ -123,12 +126,12 @@ async function updateListItem(listName, itemId, itemData) {
         
         // Now update the item
         const updateResponse = await fetch(
-            `${sharePointContext.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
+            `${context.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json;odata=verbose',
                     'Content-Type': 'application/json;odata=verbose',
-                    'X-RequestDigest': sharePointContext.requestDigest,
+                    'X-RequestDigest': context.requestDigest,
                     'X-HTTP-Method': 'MERGE',
                     'If-Match': itemDetails.d.__metadata.etag
                 },
@@ -158,9 +161,10 @@ async function updateListItem(listName, itemId, itemData) {
  */
 async function deleteListItem(listName, itemId) {
     try {
+        const context = getSharePointContext();
         // First, get the item's etag
         const getItemResponse = await fetch(
-            `${sharePointContext.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
+            `${context.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json;odata=verbose'
@@ -176,11 +180,11 @@ async function deleteListItem(listName, itemId) {
         
         // Now delete the item
         const deleteResponse = await fetch(
-            `${sharePointContext.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
+            `${context.siteUrl}/_api/web/lists/getbytitle('${listName}')/items(${itemId})`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json;odata=verbose',
-                    'X-RequestDigest': sharePointContext.requestDigest,
+                    'X-RequestDigest': context.requestDigest,
                     'X-HTTP-Method': 'DELETE',
                     'If-Match': itemDetails.d.__metadata.etag
                 }
@@ -206,7 +210,8 @@ async function deleteListItem(listName, itemId) {
  */
 async function getChoiceFieldOptions(listName, fieldName) {
     try {
-        const url = `${sharePointContext.siteUrl}/_api/web/lists/getbytitle('${listName}')/fields?$filter=EntityPropertyName eq '${fieldName}'`;
+        const context = getSharePointContext();
+        const url = `${context.siteUrl}/_api/web/lists/getbytitle('${listName}')/fields?$filter=EntityPropertyName eq '${fieldName}'`;
         
         const response = await fetch(url, {
             method: 'GET',

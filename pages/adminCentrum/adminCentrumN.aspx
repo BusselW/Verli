@@ -168,6 +168,7 @@
         // Import required components and functions
         import { getCurrentUser } from '../../js/services/sharepointService.js';
         import { getCurrentUserGroups } from '../../js/services/permissionService.js';
+        import { initializeSharePointContext } from '../js/sharePointContext.js';
 
         import BlokkenMonitor from './js/adminCentrumApp.js';
 
@@ -228,6 +229,9 @@
                 try {
                     console.log('🔍 Checking user permissions...');
                     setLoading(true);
+
+                    // Initialize SharePoint context first
+                    await initializeSharePointContext();
 
                     // Get current user
                     const user = await getCurrentUser();
