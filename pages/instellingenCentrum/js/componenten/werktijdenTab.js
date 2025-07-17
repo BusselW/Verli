@@ -265,6 +265,12 @@ export const WorkHoursTab = ({ user, data, isRegistration = false, onDataUpdate,
             if (scheduleType === 'rotating') {
                 // ROTATING SCHEDULE: Save 2 records (Week A and Week B)
                 console.log('Saving rotating schedule - creating 2 records with proper WeekType');
+                console.log('🔄 Rotation parameters:', {
+                    scheduleType: scheduleType,
+                    ingangsdatum: ingangsdatum,
+                    cycleStartDate: cycleStartDate,
+                    userId: userInfo?.LoginName
+                });
                 
                 // Week A data
                 const weekAData = generateWorkScheduleData(workHours, {
@@ -288,8 +294,8 @@ export const WorkHoursTab = ({ user, data, isRegistration = false, onDataUpdate,
                 weekAData.Title = `${userInfo?.Title || userInfo?.LoginName} - Week A (${new Date(ingangsdatum).toLocaleDateString('nl-NL')})`;
                 weekBData.Title = `${userInfo?.Title || userInfo?.LoginName} - Week B (${new Date(ingangsdatum).toLocaleDateString('nl-NL')})`;
                 
-                console.log('Week A data:', weekAData);
-                console.log('Week B data:', weekBData);
+                console.log('✅ Week A data generated:', weekAData);
+                console.log('✅ Week B data generated:', weekBData);
                 
                 // Save both weeks
                 const [weekAResult, weekBResult] = await Promise.all([

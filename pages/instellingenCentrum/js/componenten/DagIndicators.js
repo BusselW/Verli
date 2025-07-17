@@ -237,11 +237,22 @@ export function generateWorkScheduleData(workHours, options = {}) {
         MedewerkerID: userId,
         Ingangsdatum: ingangsdatum,
         VeranderingsDatum: new Date().toISOString(), // Track when this was created/updated
-        // Re-enable rotation fields for proper A/B week handling
+        // Rotation fields - ensure proper values are set
         WeekType: isRotating ? weekType : null,
-        IsRotatingSchedule: isRotating,
-        CycleStartDate: isRotating ? cycleStartDate : null,
+        IsRotatingSchedule: isRotating, // Boolean field - true for rotating schedules
+        CycleStartDate: isRotating && cycleStartDate ? cycleStartDate : null,
     };
+    
+    // Debug logging for rotating schedule
+    if (isRotating) {
+        console.log('🔄 Generating rotating schedule data:', {
+            weekType: weekType,
+            isRotating: isRotating,
+            IsRotatingSchedule: isRotating === true,
+            cycleStartDate: cycleStartDate,
+            CycleStartDate: isRotating && cycleStartDate ? cycleStartDate : null
+        });
+    }
     
     // Add day-specific data
     Object.entries(dayMap).forEach(([englishDay, dutchDay]) => {
