@@ -591,7 +591,7 @@
                 if (column.type === 'boolean') {
                     return createBooleanToggle(false);
                 }
-                return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '—');
+                return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '(leeg)');
             }
 
             // a. Color fields - show hex value with color box
@@ -635,7 +635,7 @@
 
         // Helper function to create color display with hex value box
         const createColorDisplay = (colorValue) => {
-            if (!colorValue) return h('span', { className: 'tag tag-neutral' }, 'Geen kleur');
+            if (!colorValue || colorValue === null || colorValue === undefined) return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '(leeg)');
             
             const normalizedColor = colorValue.startsWith('#') ? colorValue : `#${colorValue}`;
             
@@ -675,7 +675,7 @@
 
         // Helper function to create username tag
         const createUsernameTag = (username) => {
-            if (!username) return h('span', { className: 'tag tag-neutral' }, 'Geen gebruiker');
+            if (!username || username === null || username === undefined) return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '(leeg)');
             
             return h('span', { 
                 className: 'tag tag-user',
@@ -792,7 +792,7 @@
 
         // Helper function to create status display with colors
         const createStatusDisplay = (status) => {
-            if (!status) return h('span', { className: 'tag tag-neutral' }, 'Geen status');
+            if (!status || status === null || status === undefined) return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '(leeg)');
             
             const statusLower = status.toLowerCase();
             let statusClass = 'status-neutral';
@@ -839,7 +839,7 @@
 
         // Helper function to create email link
         const createEmailLink = (email) => {
-            if (!email) return h('span', { className: 'tag tag-neutral' }, 'Geen email');
+            if (!email || email === null || email === undefined) return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '(leeg)');
             
             return h('a', {
                 href: `mailto:${email}`,
@@ -868,6 +868,9 @@
 
         // Helper function to create text display
         const createTextDisplay = (value) => {
+            if (value === null || value === undefined || value === '') {
+                return h('span', { className: 'empty-value', style: { color: 'var(--text-secondary)', fontStyle: 'italic' } }, '(leeg)');
+            }
             if (typeof value === 'string' && value.length > 50) {
                 return h('span', { 
                     title: value,
