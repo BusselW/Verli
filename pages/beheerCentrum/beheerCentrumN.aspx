@@ -9,8 +9,8 @@
     <!-- Fonts and Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Emergency Modal Fix - Must be loaded after other styles -->
-    <link rel="stylesheet" href="css/modalFix.css">
+    <!-- Modal Styling -->
+    <link rel="stylesheet" href="css/modalFormatting.css">
     
     <!-- SharePoint Config -->
     <script src="../../js/config/configLijst.js"></script>
@@ -375,39 +375,14 @@
             justify-content: flex-start;
         }
 
-        /* Modal and form styling - FIXED */
-        .modal-overlay {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            background-color: rgba(0, 0, 0, 0.8) !important;
-            background: rgba(0, 0, 0, 0.8) !important;
-            background-image: none !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            z-index: 2000 !important;
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
+        /* Toggle switch styling */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            margin: 0;
         }
-
-        .modal-content {
-            background: #ffffff !important;
-            background-color: #ffffff !important;
-            background-image: none !important;
-            border-radius: 0.75rem;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
-            border: 2px solid #e5e7eb !important;
-            opacity: 1 !important;
-        }
-
-        /* Button styles using configLayout system */
         .btn-primary {
             background-color: var(--accent);
             color: white;
