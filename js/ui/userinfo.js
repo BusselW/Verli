@@ -13,8 +13,12 @@ import { renderHorenStatus } from './horen.js';
 const fallbackAvatar = 'https://placehold.co/96x96/4a90e2/ffffff?text=';
 
 function MedewerkerRow({ medewerker }) {
+    // Debug logging
+    console.log('🧑‍💼 MedewerkerRow rendering:', medewerker);
+    
     // Voeg een defensieve controle toe om ervoor te zorgen dat medewerker altijd een object is.
     if (!medewerker) {
+        console.error('🧑‍💼 MedewerkerRow: No medewerker data provided');
         // Render niets of een placeholder als medewerker niet wordt verstrekt.
         // Dit voorkomt fouten als de component ooit onjuist wordt gebruikt.
         return h('div', { className: 'medewerker-info' }, 'Geen data');

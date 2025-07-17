@@ -50,7 +50,10 @@ const RoosterGrid = ({
                             ),
                             (teamMedewerkers || []).map(medewerker =>
                                 h('tr', { key: medewerker.id, className: 'medewerker-rij' },
-                                    h('td', { className: 'medewerker-kolom' }, 
+                                    h('td', { 
+                                        className: 'medewerker-kolom',
+                                        'data-username': medewerker.Username
+                                    }, 
                                         h(MedewerkerRow, { medewerker: medewerker || {} })
                                     ),
                                     // Render calendar cells for each day with proper data blocks
@@ -191,6 +194,7 @@ const RoosterGrid = ({
                                                 key: dag.toISOString(),
                                                 className: classes,
                                                 id: medewerker.id === 1 && dag.getDate() === 1 ? 'dag-cel' : undefined,
+                                                'data-username': medewerker.Username,
                                                 onClick: () => handleCellClick(medewerker, dag),
                                                 onContextMenu: (e) => {
                                                     e.preventDefault();

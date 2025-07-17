@@ -39,6 +39,10 @@ import Legenda from '../ui/Legenda.js';
 import RoosterHeader from '../ui/RoosterHeader.js';
 import RoosterGrid from '../ui/RoosterGrid.js';
 import TooltipManager from '../ui/tooltipbar.js';
+import Mededelingen, { CreateAnnouncementButton } from '../ui/Mededelingen.js';
+import NavigationButtons from '../ui/NavigationButtons.js';
+import { roosterTutorial } from '../tutorial/roosterTutorialOrange.js';
+import { openHandleiding } from '../tutorial/roosterHandleiding.js';
 
 const { useState, useEffect, useMemo, useCallback, createElement: h, Fragment } = React;
 
@@ -166,6 +170,9 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
     // Header dropdown states
     const [helpDropdownOpen, setHelpDropdownOpen] = useState(false);
     const [settingsDropdownOpen, setSettingsDropdownOpen] = useState(false);
+    
+    // Announcement create form state
+    const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
     
     // Permission states for proper SharePoint group checking
     const [permissions, setPermissions] = useState({
@@ -357,7 +364,12 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             }
 
             console.log('✅ Data fetched successfully, processing...');
-            const teamsMapped = (teamsData || []).map(item => ({ id: item.Title || item.ID?.toString(), naam: item.Naam || item.Title, kleur: item.Kleur || '#cccccc' }));
+            const teamsMapped = (teamsData || []).map(item => ({ 
+                id: item.Title || item.ID?.toString(), 
+                naam: item.Naam || item.Title, 
+                Naam: item.Naam || item.Title, // Add both versions for compatibility
+                kleur: item.Kleur || '#cccccc' 
+            }));
             console.log(`👥 Loaded ${teamsMapped.length} teams:`, teamsMapped.map(t => `${t.naam} (${t.id})`));
             setTeams(teamsMapped);
             const teamNameToIdMap = teamsMapped.reduce((acc, t) => { acc[t.naam] = t.id; return acc; }, {});
@@ -527,7 +539,12 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             }
 
             console.log('✅ Silent data refresh complete, updating state...');
-            const teamsMapped = (teamsData || []).map(item => ({ id: item.Title || item.ID?.toString(), naam: item.Naam || item.Title, kleur: item.Kleur || '#cccccc' }));
+            const teamsMapped = (teamsData || []).map(item => ({ 
+                id: item.Title || item.ID?.toString(), 
+                naam: item.Naam || item.Title, 
+                Naam: item.Naam || item.Title, // Add both versions for compatibility
+                kleur: item.Kleur || '#cccccc' 
+            }));
             setTeams(teamsMapped);
             const teamNameToIdMap = teamsMapped.reduce((acc, t) => { acc[t.naam] = t.id; return acc; }, {});
             const transformedShiftTypes = (verlofredenenData || []).reduce((acc, item) => {
@@ -629,9 +646,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('Verlofaanvraag ingediend:', result);
             setIsVerlofModalOpen(false);
             
-            // Full page reload to ensure data consistency
-            console.log('🔄 Reloading page to refresh verlof data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update verlof...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('Fout bij het indienen van verlofaanvraag:', error);
             console.error('Error details:', {
@@ -650,9 +669,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('Ziekmelding ingediend:', result);
             setIsZiekModalOpen(false);
             
-            // Full page reload to ensure data consistency  
-            console.log('🔄 Reloading page to refresh ziekte data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update ziekte...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('Fout bij het indienen van ziekmelding:', error);
             alert('Fout bij het indienen van ziekmelding: ' + error.message);
@@ -666,9 +687,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('✅ Compensatie-uren ingediend successfully:', result);
             setIsCompensatieModalOpen(false);
             
-            // Full page reload to ensure data consistency
-            console.log('🔄 Reloading page to refresh compensatie data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update compensatie...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('❌ Fout bij het indienen van compensatie-uren:', error);
             alert('Fout bij het indienen van compensatie-uren: ' + error.message);
@@ -686,9 +709,11 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
             console.log('✅ Zittingsvrij ingediend successfully:', result);
             setIsZittingsvrijModalOpen(false);
             
-            // Full page reload to ensure data consistency
-            console.log('🔄 Reloading page to refresh zittingsvrij data...');
-            window.location.reload();
+            // Graceful data refresh without full page reload
+            console.log('🔄 Refreshing data silently to update zittingsvrij...');
+            setBackgroundRefreshing(true);
+            await silentRefreshData();
+            setBackgroundRefreshing(false);
         } catch (error) {
             console.error('❌ Fout bij het indienen van zittingsvrij:', error);
             alert('Fout bij het indienen van zittingsvrij: ' + error.message);
@@ -965,7 +990,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             }
                             setSelection(currentSelection);
                         }
-                        setIsVerlofModalOpen(true);
+                            setIsVerlofModalOpen(true);
                         setContextMenu(null);
                     }
                 },
@@ -990,8 +1015,8 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                         
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('🏥 Context menu Ziekte clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is - this respects the two-click selection
+                            console.log('🏥 Context menu Ziekte: Using existing selection for same employee:', selectionData);
+                            finalSelection = selectionData;
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -999,29 +1024,35 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            const rangeSelection = {
+                            finalSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏥 Context menu Ziekte: Using two-click range selection:', rangeSelection);
-                            setSelection(rangeSelection);
+                            console.log('🏥 Context menu Ziekte: Using two-click range selection:', finalSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            const currentSelection = {
+                            finalSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('🏥 Context menu Ziekte clicked. Creating single-day selection:', currentSelection);
+                            console.log('🏥 Context menu Ziekte: Creating single-day selection:', finalSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
-                            setSelection(currentSelection);
                         }
-                        setIsZiekModalOpen(true);
+                        
+                        // Ensure selection is set before opening modal
+                        setSelection(finalSelection);
+                        
+                        // Use setTimeout to ensure state update completes before opening modal
+                        setTimeout(() => {
+                            console.log('🏥 Opening Ziekte modal with final selection:', finalSelection);
+                            setIsZiekModalOpen(true);
+                        }, 0);
                         setContextMenu(null);
                     }
                 },
@@ -1045,10 +1076,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasFirstClick: !!firstClickState
                         });
                         
+                        // Determine the correct selection to use
+                        let finalSelection = null;
+                        
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('⏰ Context menu Compensatie clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is - this respects the two-click selection
+                            console.log('⏰ Context menu Compensatie: Using existing selection for same employee:', selectionData);
+                            finalSelection = selectionData;
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -1056,29 +1090,35 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            const rangeSelection = {
+                            finalSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⏰ Context menu Compensatie: Using two-click range selection:', rangeSelection);
-                            setSelection(rangeSelection);
+                            console.log('⏰ Context menu Compensatie: Using two-click range selection:', finalSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            const currentSelection = {
+                            finalSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⏰ Context menu Compensatie clicked. Creating single-day selection:', currentSelection);
+                            console.log('⏰ Context menu Compensatie: Creating single-day selection:', finalSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
-                            setSelection(currentSelection);
                         }
-                        setIsCompensatieModalOpen(true);
+                        
+                        // Ensure selection is set before opening modal
+                        setSelection(finalSelection);
+                        
+                        // Use setTimeout to ensure state update completes before opening modal
+                        setTimeout(() => {
+                            console.log('⏰ Opening Compensatie modal with final selection:', finalSelection);
+                            setIsCompensatieModalOpen(true);
+                        }, 0);
                         setContextMenu(null);
                     }
                 },
@@ -1101,10 +1141,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             hasFirstClick: !!firstClickState
                         });
                         
+                        // Determine the correct selection to use
+                        let finalSelection = null;
+                        
                         // Use existing selection if available, valid, and for the same employee
                         if (selectionData && selectionData.start && selectionData.end && selectionData.medewerkerId && selectionData.medewerkerId === employeeData.Username) {
-                            console.log('⚖️ Context menu Zittingsvrij clicked. Using existing selection for same employee:', selectionData);
-                            // Keep existing selection as-is - this respects the two-click selection
+                            console.log('⚖️ Context menu Zittingsvrij: Using existing selection for same employee:', selectionData);
+                            finalSelection = selectionData;
                         } else if (firstClickState && firstClickState.medewerker && firstClickState.medewerker.Username === employeeData.Username) {
                             // If we have a first click for this employee, use it as start and current date as end
                             const startDate = new Date(firstClickState.dag);
@@ -1112,29 +1155,35 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             const actualStart = startDate <= endDate ? startDate : endDate;
                             const actualEnd = startDate <= endDate ? endDate : startDate;
                             
-                            const rangeSelection = {
+                            finalSelection = {
                                 start: actualStart,
                                 end: actualEnd,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⚖️ Context menu Zittingsvrij: Using two-click range selection:', rangeSelection);
-                            setSelection(rangeSelection);
+                            console.log('⚖️ Context menu Zittingsvrij: Using two-click range selection:', finalSelection);
                             setFirstClickData(null); // Clear first click data
                         } else {
-                            const currentSelection = {
+                            finalSelection = {
                                 start: dateData,
                                 end: dateData,
                                 medewerkerId: employeeData.Username,
                                 medewerkerData: employeeData
                             };
-                            console.log('⚖️ Context menu Zittingsvrij clicked. Creating single-day selection:', currentSelection);
+                            console.log('⚖️ Context menu Zittingsvrij: Creating single-day selection:', finalSelection);
                             if (selectionData && selectionData.medewerkerId !== employeeData.Username) {
                                 console.log('🔄 Switching from employee', selectionData.medewerkerId, 'to', employeeData.Username);
                             }
-                            setSelection(currentSelection);
                         }
-                        setIsZittingsvrijModalOpen(true);
+                        
+                        // Ensure selection is set before opening modal
+                        setSelection(finalSelection);
+                        
+                        // Use setTimeout to ensure state update completes before opening modal
+                        setTimeout(() => {
+                            console.log('⚖️ Opening Zittingsvrij modal with final selection:', finalSelection);
+                            setIsZittingsvrijModalOpen(true);
+                        }, 0);
                         setContextMenu(null);
                     }
                 }
@@ -1497,13 +1546,13 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
     // Expose tutorial functions globally
     useEffect(() => {
         window.startTutorial = () => {
-            if (typeof roosterTutorial !== 'undefined' && roosterTutorial.start) {
+            if (roosterTutorial && roosterTutorial.start) {
                 roosterTutorial.start();
             }
         };
 
         window.openHandleiding = (section = 'algemeen') => {
-            if (typeof openHandleiding === 'function') {
+            if (openHandleiding) {
                 openHandleiding(section);
             }
         };
@@ -1766,6 +1815,28 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
         );
     }
 
+    // Navigation function with proper base URL handling
+    const navigateTo = (page) => {
+        const baseUrl = linkInfo.getBaseUrl();
+        const fullUrl = `${baseUrl}/${page}`;
+        
+        // Debug logging for org\busselw
+        const currentUser = window.currentUser || {};
+        const isDebugUser = currentUser.LoginName?.toLowerCase().includes('busselw') || 
+                           currentUser.Email?.toLowerCase().includes('busselw');
+        
+        if (isDebugUser) {
+            console.log('🔗 NavigateTo Debug Info:', {
+                page,
+                baseUrl,
+                fullUrl,
+                currentLocation: window.location.href
+            });
+        }
+        
+        window.location.href = fullUrl;
+    };
+
     // Render de roosterkop en de medewerkerrijen
     return h('div', { className: 'app-container' },
         // Subtle background refresh indicator
@@ -1804,17 +1875,21 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
         h('div', { className: 'sticky-header-container' },
             h('header', { id: 'header', className: 'header' },
                 h('div', { className: 'header-content' },
-                    // Left side - Melding button and title
+                    // Left side - Melding button, title, and announcement button
                     h('div', { className: 'header-left' },
                         h('button', {
                             className: 'btn btn-melding',
-                            onClick: () => window.location.href = 'pages/meldingMaken.aspx',
+                            onClick: () => navigateTo('pages/meldingMaken.aspx'),
                             title: 'Melding Maken'
                         },
                             h('i', { className: 'fas fa-exclamation-triangle' }),
                             'Melding'
                         ),
-                        h('h1', null, 'Verlofrooster')
+                        h('h1', null, 'Verlofrooster'),
+                        h(CreateAnnouncementButton, {
+                            onCreateClick: () => setShowAnnouncementForm(!showAnnouncementForm),
+                            canManage: permissions.isAdmin || permissions.isFunctional
+                        })
                     ),
                     
                     // Right side - Admin buttons and dropdowns
@@ -1822,7 +1897,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                         h('div', { className: 'nav-buttons-right' },
                             permissions && !permissions.loading && permissions.isAdmin && h('button', {
                                 className: 'btn btn-admin',
-                                onClick: () => window.location.href = 'pages/adminCentrum/adminCentrumN.aspx',
+                                onClick: () => navigateTo('pages/adminCentrum/adminCentrumN.aspx'),
                                 title: 'Administratie Centrum'
                             },
                                 h('i', { className: 'fas fa-cog' }),
@@ -1831,7 +1906,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             
                             permissions && !permissions.loading && permissions.isFunctional && h('button', {
                                 className: 'btn btn-functional',
-                                onClick: () => window.location.href = 'pages/beheerCentrum/beheerCentrumN.aspx',
+                                onClick: () => navigateTo('pages/beheerCentrum/beheerCentrumN.aspx'),
                                 title: 'Beheer Centrum'
                             },
                                 h('i', { className: 'fas fa-tools' }),
@@ -1840,7 +1915,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                             
                             permissions && !permissions.loading && permissions.isTaakbeheer && h('button', {
                                 className: 'btn btn-taakbeheer',
-                                onClick: () => window.location.href = 'pages/behandelCentrum/behandelCentrumN.aspx',
+                                onClick: () => navigateTo('pages/behandelCentrum/behandelCentrumN.aspx'),
                                 title: 'Behandel Centrum'
                             },
                                 h('i', { className: 'fas fa-clipboard-check' }),
@@ -1915,10 +1990,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                                     h('div', { className: 'dropdown-item-group' },
                                         h('button', {
                                             className: 'dropdown-item',
-                                            onClick: () => {
-                                                const baseUrl = "https://som.org.om.local/sites/verlofrooster";
-                                                window.location.href = `${baseUrl}/pages/instellingenCentrum/instellingenCentrumN.aspx`;
-                                            }
+                                            onClick: () => navigateTo('pages/instellingenCentrum/instellingenCentrumN.aspx')
                                         },
                                             h('i', { className: 'fas fa-user-edit' }),
                                             h('div', { className: 'dropdown-item-content' },
@@ -1947,6 +2019,12 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                     geselecteerdTeam,
                     setGeselecteerdTeam,
                     teams
+                }),
+                h(Mededelingen, {
+                    teams,
+                    medewerkers,
+                    showCreateForm: showAnnouncementForm,
+                    onCreateFormToggle: setShowAnnouncementForm
                 }),
                 h(Legenda, {
                     shiftTypes,

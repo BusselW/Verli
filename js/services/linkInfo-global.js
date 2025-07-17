@@ -287,6 +287,69 @@
     }
 
     /**
+     * Gets the base URL for navigation, using the SharePoint site URL configuration
+     * @returns {string} The base URL for the application
+     */
+    function getBaseUrl() {
+        let baseUrl = null;
+        let source = 'unknown';
+        
+        // Method 1: Get the base URL from SharePoint configuration
+        if (window.appConfiguratie?.instellingen?.siteUrl) {
+            baseUrl = window.appConfiguratie.instellingen.siteUrl.replace(/\/$/, '');
+            source = 'appConfiguratie';
+        }
+        
+        // Method 2: Fallback to current location if configuration is not available
+        if (!baseUrl) {
+            const currentUrl = window.location.href;
+            
+            // Extract the base part up to the site collection
+            // Expected pattern: https://som.org.om.local/sites/MulderT/CustomPW/Verlof/
+            const baseUrlPattern = /^(https?:\/\/[^\/]+\/sites\/[^\/]+\/[^\/]+\/[^\/]+)/;
+            const match = currentUrl.match(baseUrlPattern);
+            
+            if (match) {
+                baseUrl = match[1];
+                source = 'currentUrl';
+            }
+        }
+        
+        // Method 3: Last resort fallback
+        if (!baseUrl) {
+            baseUrl = 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof';
+            source = 'fallback';
+        }
+        
+        // Debug logging for org\busselw
+        const currentUser = window.currentUser || {};
+        const isDebugUser = currentUser.LoginName?.toLowerCase().includes('busselw') || 
+                           currentUser.Email?.toLowerCase().includes('busselw');
+        
+        if (isDebugUser) {
+            console.log('🔗 getBaseUrl() Debug Info:', {
+                baseUrl,
+                source,
+                configSiteUrl: window.appConfiguratie?.instellingen?.siteUrl,
+                currentLocation: window.location.href
+            });
+        }
+        
+        return baseUrl;
+    }
+
+    /**
+     * Gets the full URL for the verlofRooster page
+     * @returns {string} The full URL to the verlofRooster page
+     */
+    function getVerlofRoosterUrl() {
+        const baseUrl = getBaseUrl();
+        
+        // The verlofRooster page is located at: baseUrl/CPW/Rooster/Verlofrooster.aspx
+        return `${baseUrl}/CPW/Rooster/Verlofrooster.aspx`;
+    }
+
+    /**
      * Fetches a SharePoint list using the app configuration
      * @param {string} lijstNaam - The name of the list as defined in appConfiguratie
      * @returns {Promise<Array>} A Promise with the list items or an empty array on error
@@ -342,8 +405,13 @@
         getTeamNamesForTeamLeader,
         isTeamLeader,
         getEmployeesInTeam,
-        invalidateCache
+        invalidateCache,
+        getBaseUrl,
+        getVerlofRoosterUrl
     };
+    
+    // Create alias for linkInfo (lowercase)
+    window.linkInfo = window.LinkInfo;
 
     // Initialize LinkInfo object if the module failed to do so
     if (!window.LinkInfo) {
@@ -357,7 +425,9 @@
             getTeamNamesForTeamLeader: async () => [],
             isTeamLeader: async () => false,
             getEmployeesInTeam: async () => [],
-            invalidateCache: () => {}
+            invalidateCache: () => {},
+            getBaseUrl: () => 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof',
+            getVerlofRoosterUrl: () => 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof/CPW/Rooster/Verlofrooster.aspx'
         };
     }
 })();

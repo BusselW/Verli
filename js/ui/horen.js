@@ -39,7 +39,8 @@ export function renderHorenStatus(medewerker) {
         h('img', {
             src: `./icons/profilecards/${canHear ? 'horen-ja' : 'horen-nee'}.svg`,
             alt: canHear ? 'Horen: Ja' : 'Horen: Nee',
-            className: 'horen-icon'
+            className: 'horen-icon',
+            style: { width: '16px', height: '16px' }
         })
     );
 }

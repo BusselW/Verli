@@ -14,11 +14,10 @@ const Modal = ({ isOpen, onClose, title, children, footer }) => {
         return null;
     }
 
-    // Stop propagatie om te voorkomen dat een klik in de modal de overlay-klik activeert.
-    const handleModalClick = (e) => e.stopPropagation();
+    // Modal content - no click propagation handling needed since overlay doesn't close on click
 
-    return h('div', { className: 'modal-overlay', onClick: onClose },
-        h('div', { className: 'modal', onClick: handleModalClick },
+    return h('div', { className: 'modal-overlay' },
+        h('div', { className: 'modal' },
             h('div', { className: 'modal-header' },
                 h('h2', null, title),
                 h('button', { className: 'modal-close', onClick: onClose, 'aria-label': 'Sluiten' }, '×')

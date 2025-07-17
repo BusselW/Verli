@@ -1,3 +1,4 @@
+
 import { getCurrentUserInfo } from '../../services/sharepointService.js';
 import { canManageOthersEvents } from '../ContextMenu.js';
 import { validateFormSubmission, showCRUDRestrictionMessage } from '../../services/crudPermissionService.js';
@@ -179,7 +180,9 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
                     
                     // If not submitting for self, show error and return
                     if (selectedMedewerker && selectedMedewerker.Username !== loginName) {
-                        alert('Je kunt alleen zittingsvrij registreren voor jezelf.');
+                        if (window.NotificationSystem) {
+                            window.NotificationSystem.error('Je kunt alleen zittingsvrij registreren voor jezelf.', 'Toegang geweigerd');
+                        }
                         return;
                     }
                     
@@ -188,7 +191,9 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
                 }
             }).catch(error => {
                 console.error('Error checking current user for zittingsvrij:', error);
-                alert('Er is een fout opgetreden bij het controleren van je gebruikersrechten.');
+                if (window.NotificationSystem) {
+                    window.NotificationSystem.error('Er is een fout opgetreden bij het controleren van je gebruikersrechten.', 'Fout');
+                }
             });
         } else {
             // User has management rights, proceed normally
@@ -233,93 +238,94 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
             onSubmit(formData);
         } catch (error) {
             console.error('❌ Error validating zittingsvrij form:', error);
-            alert('Er is een fout opgetreden bij het valideren van het formulier.');
+            if (window.NotificationSystem) {
+                window.NotificationSystem.error('Er is een fout opgetreden bij het valideren van het formulier.', 'Validatiefout');
+            }
         }
     };
 
-    return h('form', { onSubmit: handleSubmit, className: 'modal-form' },
-        h('h2', { className: 'form-title' }, 'Zittingsvrij maken'),
-        
-        h('div', { className: 'form-content modal-form-content' },
-            h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-medewerker' }, 'Medewerker'),
-                canManageOthers 
-                    ? h('select', {
-                        id: 'zv-medewerker',
-                        className: 'form-select',
-                        value: medewerkerId,
-                        onChange: handleMedewerkerChange,
-                        required: true
-                      },
-                        h('option', { value: '', disabled: true }, 'Selecteer medewerker'),
-                        medewerkers.map(m => h('option', { key: m.Id, value: m.Id }, m.Title))
-                      )
-                    : h('input', { 
-                        className: 'form-input readonly-field', 
-                        type: 'text', 
-                        id: 'zv-medewerker', 
-                        value: medewerkers.find(m => m.Id === parseInt(medewerkerId, 10))?.Title || 'Laden...', 
-                        readOnly: true,
-                        title: 'U kunt alleen zittingsvrij maken voor uzelf'
-                      })
-            ),
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-medewerker-id' }, 'Medewerker ID'),
-                h('input', { className: 'form-input', type: 'text', id: 'zv-medewerker-id', value: medewerkerUsername, readOnly: true, disabled: true })
-            )
-        ),
+    return h('div', { className: 'modal-form-wrapper' },
+        h('form', { onSubmit: handleSubmit, className: 'form-container' },
+            h('div', { className: 'form-fields' },
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-medewerker' }, 'Medewerker'),
+                        canManageOthers 
+                            ? h('select', {
+                                id: 'zv-medewerker',
+                                className: 'form-select',
+                                value: medewerkerId,
+                                onChange: handleMedewerkerChange,
+                                required: true
+                              },
+                                h('option', { value: '', disabled: true }, 'Selecteer medewerker'),
+                                medewerkers.map(m => h('option', { key: m.Id, value: m.Id }, m.Title))
+                              )
+                            : h('input', { 
+                                className: 'form-input readonly-field', 
+                                type: 'text', 
+                                id: 'zv-medewerker', 
+                                value: medewerkers.find(m => m.Id === parseInt(medewerkerId, 10))?.Title || 'Laden...', 
+                                readOnly: true,
+                                title: 'U kunt alleen zittingsvrij maken voor uzelf'
+                              })
+                    ),
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-medewerker-id' }, 'Medewerker ID'),
+                        h('input', { className: 'form-input', type: 'text', id: 'zv-medewerker-id', value: medewerkerUsername, readOnly: true, disabled: true })
+                    )
+                ),
 
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-start-datum' }, 'Startdatum'),
-                h('input', { type: 'date', id: 'zv-start-datum', className: 'form-input', value: startDate, onChange: (e) => setStartDate(e.target.value), required: true })
-            ),
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-start-tijd' }, 'Starttijd'),
-                h('input', { type: 'time', id: 'zv-start-tijd', className: 'form-input', value: startTime, onChange: (e) => setStartTime(e.target.value), required: true })
-            )
-        ),
-        
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-eind-datum' }, 'Einddatum'),
-                h('input', { type: 'date', id: 'zv-eind-datum', className: 'form-input', value: endDate, onChange: (e) => setEndDate(e.target.value), required: true, min: startDate })
-            ),
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-eind-tijd' }, 'Eindtijd'),
-                h('input', { type: 'time', id: 'zv-eind-tijd', className: 'form-input', value: endTime, onChange: (e) => setEndTime(e.target.value), required: true })
-            )
-        ),
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-start-datum' }, 'Startdatum'),
+                        h('input', { type: 'date', id: 'zv-start-datum', className: 'form-input', value: startDate, onChange: (e) => setStartDate(e.target.value), required: true })
+                    ),
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-start-tijd' }, 'Starttijd'),
+                        h('input', { type: 'time', id: 'zv-start-tijd', className: 'form-input', value: startTime, onChange: (e) => setStartTime(e.target.value), required: true })
+                    )
+                ),
+                
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-eind-datum' }, 'Einddatum'),
+                        h('input', { type: 'date', id: 'zv-eind-datum', className: 'form-input', value: endDate, onChange: (e) => setEndDate(e.target.value), required: true, min: startDate })
+                    ),
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-eind-tijd' }, 'Eindtijd'),
+                        h('input', { type: 'time', id: 'zv-eind-tijd', className: 'form-input', value: endTime, onChange: (e) => setEndTime(e.target.value), required: true })
+                    )
+                ),
 
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-title' }, 'Titel / Reden'),
-                h('input', { 
-                    type: 'text', 
-                    id: 'zv-title', 
-                    className: 'form-input', 
-                    value: title, 
-                    onChange: (e) => setTitle(e.target.value), 
-                    required: true, 
-                    placeholder: 'Korte omschrijving, bijv. Cursus' 
-                })
-            )
-        ),
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-title' }, 'Titel / Reden'),
+                        h('input', { 
+                            type: 'text', 
+                            id: 'zv-title', 
+                            className: 'form-input', 
+                            value: title, 
+                            onChange: (e) => setTitle(e.target.value), 
+                            required: true, 
+                            placeholder: 'Korte omschrijving, bijv. Cursus' 
+                        })
+                    )
+                ),
 
-        h('div', { className: 'form-row' },
-            h('div', { className: 'form-groep' },
-                h('label', { htmlFor: 'zv-opmerking' }, 'Opmerking (optioneel)'),
-                h('textarea', { 
-                    id: 'zv-opmerking', 
-                    className: 'form-textarea', 
-                    rows: 3, 
-                    value: opmerking || '', 
-                    onChange: (e) => setOpmerking(e.target.value), 
-                    placeholder: 'Extra details' 
-                })
-            )
-        )
+                h('div', { className: 'form-row' },
+                    h('div', { className: 'form-groep' },
+                        h('label', { htmlFor: 'zv-opmerking' }, 'Opmerking (optioneel)'),
+                        h('textarea', { 
+                            id: 'zv-opmerking', 
+                            className: 'form-textarea', 
+                            rows: 3, 
+                            value: opmerking || '', 
+                            onChange: (e) => setOpmerking(e.target.value), 
+                            placeholder: 'Extra details' 
+                        })
+                    )
+                )
 
         // Terugkerende afspraak section is hidden for now
         // terugkerend && h('div', { className: 'form-row' },
@@ -349,11 +355,12 @@ const ZittingsvrijForm = ({ onSubmit, onCancel, initialData = {}, medewerkers = 
         //         )
         //     )
         // )
-        ), // Close form-content div
+            ),
 
-        h('div', { className: 'form-acties' },
-            h('button', { type: 'submit', className: 'btn btn-primary' }, 'Zittingsvrij maken'),
-            h('button', { type: 'button', className: 'btn btn-secondary', onClick: onCancel }, 'Annuleren')
+            h('div', { className: 'form-acties' },
+                h('button', { type: 'button', className: 'btn btn-secondary', onClick: onCancel }, 'Annuleren'),
+                h('button', { type: 'submit', className: 'btn btn-primary' }, 'Zittingsvrij maken')
+            )
         )
     );
 };

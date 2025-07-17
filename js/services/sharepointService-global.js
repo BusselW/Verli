@@ -439,6 +439,125 @@ if (typeof window.appConfiguratie === "undefined") {
         return null;
     }
 
+    /**
+     * Counts pending vacation requests ('Verlof/vakantie') with status 'Nieuw'
+     * Excludes 'Ziekte' requests as specified
+     * @returns {Promise<number>} Number of pending vacation requests
+     */
+    async function countPendingVacationRequests() {
+        try {
+            // Get both Verlof items and Verlofredenen to determine vacation vs sick leave
+            const verlofItems = await fetchSharePointList('Verlof');
+            const verlofredenen = await fetchSharePointList('Verlofredenen');
+            
+            if (!verlofItems || !verlofredenen) {
+                console.warn('Could not fetch required lists for vacation count');
+                return 0;
+            }
+            
+            // Check if current user is org\busselw for debug mode
+            const currentUser = await getCurrentUser();
+            const isDebugUser = currentUser && (
+                currentUser.LoginName?.toLowerCase().includes('busselw') ||
+                currentUser.Email?.toLowerCase().includes('busselw')
+            );
+            
+            // Find vacation-related reasons (exclude 'Ziekte')
+            const vacationReasons = verlofredenen.filter(reason => 
+                reason.Titel && !reason.Titel.toLowerCase().includes('ziekte')
+            );
+            
+            const vacationReasonIds = vacationReasons.map(reason => reason.ID?.toString());
+            const vacationReasonTitles = vacationReasons.map(reason => reason.Titel);
+            
+            if (isDebugUser) {
+                console.log('🔍 DEBUG MODE for org\\busselw - Detailed vacation count analysis:');
+                console.log('📋 Total verlof items found:', verlofItems.length);
+                console.log('📝 Total verlofredenen found:', verlofredenen.length);
+                console.log('🏖️ Vacation reasons (excluding Ziekte):', vacationReasons.map(r => ({ ID: r.ID, Titel: r.Titel })));
+                console.log('🔢 Vacation reason IDs:', vacationReasonIds);
+                console.log('📃 Vacation reason titles:', vacationReasonTitles);
+                
+                // Show all verlof items with detailed analysis
+                console.log('📊 All verlof items analysis:');
+                verlofItems.forEach((item, index) => {
+                    const isNewStatus = item.Status === 'Nieuw';
+                    const isVacationReason = item.RedenId && vacationReasonIds.includes(item.RedenId.toString()) ||
+                                           item.Reden && vacationReasonTitles.some(title => 
+                                               item.Reden.toLowerCase().includes(title.toLowerCase())
+                                           );
+                    const matchesFilters = isNewStatus && isVacationReason;
+                    
+                    console.log(`   ${index + 1}. ID: ${item.ID}`, {
+                        Medewerker: item.Medewerker,
+                        Status: item.Status,
+                        Reden: item.Reden,
+                        RedenId: item.RedenId,
+                        StartDatum: item.StartDatum,
+                        EindDatum: item.EindDatum,
+                        isNewStatus,
+                        isVacationReason,
+                        matchesFilters: matchesFilters ? '✅ COUNTED' : '❌ EXCLUDED'
+                    });
+                });
+            }
+            
+            // Count pending requests (Status = 'Nieuw') for vacation reasons only
+            const pendingVacationItems = verlofItems.filter(item => {
+                const isNewStatus = item.Status === 'Nieuw';
+                const isVacationReason = item.RedenId && vacationReasonIds.includes(item.RedenId.toString()) ||
+                                       item.Reden && vacationReasonTitles.some(title => 
+                                           item.Reden.toLowerCase().includes(title.toLowerCase())
+                                       );
+                
+                // For debugging - let's see all Status === 'Nieuw' items first
+                if (isDebugUser && isNewStatus) {
+                    console.log(`🔍 Found Nieuw status item:`, {
+                        ID: item.ID,
+                        Medewerker: item.Medewerker,
+                        Status: item.Status,
+                        Reden: item.Reden,
+                        RedenId: item.RedenId,
+                        isVacationReason
+                    });
+                }
+                
+                return isNewStatus && isVacationReason;
+            });
+            
+            // Also count ALL 'Nieuw' items for comparison
+            const allNewItems = verlofItems.filter(item => item.Status === 'Nieuw');
+            
+            if (isDebugUser) {
+                console.log(`🔍 COMPARISON: All 'Nieuw' items: ${allNewItems.length}, Vacation 'Nieuw' items: ${pendingVacationItems.length}`);
+            }
+            
+            // Temporarily use all 'Nieuw' items to see if badge shows up
+            const pendingVacationCount = isDebugUser ? allNewItems.length : pendingVacationItems.length;
+            
+            if (isDebugUser) {
+                console.log('🎯 FINAL RESULTS:');
+                console.log(`   Total pending vacation requests: ${pendingVacationCount}`);
+                console.log('   Counted items:', pendingVacationItems.map(item => ({
+                    ID: item.ID,
+                    Medewerker: item.Medewerker,
+                    Status: item.Status,
+                    Reden: item.Reden,
+                    StartDatum: item.StartDatum,
+                    EindDatum: item.EindDatum
+                })));
+            } else {
+                console.log(`Found ${pendingVacationCount} pending vacation requests`);
+            }
+            
+            return pendingVacationCount;
+            
+        } catch (error) {
+            console.error('Error counting pending vacation requests:', error);
+            return 0;
+        }
+    }
+
     // Expose functions to global scope
     window.SharePointService = {
         fetchSharePointList,
@@ -447,6 +566,7 @@ if (typeof window.appConfiguratie === "undefined") {
         updateListItem,
         updateListItemSimple,
         getEntityTypeName,
-        getEntityTypeFromExistingItem
+        getEntityTypeFromExistingItem,
+        countPendingVacationRequests
     };
 })();

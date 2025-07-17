@@ -528,6 +528,76 @@ if (mySenior) {
 }
 */
 
+/**
+ * Gets the base URL for navigation, using the SharePoint site URL configuration
+ * @returns {string} The base URL for the application
+ */
+export function getBaseUrl() {
+    let baseUrl = null;
+    let source = 'unknown';
+    
+    // Method 1: Get the base URL from SharePoint configuration
+    if (window.appConfiguratie?.instellingen?.siteUrl) {
+        baseUrl = window.appConfiguratie.instellingen.siteUrl.replace(/\/$/, '');
+        source = 'appConfiguratie';
+    }
+    
+    // Method 2: Fallback to current location if configuration is not available
+    if (!baseUrl) {
+        const currentUrl = window.location.href;
+        
+        // Extract the base part up to the site collection
+        // Expected pattern: https://som.org.om.local/sites/MulderT/CustomPW/Verlof/
+        const baseUrlPattern = /^(https?:\/\/[^\/]+\/sites\/[^\/]+\/[^\/]+\/[^\/]+)/;
+        const match = currentUrl.match(baseUrlPattern);
+        
+        if (match) {
+            baseUrl = match[1];
+            source = 'currentUrl';
+        }
+    }
+    
+    // Method 3: Last resort fallback
+    if (!baseUrl) {
+        baseUrl = 'https://som.org.om.local/sites/MulderT/CustomPW/Verlof';
+        source = 'fallback';
+    }
+    
+    // Ensure base URL includes the CPW/Rooster path for navigation
+    if (baseUrl && !baseUrl.includes('/CPW/Rooster')) {
+        baseUrl = `${baseUrl}/CPW/Rooster`;
+        source = `${source}+cpwRooster`;
+    }
+    
+    // Debug logging for org\busselw
+    const currentUser = window.currentUser || {};
+    const isDebugUser = currentUser.LoginName?.toLowerCase().includes('busselw') || 
+                       currentUser.Email?.toLowerCase().includes('busselw');
+    
+    if (isDebugUser) {
+        console.log('🔗 getBaseUrl() Debug Info:', {
+            baseUrl,
+            source,
+            configSiteUrl: window.appConfiguratie?.instellingen?.siteUrl,
+            currentLocation: window.location.href
+        });
+    }
+    
+    return baseUrl;
+}
+
+/**
+ * Gets the full URL for the verlofRooster page
+ * @returns {string} The full URL to the verlofRooster page
+ */
+export function getVerlofRoosterUrl() {
+    const baseUrl = getBaseUrl();
+    
+    // The verlofRooster page is located at: baseUrl/Verlofrooster.aspx
+    // (baseUrl already includes /CPW/Rooster)
+    return `${baseUrl}/Verlofrooster.aspx`;
+}
+
 export default {
     getTeamForEmployee,
     getTeamLeaderForEmployee,
@@ -546,5 +616,8 @@ export default {
     getTeamNamesForSenior,
     setCurrentUserSenior,
     getCurrentUserSenior,
-    invalidateCache
+    invalidateCache,
+    // Navigation helpers
+    getBaseUrl,
+    getVerlofRoosterUrl
 };

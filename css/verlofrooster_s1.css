@@ -827,6 +827,400 @@
     color: #2c3e50;
 }
 
+/* ==============================
+   ORANGE SQUARE TUTORIAL SYSTEM
+   ============================== */
+
+/* Orange square animations */
+@keyframes orange-pulse {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+}
+
+@keyframes orange-glow {
+    0% { box-shadow: 0 0 5px rgba(255, 140, 0, 0.5); }
+    100% { box-shadow: 0 0 20px rgba(255, 140, 0, 0.8); }
+}
+
+/* Orange square tooltip */
+.tutorial-tooltip-orange {
+    position: fixed;
+    max-width: 320px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 2px solid #ff8c00;
+    font-family: 'Inter', sans-serif;
+    z-index: 9998;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.tutorial-tooltip-orange .tooltip-header {
+    background: linear-gradient(135deg, #ff8c00, #ff6b00);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.tutorial-tooltip-orange .tooltip-icon {
+    font-size: 16px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.tutorial-tooltip-orange .tooltip-title {
+    flex: 1;
+    font-weight: 600;
+}
+
+.tutorial-tooltip-orange .tooltip-content {
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.tutorial-tooltip-orange .tooltip-navigation {
+    padding: 0 16px 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.tutorial-tooltip-orange .tooltip-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.tutorial-tooltip-orange .tooltip-btn-primary {
+    background: linear-gradient(135deg, #ff8c00, #ff6b00);
+    color: white;
+}
+
+.tutorial-tooltip-orange .tooltip-btn-primary:hover {
+    background: linear-gradient(135deg, #ff6b00, #ff5500);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+}
+
+.tutorial-tooltip-orange .tooltip-btn-secondary {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+}
+
+.tutorial-tooltip-orange .tooltip-btn-secondary:hover {
+    background: #e9ecef;
+    color: #495057;
+    transform: translateY(-1px);
+}
+
+.tutorial-tooltip-orange .tooltip-btn-skip {
+    background: transparent;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+    font-size: 12px;
+    padding: 6px 12px;
+}
+
+.tutorial-tooltip-orange .tooltip-btn-skip:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.tutorial-tooltip-orange .tooltip-progress {
+    padding: 12px 16px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: #666;
+}
+
+.tutorial-tooltip-orange .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: #f0f0f0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.tutorial-tooltip-orange .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff8c00, #ff6b00);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.tutorial-tooltip-orange .progress-text {
+    font-weight: 500;
+    color: #ff8c00;
+}
+
+.tutorial-tooltip-orange .tooltip-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+.tutorial-tooltip-orange .tooltip-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .tutorial-tooltip-orange {
+        max-width: 280px;
+        margin: 0 20px;
+    }
+    
+    .tutorial-tooltip-orange .tooltip-header {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .tutorial-tooltip-orange .tooltip-content {
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .tutorial-tooltip-orange .tooltip-navigation {
+        padding: 0 12px 12px;
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .tutorial-tooltip-orange .tooltip-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .tutorial-orange-square {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .tutorial-tooltip-orange {
+        border: 3px solid #ff8c00;
+    }
+    
+    .tutorial-tooltip-orange .tooltip-header {
+        background: #ff8c00;
+    }
+    
+    .tutorial-tooltip-orange .tooltip-btn-primary {
+        background: #ff8c00;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .tutorial-orange-square {
+        transition: none !important;
+    }
+    
+    .tutorial-tooltip-orange {
+        transition: none !important;
+    }
+    
+    @keyframes orange-pulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    }
+    
+    @keyframes orange-glow {
+        0%, 100% { box-shadow: 0 0 10px rgba(255, 140, 0, 0.6); }
+    }
+}
+
+/* ==============================
+   HANDLEIDING DEMO COMPONENTS
+   ============================== */
+
+/* Demo component container */
+.demo-component {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px;
+}
+
+/* FAB Demo Styling */
+.fab-demo {
+    position: relative;
+    width: 200px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.fab-container-demo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.fab-main-demo {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: not-allowed;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+}
+
+.fab-menu-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+    opacity: 0.9;
+}
+
+.fab-item-demo {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #495057;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Context Menu Demo Styling */
+.contextmenu-demo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 150px;
+}
+
+.contextmenu-container {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    min-width: 180px;
+    opacity: 0.9;
+}
+
+.contextmenu-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.contextmenu-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #495057;
+    border-bottom: 1px solid #f8f9fa;
+    cursor: default;
+    pointer-events: none;
+    transition: background-color 0.2s ease;
+}
+
+.contextmenu-item:last-child {
+    border-bottom: none;
+}
+
+.contextmenu-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Mobile responsiveness for demo components */
+@media (max-width: 768px) {
+    .demo-component {
+        padding: 15px;
+        margin: 10px 0;
+    }
+    
+    .fab-demo {
+        width: 150px;
+        height: 120px;
+    }
+    
+    .fab-main-demo {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    
+    .fab-item-demo {
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+    
+    .contextmenu-demo {
+        width: 150px;
+        height: 120px;
+    }
+    
+    .contextmenu-container {
+        min-width: 140px;
+    }
+    
+    .contextmenu-header,
+    .contextmenu-item {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
 /* Help dropdown arrow animation */
 .btn-help i:last-child {
     transition: transform 0.2s ease;

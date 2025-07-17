@@ -3,6 +3,9 @@
  * Defines common components and settings for administrative pages
  */
 
+// Import linkInfo service for proper navigation
+import * as linkInfo from '../../js/services/linkInfo.js';
+
 // Make sure React is available globally
 const { createElement: h, useState, useEffect } = React;
 
@@ -66,7 +69,8 @@ export const AccessDenied = () => {
  * Default navigation function to go back to main application
  */
 export const navigateBack = () => {
-    window.location.href = '../../verlofRooster.aspx';
+    const targetUrl = linkInfo.getVerlofRoosterUrl();
+    window.location.href = targetUrl;
 };
 
 console.log('Admin page configuration loaded successfully.');

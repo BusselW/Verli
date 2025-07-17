@@ -14,7 +14,9 @@ const RoosterHeader = ({
     setZoekTerm,
     geselecteerdTeam,
     setGeselecteerdTeam,
-    teams
+    teams,
+    canManageAnnouncements = false,
+    onNieuweMededeling
 }) => {
     return h('div', { className: 'toolbar-content' },
         h('div', { id: 'periode-navigatie', className: 'periode-navigatie' },
@@ -58,6 +60,14 @@ const RoosterHeader = ({
                 (teams || []).map(team => 
                     h('option', { key: team.id, value: team.id }, team.naam)
                 )
+            ),
+            canManageAnnouncements && h('button', {
+                className: 'btn btn-primary',
+                onClick: onNieuweMededeling,
+                title: 'Nieuwe mededeling aanmaken'
+            },
+                h('i', { className: 'fas fa-plus' }),
+                ' Nieuwe mededeling'
             )
         )
     );

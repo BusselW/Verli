@@ -10,7 +10,7 @@
  */
 
 // Import modules
-import { setSharePointContext, laadGebruikersInstellingen } from '../modules/userManager.js';
+import { setSharePointContext, laadGebruikersInstellingen } from './userManager.js';
 
 // Core React setup with 'h' pragma
 const { createElement: h, Fragment, useState, useEffect, useRef } = React;
