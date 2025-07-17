@@ -696,11 +696,11 @@
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    background: rgba(15, 23, 42, 0.85) !important;
-    background-color: rgba(15, 23, 42, 0.85) !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    background-color: rgba(0, 0, 0, 0.75) !important;
     background-image: none !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 1040 !important;
 }
 
@@ -713,10 +713,12 @@
     background-image: none !important;
     border-radius: 12px;
     box-shadow: 
-        0 20px 25px -5px rgba(0, 0, 0, 0.1),
-        0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 15px 30px -8px rgba(0, 0, 0, 0.3),
+        0 8px 16px -4px rgba(0, 0, 0, 0.2) !important;
     position: relative;
     z-index: 1050 !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
 }
 
 /* Modal Header - Maintain gradient but ensure it's not transparent */

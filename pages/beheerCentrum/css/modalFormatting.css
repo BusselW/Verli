@@ -168,10 +168,10 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.85) !important;
-    background-color: rgba(15, 23, 42, 0.85) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(0, 0, 0, 0.75) !important;
+    background-color: rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -186,18 +186,16 @@
     background: #ffffff !important;
     background-color: #ffffff !important;
     background-image: none !important;
-    border-radius: 20px;
+    border-radius: 16px;
     box-shadow: 
-        0 40px 80px -12px rgba(15, 23, 42, 0.3),
-        0 20px 40px -8px rgba(15, 23, 42, 0.2),
-        0 8px 16px -4px rgba(15, 23, 42, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9),
-        inset 0 -1px 0 rgba(226, 232, 240, 0.3);
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 15px 30px -8px rgba(0, 0, 0, 0.3),
+        0 8px 16px -4px rgba(0, 0, 0, 0.2);
     max-width: 90vw;
     max-height: 90vh;
     min-width: 320px;
     overflow: hidden;
-    transform: scale(0.92);
+    transform: scale(1);
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     position: relative;
@@ -206,7 +204,7 @@
     font-variation-settings: 'opsz' 32;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    border: 1px solid rgba(226, 232, 240, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.8);
 }
 
 .modal::before {
@@ -938,4 +936,66 @@
     background: #ffffff !important; 
     background-color: #ffffff !important;
     background-image: none !important;
+}
+
+/* ===== FORCE MODAL VISIBILITY AND CONTRAST ===== */
+/* Additional CSS to ensure modal is always visible and prominent */
+
+/* Ensure modal overlay is always visible with strong contrast */
+div[class*="modal"],
+div[class*="overlay"],
+.modal-overlay,
+.modal-backdrop {
+    background: rgba(0, 0, 0, 0.8) !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    background-image: none !important;
+}
+
+/* Force modal content to be solid white with strong borders */
+.modal,
+.modal-content,
+.modal-dialog,
+div[class*="modal"][class*="content"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 3px solid #e2e8f0 !important;
+    outline: 2px solid rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Ensure all modal sections have proper backgrounds */
+.modal * {
+    background-image: none !important;
+}
+
+.modal .modal-header,
+.modal .form-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 100%) !important;
+    background-image: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #2563eb 100%) !important;
+    color: white !important;
+}
+
+.modal .modal-body,
+.modal .form-body,
+.modal .modal-content,
+.modal .form-content {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+.modal .modal-footer,
+.modal .form-footer,
+.modal .form-actions {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border-top: 2px solid #e2e8f0 !important;
+}
+
+/* Force high contrast and visibility */
+.modal {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
 }
