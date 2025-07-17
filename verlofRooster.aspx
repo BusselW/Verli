@@ -416,7 +416,7 @@
                     window.startTutorial = roosterTutorial;
                     window.openHandleiding = openHandleiding;  // Not the alias
             
-                                console.log('🎉 Application initialized successfully');
+                                
                             </script>
                 </body>
             </html>

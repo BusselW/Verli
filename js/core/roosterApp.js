@@ -1895,12 +1895,7 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
                            currentUser.Email?.toLowerCase().includes('busselw');
         
         if (isDebugUser) {
-            console.log('🔗 NavigateTo Debug Info:', {
-                page,
-                baseUrl,
-                fullUrl,
-                currentLocation: window.location.href
-            });
+            
         }
         
         window.location.href = fullUrl;
