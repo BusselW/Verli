@@ -45,7 +45,7 @@ export const VERLI_THEME = {
         pill: '50px'
     },
     typography: {
-        fontFamily: "'Inter', 'Segoe UI', 'Roboto', sans-serif",
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
         fontSizes: {
             xs: '12px',
             sm: '14px',
@@ -787,6 +787,316 @@ export class VERLIButton extends VERLIComponent {
         if (this.button) {
             this.button.disabled = false;
         }
+    }
+}
+
+/**
+ * Standardized Card Component
+ */
+export class VERLICard extends VERLIComponent {
+    getDefaultOptions() {
+        return {
+            title: '',
+            text: '',
+            imageUrl: '',
+            imageAlt: '',
+            className: '',
+            onClick: null
+        };
+    }
+
+    create() {
+        const card = document.createElement('div');
+        card.className = `verli-card ${this.options.className}`;
+
+        if (this.options.onClick) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', this.options.onClick);
+        }
+
+        // Add image if provided
+        if (this.options.imageUrl) {
+            const image = document.createElement('img');
+            image.className = 'verli-card-image';
+            image.src = this.options.imageUrl;
+            image.alt = this.options.imageAlt;
+            card.appendChild(image);
+        }
+
+        // Add content container
+        const content = document.createElement('div');
+        content.className = 'verli-card-content';
+
+        // Add title if provided
+        if (this.options.title) {
+            const title = document.createElement('h3');
+            title.className = 'verli-card-title';
+            title.textContent = this.options.title;
+            content.appendChild(title);
+        }
+
+        // Add text if provided
+        if (this.options.text) {
+            const text = document.createElement('p');
+            text.className = 'verli-card-text';
+            text.textContent = this.options.text;
+            content.appendChild(text);
+        }
+
+        card.appendChild(content);
+        this.element = card;
+
+        return card;
+    }
+}
+
+/**
+ * Standardized Breadcrumb Component
+ */
+export class VERLIBreadcrumb extends VERLIComponent {
+    getDefaultOptions() {
+        return {
+            items: [], // Array of {text, href, active}
+            separator: '/',
+            className: ''
+        };
+    }
+
+    create() {
+        const nav = document.createElement('nav');
+        nav.className = `verli-breadcrumb ${this.options.className}`;
+
+        this.options.items.forEach((item, index) => {
+            if (index > 0) {
+                const separator = document.createElement('span');
+                separator.className = 'verli-breadcrumb-separator';
+                separator.textContent = this.options.separator;
+                nav.appendChild(separator);
+            }
+
+            if (item.active || !item.href) {
+                const span = document.createElement('span');
+                span.className = 'verli-breadcrumb-item verli-breadcrumb-active';
+                span.textContent = item.text;
+                nav.appendChild(span);
+            } else {
+                const link = document.createElement('a');
+                link.className = 'verli-breadcrumb-item verli-breadcrumb-link';
+                link.href = item.href;
+                link.textContent = item.text;
+                nav.appendChild(link);
+            }
+        });
+
+        this.element = nav;
+        return nav;
+    }
+}
+
+/**
+ * Standardized Progress Bar Component
+ */
+export class VERLIProgress extends VERLIComponent {
+    getDefaultOptions() {
+        return {
+            value: 0,
+            max: 100,
+            animated: false,
+            variant: 'primary', // primary, success, warning, danger
+            className: ''
+        };
+    }
+
+    create() {
+        const progress = document.createElement('div');
+        progress.className = `verli-progress ${this.options.className}`;
+
+        const bar = document.createElement('div');
+        bar.className = `verli-progress-bar verli-progress-${this.options.variant}`;
+        if (this.options.animated) {
+            bar.classList.add('verli-progress-animated');
+        }
+
+        this.updateProgress();
+        progress.appendChild(bar);
+
+        this.element = progress;
+        this.bar = bar;
+        return progress;
+    }
+
+    updateProgress() {
+        if (this.bar) {
+            const percentage = Math.min(100, Math.max(0, (this.options.value / this.options.max) * 100));
+            this.bar.style.width = `${percentage}%`;
+        }
+    }
+
+    setValue(value) {
+        this.options.value = value;
+        this.updateProgress();
+    }
+}
+
+/**
+ * Standardized Tabs Component
+ */
+export class VERLITabs extends VERLIComponent {
+    getDefaultOptions() {
+        return {
+            tabs: [], // Array of {id, label, content, active}
+            className: ''
+        };
+    }
+
+    create() {
+        const container = document.createElement('div');
+        container.className = `verli-tabs-container ${this.options.className}`;
+
+        // Create tabs header
+        const tabsHeader = document.createElement('div');
+        tabsHeader.className = 'verli-tabs';
+
+        // Create tab panels container
+        const panelsContainer = document.createElement('div');
+        panelsContainer.className = 'verli-tab-panels';
+
+        this.options.tabs.forEach((tab, index) => {
+            // Create tab button
+            const tabButton = document.createElement('div');
+            tabButton.className = 'verli-tab';
+            tabButton.textContent = tab.label;
+            tabButton.dataset.tab = tab.id;
+            if (tab.active) {
+                tabButton.classList.add('verli-tab-active');
+            }
+
+            // Add click handler
+            tabButton.addEventListener('click', () => {
+                this.activateTab(tab.id);
+            });
+
+            tabsHeader.appendChild(tabButton);
+
+            // Create tab panel
+            const panel = document.createElement('div');
+            panel.className = 'verli-tab-panel';
+            panel.id = tab.id;
+            if (tab.active) {
+                panel.classList.add('verli-tab-active');
+            }
+            if (typeof tab.content === 'string') {
+                panel.innerHTML = tab.content;
+            } else if (tab.content instanceof HTMLElement) {
+                panel.appendChild(tab.content);
+            }
+
+            panelsContainer.appendChild(panel);
+        });
+
+        container.appendChild(tabsHeader);
+        container.appendChild(panelsContainer);
+
+        this.element = container;
+        this.tabsHeader = tabsHeader;
+        this.panelsContainer = panelsContainer;
+
+        return container;
+    }
+
+    activateTab(tabId) {
+        // Remove active class from all tabs and panels
+        this.tabsHeader.querySelectorAll('.verli-tab').forEach(tab => {
+            tab.classList.remove('verli-tab-active');
+        });
+        this.panelsContainer.querySelectorAll('.verli-tab-panel').forEach(panel => {
+            panel.classList.remove('verli-tab-active');
+        });
+
+        // Add active class to selected tab and panel
+        const selectedTab = this.tabsHeader.querySelector(`[data-tab="${tabId}"]`);
+        const selectedPanel = this.panelsContainer.querySelector(`#${tabId}`);
+
+        if (selectedTab) selectedTab.classList.add('verli-tab-active');
+        if (selectedPanel) selectedPanel.classList.add('verli-tab-active');
+    }
+}
+
+/**
+ * Standardized Accordion Component
+ */
+export class VERLIAccordion extends VERLIComponent {
+    getDefaultOptions() {
+        return {
+            items: [], // Array of {id, title, content, open}
+            allowMultiple: false,
+            className: ''
+        };
+    }
+
+    create() {
+        const accordion = document.createElement('div');
+        accordion.className = `verli-accordion ${this.options.className}`;
+
+        this.options.items.forEach((item, index) => {
+            const accordionItem = document.createElement('div');
+            accordionItem.className = 'verli-accordion-item';
+
+            // Create header
+            const header = document.createElement('div');
+            header.className = 'verli-accordion-header';
+            header.innerHTML = `
+                <h4>${item.title}</h4>
+                <span class="verli-accordion-icon">▶</span>
+            `;
+
+            // Create content
+            const content = document.createElement('div');
+            content.className = 'verli-accordion-content';
+            if (typeof item.content === 'string') {
+                content.innerHTML = item.content;
+            } else if (item.content instanceof HTMLElement) {
+                content.appendChild(item.content);
+            }
+
+            // Set initial state
+            if (item.open) {
+                content.classList.add('verli-accordion-open');
+                header.querySelector('.verli-accordion-icon').classList.add('verli-accordion-open');
+            }
+
+            // Add click handler
+            header.addEventListener('click', () => {
+                this.toggleItem(accordionItem, !this.options.allowMultiple);
+            });
+
+            accordionItem.appendChild(header);
+            accordionItem.appendChild(content);
+            accordion.appendChild(accordionItem);
+        });
+
+        this.element = accordion;
+        return accordion;
+    }
+
+    toggleItem(item, closeOthers = false) {
+        const content = item.querySelector('.verli-accordion-content');
+        const icon = item.querySelector('.verli-accordion-icon');
+        const isOpen = content.classList.contains('verli-accordion-open');
+
+        if (closeOthers) {
+            // Close all other items
+            this.element.querySelectorAll('.verli-accordion-content').forEach(otherContent => {
+                if (otherContent !== content) {
+                    otherContent.classList.remove('verli-accordion-open');
+                    otherContent.parentNode.querySelector('.verli-accordion-icon').classList.remove('verli-accordion-open');
+                }
+            });
+        }
+
+        // Toggle current item
+        content.classList.toggle('verli-accordion-open', !isOpen);
+        icon.classList.toggle('verli-accordion-open', !isOpen);
     }
 }
 

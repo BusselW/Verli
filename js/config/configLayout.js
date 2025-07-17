@@ -57,7 +57,7 @@
 
             // Typography settings
             typography: {
-                fontFamily: "'Inter', system-ui, sans-serif",
+                fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif",
                 fontSize: {
                     xs: '0.75rem',
                     sm: '0.875rem',
@@ -318,6 +318,104 @@
              */
             createBadge: function(text, type = 'primary') {
                 return `<span class="badge badge-${type}">${text}</span>`;
+            },
+
+            /**
+             * Creates a card component
+             */
+            createCard: function(config = {}) {
+                const {
+                    title = '',
+                    text = '',
+                    imageUrl = '',
+                    imageAlt = '',
+                    className = ''
+                } = config;
+
+                return `
+                <div class="verli-card ${className}">
+                    ${imageUrl ? `<img src="${imageUrl}" alt="${imageAlt}" class="verli-card-image">` : ''}
+                    <div class="verli-card-content">
+                        ${title ? `<h3 class="verli-card-title">${title}</h3>` : ''}
+                        ${text ? `<p class="verli-card-text">${text}</p>` : ''}
+                    </div>
+                </div>`;
+            },
+
+            /**
+             * Creates a breadcrumb navigation
+             */
+            createBreadcrumb: function(items = [], separator = '/') {
+                const breadcrumbItems = items.map((item, index) => {
+                    const separatorHtml = index > 0 ? `<span class="verli-breadcrumb-separator">${separator}</span>` : '';
+                    
+                    if (item.active || !item.href) {
+                        return `${separatorHtml}<span class="verli-breadcrumb-item verli-breadcrumb-active">${item.text}</span>`;
+                    } else {
+                        return `${separatorHtml}<a href="${item.href}" class="verli-breadcrumb-item verli-breadcrumb-link">${item.text}</a>`;
+                    }
+                }).join('');
+
+                return `<nav class="verli-breadcrumb">${breadcrumbItems}</nav>`;
+            },
+
+            /**
+             * Creates a progress bar
+             */
+            createProgress: function(config = {}) {
+                const {
+                    value = 0,
+                    max = 100,
+                    variant = 'primary',
+                    animated = false,
+                    className = ''
+                } = config;
+
+                const percentage = Math.min(100, Math.max(0, (value / max) * 100));
+                const animatedClass = animated ? 'verli-progress-animated' : '';
+
+                return `
+                <div class="verli-progress ${className}">
+                    <div class="verli-progress-bar verli-progress-${variant} ${animatedClass}" style="width: ${percentage}%"></div>
+                </div>`;
+            },
+
+            /**
+             * Creates tabs component
+             */
+            createTabs: function(tabs = []) {
+                const tabsHtml = tabs.map(tab => 
+                    `<div class="verli-tab ${tab.active ? 'verli-tab-active' : ''}" data-tab="${tab.id}">${tab.label}</div>`
+                ).join('');
+
+                const panelsHtml = tabs.map(tab => 
+                    `<div id="${tab.id}" class="verli-tab-panel ${tab.active ? 'verli-tab-active' : ''}">${tab.content}</div>`
+                ).join('');
+
+                return `
+                <div class="verli-tabs-container">
+                    <div class="verli-tabs">${tabsHtml}</div>
+                    <div class="verli-tab-panels">${panelsHtml}</div>
+                </div>`;
+            },
+
+            /**
+             * Creates accordion component
+             */
+            createAccordion: function(items = []) {
+                const accordionItems = items.map(item => 
+                    `<div class="verli-accordion-item">
+                        <div class="verli-accordion-header">
+                            <h4>${item.title}</h4>
+                            <span class="verli-accordion-icon ${item.open ? 'verli-accordion-open' : ''}">▶</span>
+                        </div>
+                        <div class="verli-accordion-content ${item.open ? 'verli-accordion-open' : ''}">
+                            ${item.content}
+                        </div>
+                    </div>`
+                ).join('');
+
+                return `<div class="verli-accordion">${accordionItems}</div>`;
             }
         },
 
@@ -431,6 +529,152 @@
                     color: var(--text-secondary); 
                     font-size: 0.875rem; 
                 }
+
+                /* Card Components */
+                .verli-card {
+                    background: var(--bg-secondary);
+                    border: 1px solid var(--border);
+                    border-radius: 0.75rem;
+                    box-shadow: var(--shadow);
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
+                .verli-card-image {
+                    width: 100%;
+                    height: 8rem;
+                    object-fit: cover;
+                }
+                .verli-card-content {
+                    padding: 1rem;
+                    flex: 1;
+                }
+                .verli-card-title {
+                    margin: 0 0 0.5rem;
+                    font-size: 1rem;
+                    font-weight: 600;
+                }
+                .verli-card-text {
+                    margin: 0;
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+                }
+
+                /* Breadcrumb Components */
+                .verli-breadcrumb {
+                    display: flex;
+                    gap: 0.5rem;
+                    font-size: 0.875rem;
+                }
+                .verli-breadcrumb-link {
+                    color: var(--text-secondary);
+                    text-decoration: none;
+                    transition: color 0.2s var(--ease-in-out-quad);
+                }
+                .verli-breadcrumb-link:hover {
+                    color: var(--text-primary);
+                }
+                .verli-breadcrumb-separator {
+                    color: var(--text-secondary);
+                }
+                .verli-breadcrumb-active {
+                    color: var(--text-primary);
+                    font-weight: 500;
+                }
+
+                /* Progress Components */
+                .verli-progress {
+                    background: var(--bg-tertiary);
+                    border-radius: 0.375rem;
+                    overflow: hidden;
+                    width: 100%;
+                    height: 0.75rem;
+                    border: 1px solid var(--border);
+                }
+                .verli-progress-bar {
+                    height: 100%;
+                    width: 0;
+                    transition: width 0.3s var(--ease-in-out-quad);
+                }
+                .verli-progress-primary {
+                    background: var(--accent);
+                }
+                .verli-progress-success {
+                    background: var(--success);
+                }
+                .verli-progress-warning {
+                    background: var(--warning);
+                }
+                .verli-progress-danger {
+                    background: var(--danger);
+                }
+
+                /* Tab Components */
+                .verli-tabs-container {
+                    width: 100%;
+                }
+                .verli-tabs {
+                    display: flex;
+                    gap: 1rem;
+                    border-bottom: 1px solid var(--border);
+                }
+                .verli-tab {
+                    padding: 0.5rem 1rem;
+                    cursor: pointer;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    border-bottom: 2px solid transparent;
+                    transition: all 0.2s var(--ease-in-out-quad);
+                }
+                .verli-tab-active {
+                    color: var(--text-primary);
+                    border-color: var(--accent);
+                }
+                .verli-tab-panel {
+                    display: none;
+                    padding: 1rem 0;
+                }
+                .verli-tab-panel.verli-tab-active {
+                    display: block;
+                }
+
+                /* Accordion Components */
+                .verli-accordion-item {
+                    border-top: 1px solid var(--border);
+                }
+                .verli-accordion-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 0.75rem 1rem;
+                    cursor: pointer;
+                    transition: background-color 0.2s var(--ease-in-out-quad);
+                }
+                .verli-accordion-header:hover {
+                    background-color: var(--bg-primary);
+                }
+                .verli-accordion-header h4 {
+                    margin: 0;
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                }
+                .verli-accordion-icon {
+                    transition: transform 0.2s var(--ease-in-out-quad);
+                    font-size: 0.75rem;
+                }
+                .verli-accordion-icon.verli-accordion-open {
+                    transform: rotate(90deg);
+                }
+                .verli-accordion-content {
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: max-height 0.3s var(--ease-in-out-quad);
+                    padding: 0 1rem;
+                }
+                .verli-accordion-content.verli-accordion-open {
+                    max-height: 20rem;
+                    padding: 0.75rem 1rem;
+                }
                 `;
 
                 let styleElement = document.getElementById('layout-config-core');
@@ -445,6 +689,72 @@
         },
 
         /**
+         * Interactive Component Utilities
+         */
+        interactions: {
+            
+            /**
+             * Initialize tabs functionality
+             */
+            initializeTabs: function() {
+                document.querySelectorAll('.verli-tab').forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        const tabContainer = this.closest('.verli-tabs-container');
+                        const targetId = this.dataset.tab;
+                        
+                        // Remove active class from all tabs and panels in this container
+                        tabContainer.querySelectorAll('.verli-tab, .verli-tab-panel').forEach(el => {
+                            el.classList.remove('verli-tab-active');
+                        });
+                        
+                        // Add active class to clicked tab and corresponding panel
+                        this.classList.add('verli-tab-active');
+                        const targetPanel = tabContainer.querySelector(`#${targetId}`);
+                        if (targetPanel) {
+                            targetPanel.classList.add('verli-tab-active');
+                        }
+                    });
+                });
+            },
+            
+            /**
+             * Initialize accordion functionality
+             */
+            initializeAccordions: function() {
+                document.querySelectorAll('.verli-accordion-header').forEach(header => {
+                    header.addEventListener('click', function() {
+                        const content = this.nextElementSibling;
+                        const icon = this.querySelector('.verli-accordion-icon');
+                        const accordion = this.closest('.verli-accordion');
+                        const allowMultiple = accordion.dataset.allowMultiple === 'true';
+                        
+                        // If not allowing multiple, close all other items
+                        if (!allowMultiple) {
+                            accordion.querySelectorAll('.verli-accordion-content').forEach(otherContent => {
+                                if (otherContent !== content) {
+                                    otherContent.classList.remove('verli-accordion-open');
+                                    otherContent.previousElementSibling.querySelector('.verli-accordion-icon').classList.remove('verli-accordion-open');
+                                }
+                            });
+                        }
+                        
+                        // Toggle current item
+                        const isOpen = content.classList.toggle('verli-accordion-open');
+                        icon.classList.toggle('verli-accordion-open', isOpen);
+                    });
+                });
+            },
+            
+            /**
+             * Initialize all interactive components
+             */
+            initializeAll: function() {
+                this.initializeTabs();
+                this.initializeAccordions();
+            }
+        },
+
+        /**
          * Initialization function
          */
         init: function() {
@@ -454,12 +764,30 @@
             this.styles.injectCSSVariables.call(this);
             this.styles.injectCoreStyles.call(this);
             
-            // Add Google Fonts if not already present
-            if (!document.querySelector('link[href*="fonts.googleapis.com"]')) {
-                const fontLink = document.createElement('link');
-                fontLink.rel = 'stylesheet';
-                fontLink.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-                document.head.appendChild(fontLink);
+            // Initialize interactive components
+            this.interactions.initializeAll();
+            
+            // Set up observer for dynamically added components
+            if (typeof MutationObserver !== 'undefined') {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'childList') {
+                            mutation.addedNodes.forEach((node) => {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    // Re-initialize interactive components for new content
+                                    if (node.querySelector && (node.querySelector('.verli-tab') || node.querySelector('.verli-accordion-header'))) {
+                                        this.interactions.initializeAll();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+                
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
             }
             
             console.log('✅ LayoutConfig initialized successfully');
