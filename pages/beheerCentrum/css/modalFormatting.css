@@ -999,3 +999,102 @@ div[class*="modal"][class*="content"] {
     visibility: visible !important;
     display: block !important;
 }
+
+/* ===== NUCLEAR OPTION - MAXIMUM SPECIFICITY MODAL FIXES ===== */
+/* This section uses maximum CSS specificity to override any conflicting styles */
+
+/* Ultra-high specificity modal overlay fix */
+html body div.modal-overlay,
+html body .modal-overlay,
+html body [class*="modal"][class*="overlay"],
+html body [class*="overlay"] {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    background-image: none !important;
+    background-attachment: initial !important;
+    background-origin: initial !important;
+    background-clip: initial !important;
+    background-size: initial !important;
+    background-repeat: initial !important;
+    background-position: initial !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Ultra-high specificity modal content fix */
+html body div.modal,
+html body .modal,
+html body [class*="modal"]:not([class*="overlay"]),
+html body .modal-content,
+html body .modal-dialog,
+html body [class*="modal"][class*="content"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    background-image: none !important;
+    background-attachment: initial !important;
+    background-origin: initial !important;
+    background-clip: initial !important;
+    background-size: initial !important;
+    background-repeat: initial !important;
+    background-position: initial !important;
+    opacity: 1 !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* Force all modal child elements to have solid backgrounds */
+html body .modal *,
+html body [class*="modal"] * {
+    background-image: none !important;
+}
+
+html body .modal .modal-body,
+html body .modal .form-body,
+html body [class*="modal"] [class*="body"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    background-image: none !important;
+}
+
+html body .modal .modal-footer,
+html body .modal .form-footer,
+html body .modal .form-actions,
+html body [class*="modal"] [class*="footer"],
+html body [class*="modal"] [class*="actions"] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    background-image: none !important;
+}
+
+/* Force header to be solid gradient */
+html body .modal .modal-header,
+html body .modal .form-header,
+html body [class*="modal"] [class*="header"] {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    background-image: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+}
+
+/* CSS Custom Properties override - force variables to solid colors */
+.modal-overlay {
+    --modal-overlay-bg: rgba(0, 0, 0, 0.8) !important;
+    --backdrop-filter: none !important;
+}
+
+.modal {
+    --modal-bg: #ffffff !important;
+    --modal-bg-color: #ffffff !important;
+    --background: #ffffff !important;
+    --bg: #ffffff !important;
+}
+
+/* Style attribute override simulation */
+.modal-overlay[style] {
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.modal[style] {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+}

@@ -9,6 +9,9 @@
     <!-- Fonts and Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Emergency Modal Fix - Must be loaded after other styles -->
+    <link rel="stylesheet" href="css/modalFix.css">
+    
     <!-- SharePoint Config -->
     <script src="../../js/config/configLijst.js"></script>
     <script src="../../js/config/configLayout.js"></script>
@@ -372,28 +375,36 @@
             justify-content: flex-start;
         }
 
-        /* Modal and form styling */
+        /* Modal and form styling - FIXED */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.8) !important;
+            background: rgba(0, 0, 0, 0.8) !important;
+            background-image: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 2000 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
 
         .modal-content {
-            background: var(--bg-secondary);
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            background-image: none !important;
             border-radius: 0.75rem;
             max-width: 600px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+            border: 2px solid #e5e7eb !important;
+            opacity: 1 !important;
         }
 
         /* Button styles using configLayout system */
@@ -1266,6 +1277,69 @@
         );
 
         console.log('🎉 Beheercentrum (Full-Width) initialized successfully');
+        
+        // EMERGENCY MODAL BACKGROUND FIX
+        // Force modal backgrounds with JavaScript as a fallback
+        const forceModalBackgrounds = () => {
+            // Look for modal overlays
+            document.querySelectorAll('.modal-overlay, [class*="modal"]:not([class*="content"]):not([class*="body"])').forEach(overlay => {
+                if (overlay.classList.contains('modal-overlay') || (overlay.className.includes('modal') && !overlay.className.includes('content') && !overlay.className.includes('body'))) {
+                    overlay.style.setProperty('background-color', 'rgba(0, 0, 0, 0.8)', 'important');
+                    overlay.style.setProperty('background', 'rgba(0, 0, 0, 0.8)', 'important');
+                    overlay.style.setProperty('background-image', 'none', 'important');
+                    overlay.style.setProperty('backdrop-filter', 'none', 'important');
+                }
+            });
+            
+            // Look for modal content
+            document.querySelectorAll('.modal, .modal-content, .modal-dialog').forEach(modal => {
+                if (!modal.classList.contains('modal-overlay')) {
+                    modal.style.setProperty('background-color', '#ffffff', 'important');
+                    modal.style.setProperty('background', '#ffffff', 'important');
+                    modal.style.setProperty('background-image', 'none', 'important');
+                    modal.style.setProperty('opacity', '1', 'important');
+                }
+            });
+            
+            // Look for modal body and footer
+            document.querySelectorAll('.modal-body, .form-body, .modal-footer, .form-footer, .form-actions').forEach(section => {
+                section.style.setProperty('background-color', '#ffffff', 'important');
+                section.style.setProperty('background', '#ffffff', 'important');
+                section.style.setProperty('background-image', 'none', 'important');
+            });
+            
+            // Look for modal header
+            document.querySelectorAll('.modal-header, .form-header').forEach(header => {
+                header.style.setProperty('background', 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)', 'important');
+                header.style.setProperty('background-color', '#1e40af', 'important');
+                header.style.setProperty('color', '#ffffff', 'important');
+            });
+        };
+        
+        // Run immediately
+        forceModalBackgrounds();
+        
+        // Run on DOM changes (for dynamically created modals)
+        const observer = new MutationObserver((mutations) => {
+            let hasModalChanges = false;
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1 && (node.classList?.contains('modal') || node.className?.includes('modal'))) {
+                            hasModalChanges = true;
+                        }
+                    });
+                }
+            });
+            if (hasModalChanges) {
+                setTimeout(forceModalBackgrounds, 10);
+            }
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // Also run periodically as a safety net
+        setInterval(forceModalBackgrounds, 2000);
     </script>
 </body>
 </html>
