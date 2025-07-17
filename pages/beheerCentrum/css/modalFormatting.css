@@ -1,20 +1,53 @@
 /**
  * modalFormatting.css - Dedicated modal styling for Beheercentrum
- * Modern, compact modal design with consistent typography
- * Enhanced with configuration-based modal layouts
+ * Modern, compact modal design using Verli/configLayout design system
+ * Integrated with existing CSS variables and design tokens
  */
 
-/* ===== MODAL SIZE CONFIGURATIONS ===== */
-.modal-small { width: 400px; }
-.modal-medium { width: 600px; }
-.modal-large { width: 800px; }
-.modal-xlarge { width: 1200px; }
-.modal-full { width: 100vw; height: 100vh; }
+/* ===== VERLI DESIGN SYSTEM INTEGRATION ===== */
+/* Use the established design tokens from configLayout and Verli systems */
+
+:root {
+    /* Modal-specific variables that integrate with Verli system */
+    --modal-overlay-bg: rgba(0, 0, 0, 0.8);
+    --modal-bg: var(--bg-secondary, #ffffff);
+    --modal-border: var(--border, #e2e8f0);
+    --modal-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0, 0, 0, 0.1));
+    --modal-radius: var(--radius-xl, 1rem);
+    --modal-header-bg: var(--accent, #FF6D22);
+    --modal-text-primary: var(--text-primary, #1e293b);
+    --modal-text-secondary: var(--text-secondary, #64748b);
+    --modal-z-index: var(--z-modal, 1050);
+}
+
+/* ===== MODAL SIZE CONFIGURATIONS USING VERLI SPACING ===== */
+.modal-small { 
+    width: min(400px, 90vw); 
+    max-width: 400px;
+}
+.modal-medium { 
+    width: min(600px, 90vw); 
+    max-width: 600px;
+}
+.modal-large { 
+    width: min(800px, 90vw); 
+    max-width: 800px;
+}
+.modal-xlarge { 
+    width: min(1200px, 95vw); 
+    max-width: 1200px;
+}
+.modal-full { 
+    width: 100vw; 
+    height: 100vh; 
+    max-width: none;
+    max-height: none;
+}
 
 .modal-height-auto { height: auto; }
-.modal-height-small { height: 400px; }
-.modal-height-medium { height: 600px; }
-.modal-height-large { height: 800px; }
+.modal-height-small { height: min(400px, 80vh); }
+.modal-height-medium { height: min(600px, 80vh); }
+.modal-height-large { height: min(800px, 85vh); }
 .modal-height-full { height: 100vh; }
 
 /* ===== MODAL ANIMATIONS ===== */
