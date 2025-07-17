@@ -1,10 +1,31 @@
 /* ==========================================================================
    BEHANDELCENTRUM - PROFESSIONAL REDESIGN
    Clean, sleek, modern interface with proper proportions
+   Integrated with configLayout.js design system
    ========================================================================== */
 
-/* Color Palette & Variables */
+/* ConfigLayout.js Integration - Primary Variables Override */
 :root {
+    /* Inherit from configLayout.js when available, fallback to custom values */
+    --font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif);
+    --ease-in-out-quad: var(--ease-in-out-quad, cubic-bezier(0.45, 0, 0.55, 1));
+    --ease-out-circ: var(--ease-out-circ, cubic-bezier(0.075, 0.82, 0.165, 1));
+    
+    /* Use configLayout colors when available */
+    --primary-bg: var(--bg-primary, #E6E8EB);
+    --secondary-bg: var(--bg-secondary, #FFFFFF);
+    --tertiary-bg: var(--bg-tertiary, #FFFFFF);
+    --primary-text: var(--text-primary, #001935);
+    --secondary-text: var(--text-secondary, #99A3AE);
+    --border-color: var(--border, #CCD1D7);
+    --accent-color: var(--accent, #FF6D22);
+    --accent-hover-color: var(--accent-hover, #E5621E);
+    --success-color: var(--success, #16a34a);
+    --danger-color: var(--danger, #dc2626);
+    --warning-color: var(--warning, #f59e0b);
+    --configlayout-shadow: var(--shadow, 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07));
+
+/* Original Color Palette & Variables (preserved for compatibility) */
     /* Core Colors */
     --bg-primary: #f8fafc;
     --bg-secondary: #ffffff;
@@ -106,7 +127,7 @@ body.light-theme {
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif);
     margin: 0;
     padding: 0;
     background-color: var(--bg-primary);
@@ -2176,4 +2197,80 @@ html, body {
     background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+
+/* ==========================================================================
+   CONFIGLAYOUT.JS INTEGRATION OVERRIDES
+   Ensure consistent styling with the design system
+   ========================================================================== */
+
+/* Apply Apple system fonts consistently */
+body,
+h1, h2, h3, h4, h5, h6,
+p, span, div, button, input, select, textarea,
+.header, .header h1, .btn, .user-name {
+    font-family: var(--font-family) !important;
+}
+
+/* Update transitions to use configLayout easing */
+*,
+.btn,
+.header-emulation-select,
+input,
+select,
+textarea {
+    transition-timing-function: var(--ease-in-out-quad) !important;
+}
+
+/* Use configLayout colors for main elements */
+body {
+    background-color: var(--primary-bg) !important;
+    color: var(--primary-text) !important;
+}
+
+/* Header integration */
+.header {
+    background-color: var(--primary-text) !important;
+    color: var(--secondary-bg) !important;
+    box-shadow: var(--configlayout-shadow) !important;
+}
+
+/* Button integration */
+.btn-functional {
+    background-color: var(--accent-color) !important;
+    color: var(--secondary-bg) !important;
+}
+
+.btn-functional:hover {
+    background-color: var(--accent-hover-color) !important;
+}
+
+/* Content containers */
+.content-container,
+.app-container > div {
+    background-color: var(--secondary-bg);
+}
+
+.app-container {
+    background-color: var(--primary-bg);
+}
+
+/* Form elements */
+input, select, textarea {
+    border-color: var(--border-color);
+}
+
+/* Status colors integration */
+.status-goedgekeurd { background-color: var(--success-color) !important; }
+.status-afgekeurd { background-color: var(--danger-color) !important; }
+.status-pending { background-color: var(--warning-color) !important; }
+
+/* Ensure consistent border radius */
+.btn, input, select, textarea, .card, .modal-content {
+    border-radius: var(--radius-md, 0.5rem);
+}
+
+/* Shadow consistency */
+.card, .modal-content, .dropdown-menu {
+    box-shadow: var(--configlayout-shadow);
 }
