@@ -373,73 +373,64 @@ export const EnhancedBaseForm = ({
     };
 
     return h('div', { 
-        className: getModalClasses(),
+        className: 'modal-form-content modal-compact',
         role: 'dialog',
         'aria-labelledby': 'modal-title',
         'aria-modal': 'true'
     },
-        h('div', { className: 'modal-form-content' },
-            // Header
-            h('div', { className: getHeaderClasses() },
-                h('h2', { 
-                    id: 'modal-title',
-                    className: 'modal-title' 
-                }, title),
-                modalConfig.header.showCloseButton && h('button', {
-                    type: 'button',
-                    className: 'modal-close-button',
-                    onClick: onCancel,
-                    'aria-label': 'Sluiten'
-                }, '×')
-            ),
+        // Header
+        h('div', { className: getHeaderClasses() },
+            h('h2', { 
+                id: 'modal-title',
+                className: 'modal-title' 
+            }, title),
+            modalConfig.header.showCloseButton && h('button', {
+                type: 'button',
+                className: 'modal-close-button',
+                onClick: onCancel,
+                'aria-label': 'Sluiten'
+            }, '×')
+        ),
+        
+        // Body - removed nested modal-body wrapper to prevent double scrollbars
+        h('form', { 
+            id: 'enhanced-form',
+            onSubmit: handleSubmit, 
+            className: `enhanced-form padding-${modalConfig.body.padding} bg-${modalConfig.body.background}` 
+        },
+            // Show general error if any
+            errors._general && h('div', {
+                className: 'form-error general-error',
+                role: 'alert'
+            }, errors._general),
             
-            // Body
-            h('div', { 
-                className: `modal-body padding-${modalConfig.body.padding} bg-${modalConfig.body.background}`,
-                style: { 
-                    overflowY: modalConfig.body.scrollable ? 'auto' : 'visible' 
-                }
-            },
-                h('form', { 
-                    id: 'enhanced-form',
-                    onSubmit: handleSubmit, 
-                    className: 'enhanced-form' 
-                },
-                    // Show general error if any
-                    errors._general && h('div', {
-                        className: 'form-error general-error',
-                        role: 'alert'
-                    }, errors._general),
-                    
-                    // Autocomplete section for employee forms
-                    renderAutocompleteSection(),
-                    
-                    // Form sections or custom children
-                    children || config.sections.map(renderSection)
-                )
-            ),
+            // Autocomplete section for employee forms
+            renderAutocompleteSection(),
             
-            // Footer
-            modalConfig.footer.show && h('div', { 
-                className: `modal-footer alignment-${modalConfig.footer.alignment} padding-${modalConfig.footer.padding} bg-${modalConfig.footer.background}`,
-                style: {
-                    position: modalConfig.footer.sticky ? 'sticky' : 'static',
-                    bottom: modalConfig.footer.sticky ? 0 : 'auto'
-                }
-            },
-                h('button', {
-                    type: 'button',
-                    className: 'btn btn-secondary',
-                    onClick: onCancel,
-                    disabled: isSubmitting
-                }, 'Annuleren'),
-                h('button', {
-                    type: 'submit',
-                    form: 'enhanced-form',
-                    className: 'btn btn-primary',
-                    disabled: isSubmitting
-                }, isSubmitting ? 'Opslaan...' : 'Opslaan')
-            )
+            // Form sections or custom children
+            children || config.sections.map(renderSection)
+        ),
+        
+        // Footer
+        modalConfig.footer.show && h('div', { 
+            className: `modal-footer alignment-${modalConfig.footer.alignment} padding-${modalConfig.footer.padding} bg-${modalConfig.footer.background}`,
+            style: {
+                position: modalConfig.footer.sticky ? 'sticky' : 'static',
+                bottom: modalConfig.footer.sticky ? 0 : 'auto'
+            }
+        },
+            h('button', {
+                type: 'button',
+                className: 'btn btn-secondary',
+                onClick: onCancel,
+                disabled: isSubmitting
+            }, 'Annuleren'),
+            h('button', {
+                type: 'submit',
+                form: 'enhanced-form',
+                className: 'btn btn-primary',
+                disabled: isSubmitting
+            }, isSubmitting ? 'Opslaan...' : 'Opslaan')
         )
     );
 };

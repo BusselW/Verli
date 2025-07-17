@@ -191,28 +191,26 @@ export const BaseForm = ({
         );
     };
 
-    return h('div', { className: `modal-form-wrapper modal-${config.width || 'medium'}` },
-        h('div', { className: 'modal-form-content' },
-            h('div', { className: 'form-header' },
-                h('h2', { className: 'form-title' }, title)
+    return h('div', { className: 'modal-form-content modal-compact' },
+        h('div', { className: 'form-header' },
+            h('h2', { className: 'form-title' }, title)
+        ),
+        h('form', { onSubmit: handleSubmit, className: 'enhanced-form' },
+            h('div', { className: 'form-body' },
+                children || config.sections.map(renderSection)
             ),
-            h('form', { onSubmit: handleSubmit, className: 'enhanced-form' },
-                h('div', { className: 'form-body' },
-                    children || config.sections.map(renderSection)
-                ),
-                h('div', { className: 'form-actions' },
-                    h('button', {
-                        type: 'button',
-                        className: 'btn btn-secondary',
-                        onClick: onCancel,
-                        disabled: isSubmitting
-                    }, 'Annuleren'),
-                    h('button', {
-                        type: 'submit',
-                        className: 'btn btn-primary',
-                        disabled: isSubmitting
-                    }, isSubmitting ? 'Opslaan...' : 'Opslaan')
-                )
+            h('div', { className: 'form-actions' },
+                h('button', {
+                    type: 'button',
+                    className: 'btn btn-secondary',
+                    onClick: onCancel,
+                    disabled: isSubmitting
+                }, 'Annuleren'),
+                h('button', {
+                    type: 'submit',
+                    className: 'btn btn-primary',
+                    disabled: isSubmitting
+                }, isSubmitting ? 'Opslaan...' : 'Opslaan')
             )
         )
     );

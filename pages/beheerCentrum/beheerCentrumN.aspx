@@ -11,6 +11,8 @@
     
     <!-- Modal Styling -->
     <link rel="stylesheet" href="css/modalFormatting.css">
+    <!-- Modal spacing and nesting fixes -->
+    <link rel="stylesheet" href="css/modalFixesCompact.css">
     
     <!-- SharePoint Config -->
     <script src="../../js/config/configLijst.js"></script>
