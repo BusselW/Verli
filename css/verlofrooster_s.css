@@ -1,4 +1,92 @@
 /* ==========================================================================
+   Tooltip Stijlen (Aangepaste Tooltips)
+   ========================================================================== */
+.custom-tooltip {
+    position: fixed;
+    z-index: 10000;
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+    background-color: #1f2937;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.25;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: opacity 0.2s ease-in-out;
+    max-width: 300px;
+    word-wrap: break-word;
+    font-family: 'Inter', sans-serif;
+}
+
+.custom-tooltip-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #f9fafb;
+    font-size: 0.9rem;
+}
+
+.custom-tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.custom-tooltip-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.custom-tooltip-label {
+    font-weight: 500;
+    color: #d1d5db;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.custom-tooltip-value {
+    color: #f9fafb;
+    word-break: break-word;
+    flex: 1;
+}
+
+.tooltip-status {
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.tooltip-status-new {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.tooltip-status-approved {
+    background-color: #10b981;
+    color: white;
+}
+
+.tooltip-status-rejected {
+    background-color: #ef4444;
+    color: white;
+}
+
+.tooltip-status-sick {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.tooltip-holiday {
+    background-color: #7c3aed;
+    border-left: 4px solid #a855f7;
+}
+
+/* ==========================================================================
    Algemene Stijlen & Typografie (Minimale Aanpassingen)
    ========================================================================== */
 body,

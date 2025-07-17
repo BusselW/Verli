@@ -43,8 +43,7 @@
 
         const { useState, useEffect, useMemo, useCallback, createElement: h, Fragment } = React;
 
-        // Initialize tooltip manager as soon as the script runs
-        TooltipManager.init();
+        // Tooltip manager will be initialized by the RoosterApp component
 
         // =====================
         // Note: Navigation is now handled by the imported RoosterApp component

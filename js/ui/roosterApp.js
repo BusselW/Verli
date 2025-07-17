@@ -1482,10 +1482,10 @@ const RoosterApp = ({ isUserValidated = true, currentUser, userPermissions }) =>
     
     // Initialize the tooltip manager when the component mounts
     useEffect(() => {
-        // Make sure TooltipManager is initialized
-        console.log('🔍 Initializing TooltipManager from RoosterApp');
-        if (typeof TooltipManager !== 'undefined' && TooltipManager.init) {
-            TooltipManager.init();
+        // Start the TooltipManager system
+        console.log('🔍 Starting TooltipManager from RoosterApp');
+        if (typeof TooltipManager !== 'undefined' && TooltipManager.start) {
+            TooltipManager.start();
         }
     }, []);
    

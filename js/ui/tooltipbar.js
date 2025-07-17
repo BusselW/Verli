@@ -76,6 +76,34 @@ const TooltipManager = {
     },
 
     /**
+     * Start the tooltip system with proper initialization and observation
+     * This is the main entry point for ES6 modules
+     */
+    start: function() {
+        console.log('🚀 Starting TooltipManager system');
+        
+        // Initialize if not already done
+        this.init();
+        
+        // Auto-attach tooltips to existing elements
+        setTimeout(() => {
+            console.log('🔄 Auto-attaching tooltips to existing elements');
+            this.autoAttachTooltips();
+            this.observeDOM();
+        }, 100);
+        
+        // React integration - listen for React updates
+        window.addEventListener('react-update', () => {
+            console.log('⚛️ React update detected, re-attaching tooltips');
+            setTimeout(() => {
+                this.autoAttachTooltips();
+            }, 50);
+        });
+        
+        console.log('✅ TooltipManager system started successfully');
+    },
+
+    /**
      * Koppelt tooltip-events aan een specifiek DOM-element.
      * @param {HTMLElement} element - Het element waarop de mouseover de tooltip moet tonen.
      * @param {string|function} content - De HTML-content voor de tooltip of een functie die de content retourneert.
@@ -788,9 +816,20 @@ const TooltipManager = {
                     // Check of er nieuwe elementen zijn toegevoegd die tooltips nodig hebben
                     mutation.addedNodes.forEach((node) => {
                         if (node.nodeType === Node.ELEMENT_NODE) {
+                            const tooltipSelectors = [
+                                '.verlof-blok:not([data-username])',
+                                '.compensatie-uur-blok:not([data-username])',
+                                '.zittingsvrij-blok:not([data-username])',
+                                '.ziekte-blok:not([data-username])',
+                                '.feestdag:not([data-username])',
+                                '[data-feestdag]:not([data-username])',
+                                'button[title]:not([data-username])',
+                                'i[title]:not([data-username])'
+                            ];
+                            
                             const hasTooltipElements = node.querySelectorAll ? 
-                                node.querySelectorAll(this.TOOLTIP_SELECTOR).length > 0 ||
-                                node.matches(this.TOOLTIP_SELECTOR) : false;
+                                tooltipSelectors.some(selector => node.querySelectorAll(selector).length > 0) ||
+                                tooltipSelectors.some(selector => node.matches && node.matches(selector)) : false;
                                 
                             if (hasTooltipElements) {
                                 shouldReattach = true;
@@ -1084,36 +1123,8 @@ const TooltipManager = {
 // Exporteer de manager voor gebruik in andere modules
 export default TooltipManager;
 
-// Initialize when the document is loaded
-if (typeof window !== 'undefined') {
-    window.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 Initializing TooltipManager on DOMContentLoaded');
-        TooltipManager.init();
-        // Auto-attach tooltips to existing elements
-        setTimeout(() => {
-            TooltipManager.autoAttachTooltips();
-            TooltipManager.observeDOM();
-        }, 500);
-    });
-    
-    // Also initialize immediately in case the DOM is already loaded
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        console.log('🚀 Initializing TooltipManager immediately');
-        TooltipManager.init();
-        setTimeout(() => {
-            TooltipManager.autoAttachTooltips();
-            TooltipManager.observeDOM();
-        }, 100);
-    }
-    
-    // React integration - listen for React updates
-    window.addEventListener('react-update', function() {
-        console.log('⚛️ React update detected, re-attaching tooltips');
-        setTimeout(() => {
-            TooltipManager.autoAttachTooltips();
-        }, 50);
-    });
-    
+// Initialize when the document is loaded (only if not already initialized)
+if (typeof window !== 'undefined' && !window.TooltipManager) {
     // Add developer utilities to window object for easy debugging
     window.TooltipManager = TooltipManager;
     
