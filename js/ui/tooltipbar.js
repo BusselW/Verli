@@ -20,6 +20,7 @@ const TooltipManager = {
     currentUserGroups: null,
     showTimeout: null,
     hideTimeout: null,
+    globalContextMenuActive: false,
 
     /**
      * Check if current user belongs to privileged groups that can see comments
@@ -89,13 +90,50 @@ const TooltipManager = {
             return;
         }
 
+        // State tracking for better interaction
+        let isContextMenuActive = false;
+        let lastInteractionType = null;
+
+        const getDeletabilityDelay = (element) => {
+            // Check if element is deletable/editable (has contextmenu interactions)
+            const isDeletable = element.classList.contains('verlof-blok') || 
+                               element.classList.contains('compensatie-uur-blok') ||
+                               element.classList.contains('zittingsvrij-blok') ||
+                               element.classList.contains('ziekte-blok') ||
+                               element.hasAttribute('data-can-delete') ||
+                               element.hasAttribute('data-contextmenu') ||
+                               element.closest('[data-can-delete]') ||
+                               element.closest('[data-contextmenu]');
+            
+            // Longer delay for deletable items to prevent contextmenu conflicts
+            return isDeletable ? 1200 : 500; // 1.2s for deletable, 500ms for others
+        };
+
         const showTooltip = (event) => {
+            // Don't show tooltip if context menu is active (local or global)
+            if (isContextMenuActive || this.globalContextMenuActive) {
+                return;
+            }
+
+            // Don't show tooltip if this was triggered by right-click
+            if (lastInteractionType === 'rightclick') {
+                return;
+            }
+
             // Clear any existing timeouts
             clearTimeout(this.showTimeout);
             clearTimeout(this.hideTimeout);
             
-            // Add delay to prevent flicker
+            // Determine delay based on element deletability
+            const delay = getDeletabilityDelay(element);
+            
+            // Add delay to prevent flicker and contextmenu conflicts
             this.showTimeout = setTimeout(async () => {
+                // Double-check context menu state before showing (local or global)
+                if (isContextMenuActive || this.globalContextMenuActive) {
+                    return;
+                }
+
                 try {
                     const tooltipContent = typeof content === 'function' ? await content() : content;
                     if (tooltipContent && typeof tooltipContent === 'string' && tooltipContent.trim()) {
@@ -105,7 +143,7 @@ const TooltipManager = {
                 } catch (error) {
                     console.error('Error generating tooltip content:', error);
                 }
-            }, 500); // 500ms delay for better UX (less annoying)
+            }, delay);
         };
 
         const hideTooltip = () => {
@@ -118,7 +156,45 @@ const TooltipManager = {
             }, 100);
         };
 
+        const cancelTooltip = () => {
+            // Immediately cancel any pending tooltips
+            clearTimeout(this.showTimeout);
+            clearTimeout(this.hideTimeout);
+            this.hide();
+        };
+
+        const handleRightClick = (event) => {
+            lastInteractionType = 'rightclick';
+            isContextMenuActive = true;
+            
+            // Cancel any pending tooltips immediately
+            cancelTooltip();
+            
+            // Reset context menu state after a delay
+            setTimeout(() => {
+                isContextMenuActive = false;
+                lastInteractionType = null;
+            }, 3000); // Reset after 3 seconds
+        };
+
+        const handleLeftClick = (event) => {
+            lastInteractionType = 'leftclick';
+            
+            // Cancel tooltip on left click as well
+            cancelTooltip();
+            
+            // Reset after short delay
+            setTimeout(() => {
+                lastInteractionType = null;
+            }, 1000);
+        };
+
         const updateTooltipPosition = (event) => {
+            // Don't update position if context menu is active (local or global)
+            if (isContextMenuActive || this.globalContextMenuActive) {
+                return;
+            }
+
             // Throttle position updates for better performance
             if (!this.updatePositionThrottle) {
                 this.updatePositionThrottle = setTimeout(() => {
@@ -128,9 +204,39 @@ const TooltipManager = {
             }
         };
 
+        // Mouse events
         element.addEventListener('mouseenter', showTooltip);
         element.addEventListener('mouseleave', hideTooltip);
         element.addEventListener('mousemove', updateTooltipPosition);
+        
+        // Click events to handle tooltip cancellation
+        element.addEventListener('contextmenu', handleRightClick);
+        element.addEventListener('click', handleLeftClick);
+        
+        // Global context menu detection
+        document.addEventListener('contextmenu', () => {
+            isContextMenuActive = true;
+            this.globalContextMenuActive = true;
+            cancelTooltip();
+        });
+        
+        // Reset context menu state when clicking elsewhere
+        document.addEventListener('click', (event) => {
+            // Check if click is outside any context menu
+            if (!event.target.closest('.context-menu, .contextmenu, [role="menu"]')) {
+                isContextMenuActive = false;
+                this.globalContextMenuActive = false;
+            }
+        });
+        
+        // ESC key to cancel tooltips and context menus
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                isContextMenuActive = false;
+                this.globalContextMenuActive = false;
+                cancelTooltip();
+            }
+        });
         
         // Mark element as having a tooltip attached
         element.dataset.tooltipAttached = 'true';
@@ -1010,6 +1116,61 @@ if (typeof window !== 'undefined') {
     
     // Add developer utilities to window object for easy debugging
     window.TooltipManager = TooltipManager;
+    
+    // Global API methods for contextmenu coordination
+    window.tooltipbar = {
+        /**
+         * Notify tooltip system that contextmenu is now active
+         * This will cancel any pending tooltips and prevent new ones
+         */
+        setContextMenuActive: () => {
+            console.log('📡 tooltipbar API: Setting contextmenu active');
+            TooltipManager.globalContextMenuActive = true;
+            
+            // Cancel any pending tooltips
+            if (TooltipManager.showTimeout) {
+                clearTimeout(TooltipManager.showTimeout);
+                TooltipManager.showTimeout = null;
+            }
+            if (TooltipManager.hideTimeout) {
+                clearTimeout(TooltipManager.hideTimeout);
+                TooltipManager.hideTimeout = null;
+            }
+            TooltipManager.hide();
+        },
+        
+        /**
+         * Notify tooltip system that contextmenu is no longer active
+         * This allows tooltips to function normally again
+         */
+        setContextMenuInactive: () => {
+            console.log('📡 tooltipbar API: Setting contextmenu inactive');
+            TooltipManager.globalContextMenuActive = false;
+        },
+        
+        /**
+         * Force cancel any pending tooltip
+         */
+        cancelPendingTooltip: () => {
+            console.log('📡 tooltipbar API: Force canceling pending tooltip');
+            if (TooltipManager.showTimeout) {
+                clearTimeout(TooltipManager.showTimeout);
+                TooltipManager.showTimeout = null;
+            }
+            if (TooltipManager.hideTimeout) {
+                clearTimeout(TooltipManager.hideTimeout);
+                TooltipManager.hideTimeout = null;
+            }
+            TooltipManager.hide();
+        },
+        
+        /**
+         * Check if contextmenu is currently active
+         */
+        isContextMenuActive: () => {
+            return TooltipManager.globalContextMenuActive || false;
+        }
+    };
     
     // Global helper functions for feestdag inspection
     window.inspectFeestdag = function(dateOrElement) {
