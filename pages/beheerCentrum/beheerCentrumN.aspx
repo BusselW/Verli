@@ -41,7 +41,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            background-color: var(--text-primary);
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 85%, #c2410c 100%);
             color: var(--bg-secondary);
             padding: 0.75rem 1.5rem;
             display: flex;
