@@ -563,6 +563,12 @@ export function getBaseUrl() {
         source = 'fallback';
     }
     
+    // Ensure base URL includes the CPW/Rooster path for navigation
+    if (baseUrl && !baseUrl.includes('/CPW/Rooster')) {
+        baseUrl = `${baseUrl}/CPW/Rooster`;
+        source = `${source}+cpwRooster`;
+    }
+    
     // Debug logging for org\busselw
     const currentUser = window.currentUser || {};
     const isDebugUser = currentUser.LoginName?.toLowerCase().includes('busselw') || 
