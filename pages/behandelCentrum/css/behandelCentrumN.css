@@ -2228,9 +2228,9 @@ body {
     color: var(--primary-text) !important;
 }
 
-/* Header integration */
+/* Header integration with gradient */
 .header {
-    background-color: var(--primary-text) !important;
+    background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 85%, #c2410c 100%) !important;
     color: var(--secondary-bg) !important;
     box-shadow: var(--configlayout-shadow) !important;
 }
